@@ -28,8 +28,6 @@ freq <- function(dataset, variable, include_nas = TRUE, weight = NULL) {
 
 ##### Private functions #####
 
-### Functions for freq ###
-
 ns <- function(dataset, variable, weight) {
   counts <- if (class(dataset %>% dplyr::pull(!!variable)) == 'labelled') {
     # Metadata is better if the given variable has labels
@@ -51,10 +49,8 @@ ns <- function(dataset, variable, weight) {
 
 percents <- function(counts, include_nas) {
   # Filter out NAs if requested
-  counts <- if (include_nas) {
-    counts
-  } else {
-    counts %>%
+  if (! include_nas) {
+    counts <- counts %>%
       dplyr::filter(
         !is.na(value)
       )
