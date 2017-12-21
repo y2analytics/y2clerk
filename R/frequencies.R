@@ -1,4 +1,6 @@
 
+##### Public functions #####
+
 #' Run a frequency for a single variable.
 #'
 #' @param dataset A dataframe.
@@ -24,22 +26,9 @@ freq <- function(dataset, variable, include_nas = TRUE, weight = NULL) {
     percents(include_nas)
 }
 
-percents <- function(counts, include_nas) {
-  # Filter out NAs if requested
-  counts <- if (include_nas) {
-    counts
-  } else {
-    counts %>%
-      dplyr::filter(
-        !is.na(value)
-      )
-  }
-  # Calculate and round to integer percentages
-  counts %>%
-    dplyr::mutate(
-      percent = (n / sum(n)) %>% round(2)
-    )
-}
+##### Private functions #####
+
+### Functions for freq ###
 
 ns <- function(dataset, variable, weight) {
   counts <- if (class(dataset %>% dplyr::pull(!!variable)) == 'labelled') {
@@ -57,6 +46,23 @@ ns <- function(dataset, variable, weight) {
       value,
       label,
       n
+    )
+}
+
+percents <- function(counts, include_nas) {
+  # Filter out NAs if requested
+  counts <- if (include_nas) {
+    counts
+  } else {
+    counts %>%
+      dplyr::filter(
+        !is.na(value)
+      )
+  }
+  # Calculate and round to integer percentages
+  counts %>%
+    dplyr::mutate(
+      percent = (n / sum(n)) %>% round(2)
     )
 }
 
