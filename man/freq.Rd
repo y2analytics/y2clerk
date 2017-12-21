@@ -15,6 +15,10 @@ freq(dataset, variable, include_nas = TRUE, weight = NULL)
 
 \item{weight}{The unquoted name of a weighting variable in the dataframe.}
 }
+\value{
+A dataframe with the variable name, prompt, values, labels, counts,
+and percents.
+}
 \description{
 Run a frequency for a single variable.
 }

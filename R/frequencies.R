@@ -5,6 +5,8 @@
 #' @param variable The unquoted name of a variable in the dataframe.
 #' @param include_nas Boolean, whether or not to include NAs in the tabulation.
 #' @param weight The unquoted name of a weighting variable in the dataframe.
+#' @return A dataframe with the variable name, prompt, values, labels, counts,
+#' and percents.
 #' @examples
 #' df <- data.frame(
 #'   a = c(1, 2, 2, 3, 4, 2, NA),
