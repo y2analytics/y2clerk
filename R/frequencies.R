@@ -29,7 +29,7 @@ freq <- function(dataset, variable, include_nas = TRUE, weight = NULL) {
 #' Run frequencies for multiple variables.
 #'
 #' @param dataset A dataframe.
-#' @param variables The unquoted name of a set of variables in the dataframe.
+#' @param ... The unquoted names of a set of variables in the dataframe.
 #' @param include_nas Boolean, whether or not to include NAs in the tabulation.
 #' @param weight The unquoted name of a weighting variable in the dataframe.
 #' @return A dataframe with the variable names, prompts, values, labels, counts,

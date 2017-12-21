@@ -9,11 +9,11 @@ freqs(dataset, ..., include_nas = TRUE, weight = NULL)
 \arguments{
 \item{dataset}{A dataframe.}
 
+\item{...}{The unquoted names of a set of variables in the dataframe.}
+
 \item{include_nas}{Boolean, whether or not to include NAs in the tabulation.}
 
 \item{weight}{The unquoted name of a weighting variable in the dataframe.}
-
-\item{variables}{The unquoted name of a set of variables in the dataframe.}
 }
 \value{
 A dataframe with the variable names, prompts, values, labels, counts,
