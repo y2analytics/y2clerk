@@ -26,6 +26,35 @@ freq <- function(dataset, variable, include_nas = TRUE, weight = NULL) {
     percents(include_nas)
 }
 
+#' Run frequencies for multiple variables.
+#'
+#' @param dataset A dataframe.
+#' @param variables The unquoted name of a set of variables in the dataframe.
+#' @param include_nas Boolean, whether or not to include NAs in the tabulation.
+#' @param weight The unquoted name of a weighting variable in the dataframe.
+#' @return A dataframe with the variable names, prompts, values, labels, counts,
+#' and percents.
+#' @examples
+#' df <- data.frame(
+#'   a = c(1, 2, 2, 3, 4, 2, NA),
+#'   b = c(1, 2, 2, 3, 4, 1, NA),
+#'   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
+#' )
+#'
+#' freq(df, a, b)
+#' freq(df, a, b, include_nas = FALSE)
+#' freq(df, a, b, weight = weights)
+#' @export
+freqs <- function(dataset, ..., include_nas = TRUE, weight = NULL) {
+  weight = dplyr::enquo(weight)
+  purrr::map_dfr(
+    .x = dplyr::quos(...),
+    .f = function(variable) {
+      freq(dataset, !!variable, include_nas, !!weight)
+    }
+  )
+}
+
 ##### Private functions #####
 
 ns <- function(dataset, variable, weight) {
