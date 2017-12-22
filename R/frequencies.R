@@ -60,7 +60,7 @@ freqs <- function(dataset, ..., include_nas = TRUE, weight = NULL) {
 #' @param dataset A dataframe.
 #' @param ... The unquoted names of a set of variables in the dataframe that
 #' represent a single multiple select question on a survey. Each variable
-#' should be encoded as 1 for a selection, NA for no selection.
+#' should be encoded as non-NA for a selection, NA for no selection.
 #' @param weight The unquoted name of a weighting variable in the dataframe.
 #' @param var_name An optional variable name to assign to the results. If
 #' omitted, it will derive a name by slicing off _[digit] suffixes.
@@ -71,7 +71,7 @@ freq_ms <- function(dataset, ..., weight = NULL, var_name = NULL) {
   weight <- dplyr::enquo(weight)
   freqs(dataset, ..., weight = !!weight) %>%
     filter(
-      value == 1
+      !is.na(value)
     ) %>%
     mutate(
       variable = ifelse(
@@ -148,7 +148,7 @@ base_ns <- function(dataset, variable, weight) {
 }
 
 derive_var_name <- function(variable_names) {
-  # Just chops off the final _1 or _2. We can make this more sophisticated
+  # Just chops off the final _1 or _x2. We can make this more sophisticated
   # later if this isn't working right for us.
-  stringr::str_replace(variable_names, '_\\d+$', '')
+  stringr::str_replace(variable_names, '_[x\\d]+$', '')
 }

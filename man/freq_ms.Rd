@@ -11,7 +11,7 @@ freq_ms(dataset, ..., weight = NULL, var_name = NULL)
 
 \item{...}{The unquoted names of a set of variables in the dataframe that
 represent a single multiple select question on a survey. Each variable
-should be encoded as 1 for a selection, NA for no selection.}
+should be encoded as non-NA for a selection, NA for no selection.}
 
 \item{weight}{The unquoted name of a weighting variable in the dataframe.}
 
