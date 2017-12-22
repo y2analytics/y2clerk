@@ -4,7 +4,7 @@
 \alias{freqs}
 \title{Run frequencies for multiple variables.}
 \usage{
-freqs(dataset, ..., nas = TRUE, wt = NULL)
+freqs(dataset, ..., nas = TRUE, wt = NULL, prompt = F)
 }
 \arguments{
 \item{dataset}{A dataframe.}
@@ -14,6 +14,8 @@ freqs(dataset, ..., nas = TRUE, wt = NULL)
 \item{nas}{Boolean, whether or not to include NAs in the tabulation.}
 
 \item{wt}{The unquoted name of a weighting variable in the dataframe.}
+
+\item{prompt}{Boolean, whether or not to include the prompt in the dataframe.}
 }
 \value{
 A dataframe with the variable names, prompts, values, labels, counts,

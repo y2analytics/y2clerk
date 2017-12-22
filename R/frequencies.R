@@ -7,6 +7,7 @@
 #' @param variable The unquoted name of a variable in the dataframe.
 #' @param nas Boolean, whether or not to include NAs in the tabulation.
 #' @param wt The unquoted name of a weighting variable in the dataframe.
+#' @param prompt Boolean, whether or not to include the prompt in the dataframe.
 #' @return A dataframe with the variable name, prompt, values, labels, counts,
 #' and percents.
 #' @examples
@@ -19,10 +20,10 @@
 #' freq(df, a, nas = FALSE)
 #' freq(df, a, wt = weights)
 #' @export
-freq <- function(dataset, variable, nas = TRUE, wt = NULL) {
+freq <- function(dataset, variable, nas = TRUE, wt = NULL, prompt = F) {
   variable <- dplyr::enquo(variable)
   weight <- dplyr::enquo(wt)
-  ns(dataset, variable, weight) %>%
+  ns(dataset, variable, weight, prompt) %>%
     percents(nas)
 }
 
@@ -32,6 +33,7 @@ freq <- function(dataset, variable, nas = TRUE, wt = NULL) {
 #' @param ... The unquoted names of a set of variables in the dataframe.
 #' @param nas Boolean, whether or not to include NAs in the tabulation.
 #' @param wt The unquoted name of a weighting variable in the dataframe.
+#' @param prompt Boolean, whether or not to include the prompt in the dataframe.
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' and percents.
 #' @examples
@@ -45,12 +47,12 @@ freq <- function(dataset, variable, nas = TRUE, wt = NULL) {
 #' freq(df, a, b, nas = FALSE)
 #' freq(df, a, b, wt = weights)
 #' @export
-freqs <- function(dataset, ..., nas = TRUE, wt = NULL) {
+freqs <- function(dataset, ..., nas = TRUE, wt = NULL, prompt = F) {
   weight = dplyr::enquo(wt)
   purrr::map_dfr(
     .x = dplyr::quos(...),
     .f = function(variable) {
-      freq(dataset, !!variable, nas, !!weight)
+      freq(dataset, !!variable, nas, !!weight, prompt)
     }
   )
 }
@@ -64,12 +66,13 @@ freqs <- function(dataset, ..., nas = TRUE, wt = NULL) {
 #' @param wt The unquoted name of a weighting variable in the dataframe.
 #' @param var_name An optional variable name to assign to the results. If
 #' omitted, it will derive a name by slicing off _[digit] suffixes.
+#' @param prompt Boolean, whether or not to include the prompt in the dataframe.
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' and percents.
 #' @export
-freq_ms <- function(dataset, ..., wt = NULL, var_name = NULL) {
+freq_ms <- function(dataset, ..., wt = NULL, var_name = NULL, prompt = F) {
   weight <- dplyr::enquo(wt)
-  freqs(dataset, ..., wt = !!weight) %>%
+  freqs(dataset, ..., wt = !!weight, prompt = prompt) %>%
     filter(
       !is.na(value)
     ) %>%
@@ -84,23 +87,33 @@ freq_ms <- function(dataset, ..., wt = NULL, var_name = NULL) {
 
 ##### Private functions #####
 
-ns <- function(dataset, variable, weight) {
+ns <- function(dataset, variable, weight, prompt) {
   counts <- if (class(dataset %>% dplyr::pull(!!variable)) == 'labelled') {
     # Metadata is better if the given variable has labels
-    labelled_ns(dataset, variable, weight)
+    labelled_ns(dataset, variable, weight, prompt)
   } else {
     # Otherwise, use some sensible defaults
-    unlabelled_ns(dataset, variable, weight)
+    unlabelled_ns(dataset, variable, weight, prompt)
   }
   # Reorder because Scotty is OCD
-  counts %>%
-    dplyr::select(
-      variable,
-      prompt,
-      value,
-      label,
-      n
-    )
+  if (prompt) {
+    counts %>%
+      dplyr::select(
+        variable,
+        prompt,
+        value,
+        label,
+        n
+      )
+  } else {
+    counts %>%
+      dplyr::select(
+        variable,
+        value,
+        label,
+        n
+      )
+  }
 }
 
 percents <- function(counts, include_nas) {
@@ -118,23 +131,36 @@ percents <- function(counts, include_nas) {
     )
 }
 
-labelled_ns <- function(dataset, variable, weight) {
+labelled_ns <- function(dataset, variable, weight, prompt) {
   # Extract the metadata from the labelled class
-  base_ns(dataset, variable, weight) %>%
+  counts <- base_ns(dataset, variable, weight)
+  counts <- counts %>%
     dplyr::mutate(
       label = labelled::to_factor(value) %>% as.character,
-      prompt = labelled::var_label(value),
       value = value %>% as.character
     )
+  if (prompt) {
+    counts <- counts %>%
+      dplyr::mutate(
+        prompt = labelled::var_label(value)
+      )
+  }
+  return(counts)
 }
 
-unlabelled_ns <- function(dataset, variable, weight) {
-  base_ns(dataset, variable, weight) %>%
+unlabelled_ns <- function(dataset, variable, weight, prompt) {
+  counts <- base_ns(dataset, variable, weight) %>%
     dplyr::mutate(
       label = value %>% as.character,
-      prompt = '',
       value = value %>% as.character
     )
+  if (prompt) {
+    counts <- counts %>%
+      dplyr::mutate(
+        prompt = ''
+      )
+  }
+  return(counts)
 }
 
 base_ns <- function(dataset, variable, weight) {

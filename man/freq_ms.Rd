@@ -4,7 +4,7 @@
 \alias{freq_ms}
 \title{Run frequencies for multiple select survey questions.}
 \usage{
-freq_ms(dataset, ..., wt = NULL, var_name = NULL)
+freq_ms(dataset, ..., wt = NULL, var_name = NULL, prompt = F)
 }
 \arguments{
 \item{dataset}{A dataframe.}
@@ -17,6 +17,8 @@ should be encoded as non-NA for a selection, NA for no selection.}
 
 \item{var_name}{An optional variable name to assign to the results. If
 omitted, it will derive a name by slicing off _[digit] suffixes.}
+
+\item{prompt}{Boolean, whether or not to include the prompt in the dataframe.}
 }
 \value{
 A dataframe with the variable names, prompts, values, labels, counts,
