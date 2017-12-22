@@ -4,7 +4,7 @@
 \alias{freq_ms}
 \title{Run frequencies for multiple select survey questions.}
 \usage{
-freq_ms(dataset, ..., weight = NULL, var_name = NULL)
+freq_ms(dataset, ..., wt = NULL, var_name = NULL)
 }
 \arguments{
 \item{dataset}{A dataframe.}
@@ -13,7 +13,7 @@ freq_ms(dataset, ..., weight = NULL, var_name = NULL)
 represent a single multiple select question on a survey. Each variable
 should be encoded as non-NA for a selection, NA for no selection.}
 
-\item{weight}{The unquoted name of a weighting variable in the dataframe.}
+\item{wt}{The unquoted name of a weighting variable in the dataframe.}
 
 \item{var_name}{An optional variable name to assign to the results. If
 omitted, it will derive a name by slicing off _[digit] suffixes.}

@@ -4,16 +4,16 @@
 \alias{freq}
 \title{Run a frequency for a single variable.}
 \usage{
-freq(dataset, variable, include_nas = TRUE, weight = NULL)
+freq(dataset, variable, nas = TRUE, wt = NULL)
 }
 \arguments{
 \item{dataset}{A dataframe.}
 
 \item{variable}{The unquoted name of a variable in the dataframe.}
 
-\item{include_nas}{Boolean, whether or not to include NAs in the tabulation.}
+\item{nas}{Boolean, whether or not to include NAs in the tabulation.}
 
-\item{weight}{The unquoted name of a weighting variable in the dataframe.}
+\item{wt}{The unquoted name of a weighting variable in the dataframe.}
 }
 \value{
 A dataframe with the variable name, prompt, values, labels, counts,
@@ -29,6 +29,6 @@ df <- data.frame(
 )
 
 freq(df, a)
-freq(df, a, include_nas = FALSE)
-freq(df, a, weight = weights)
+freq(df, a, nas = FALSE)
+freq(df, a, wt = weights)
 }

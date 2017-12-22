@@ -5,8 +5,8 @@
 #'
 #' @param dataset A dataframe.
 #' @param variable The unquoted name of a variable in the dataframe.
-#' @param include_nas Boolean, whether or not to include NAs in the tabulation.
-#' @param weight The unquoted name of a weighting variable in the dataframe.
+#' @param nas Boolean, whether or not to include NAs in the tabulation.
+#' @param wt The unquoted name of a weighting variable in the dataframe.
 #' @return A dataframe with the variable name, prompt, values, labels, counts,
 #' and percents.
 #' @examples
@@ -16,22 +16,22 @@
 #' )
 #'
 #' freq(df, a)
-#' freq(df, a, include_nas = FALSE)
-#' freq(df, a, weight = weights)
+#' freq(df, a, nas = FALSE)
+#' freq(df, a, wt = weights)
 #' @export
-freq <- function(dataset, variable, include_nas = TRUE, weight = NULL) {
+freq <- function(dataset, variable, nas = TRUE, wt = NULL) {
   variable <- dplyr::enquo(variable)
-  weight <- dplyr::enquo(weight)
+  weight <- dplyr::enquo(wt)
   ns(dataset, variable, weight) %>%
-    percents(include_nas)
+    percents(nas)
 }
 
 #' Run frequencies for multiple variables.
 #'
 #' @param dataset A dataframe.
 #' @param ... The unquoted names of a set of variables in the dataframe.
-#' @param include_nas Boolean, whether or not to include NAs in the tabulation.
-#' @param weight The unquoted name of a weighting variable in the dataframe.
+#' @param nas Boolean, whether or not to include NAs in the tabulation.
+#' @param wt The unquoted name of a weighting variable in the dataframe.
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' and percents.
 #' @examples
@@ -42,15 +42,15 @@ freq <- function(dataset, variable, include_nas = TRUE, weight = NULL) {
 #' )
 #'
 #' freq(df, a, b)
-#' freq(df, a, b, include_nas = FALSE)
-#' freq(df, a, b, weight = weights)
+#' freq(df, a, b, nas = FALSE)
+#' freq(df, a, b, wt = weights)
 #' @export
-freqs <- function(dataset, ..., include_nas = TRUE, weight = NULL) {
-  weight = dplyr::enquo(weight)
+freqs <- function(dataset, ..., nas = TRUE, wt = NULL) {
+  weight = dplyr::enquo(wt)
   purrr::map_dfr(
     .x = dplyr::quos(...),
     .f = function(variable) {
-      freq(dataset, !!variable, include_nas, !!weight)
+      freq(dataset, !!variable, nas, !!weight)
     }
   )
 }
@@ -61,15 +61,15 @@ freqs <- function(dataset, ..., include_nas = TRUE, weight = NULL) {
 #' @param ... The unquoted names of a set of variables in the dataframe that
 #' represent a single multiple select question on a survey. Each variable
 #' should be encoded as non-NA for a selection, NA for no selection.
-#' @param weight The unquoted name of a weighting variable in the dataframe.
+#' @param wt The unquoted name of a weighting variable in the dataframe.
 #' @param var_name An optional variable name to assign to the results. If
 #' omitted, it will derive a name by slicing off _[digit] suffixes.
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' and percents.
 #' @export
-freq_ms <- function(dataset, ..., weight = NULL, var_name = NULL) {
-  weight <- dplyr::enquo(weight)
-  freqs(dataset, ..., weight = !!weight) %>%
+freq_ms <- function(dataset, ..., wt = NULL, var_name = NULL) {
+  weight <- dplyr::enquo(wt)
+  freqs(dataset, ..., wt = !!weight) %>%
     filter(
       !is.na(value)
     ) %>%
