@@ -134,17 +134,17 @@ percents <- function(counts, include_nas) {
 labelled_ns <- function(dataset, variable, weight, prompt) {
   # Extract the metadata from the labelled class
   counts <- base_ns(dataset, variable, weight)
-  counts <- counts %>%
-    dplyr::mutate(
-      label = labelled::to_factor(value) %>% as.character,
-      value = value %>% as.character
-    )
   if (prompt) {
     counts <- counts %>%
       dplyr::mutate(
         prompt = labelled::var_label(value)
       )
   }
+  counts <- counts %>%
+    dplyr::mutate(
+      label = labelled::to_factor(value) %>% as.character,
+      value = value %>% as.character
+    )
   return(counts)
 }
 
