@@ -55,6 +55,33 @@ freqs <- function(dataset, ..., include_nas = TRUE, weight = NULL) {
   )
 }
 
+#' Run frequencies for multiple select survey questions.
+#'
+#' @param dataset A dataframe.
+#' @param ... The unquoted names of a set of variables in the dataframe that
+#' represent a single multiple select question on a survey. Each variable
+#' should be encoded as 1 for a selection, NA for no selection.
+#' @param weight The unquoted name of a weighting variable in the dataframe.
+#' @param var_name An optional variable name to assign to the results. If
+#' omitted, it will derive a name by slicing off _[digit] suffixes.
+#' @return A dataframe with the variable names, prompts, values, labels, counts,
+#' and percents.
+#' @export
+freq_ms <- function(dataset, ..., weight = NULL, var_name = NULL) {
+  weight <- dplyr::enquo(weight)
+  freqs(dataset, ..., weight = !!weight) %>%
+    filter(
+      value == 1
+    ) %>%
+    mutate(
+      variable = ifelse(
+        is.null(var_name),
+        derive_var_name(variable),
+        var_name
+      )
+    )
+}
+
 ##### Private functions #####
 
 ns <- function(dataset, variable, weight) {
@@ -118,4 +145,10 @@ base_ns <- function(dataset, variable, weight) {
     dplyr::mutate(
       variable = dplyr::quo_name(variable)
     )
+}
+
+derive_var_name <- function(variable_names) {
+  # Just chops off the final _1 or _2. We can make this more sophisticated
+  # later if this isn't working right for us.
+  stringr::str_replace(variable_names, '_\\d+$', '')
 }

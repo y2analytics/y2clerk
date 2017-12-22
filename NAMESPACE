@@ -1,3 +1,4 @@
 importFrom(dplyr,"%>%")
 export(freq)
 export(freqs)
+export(freq_ms)
