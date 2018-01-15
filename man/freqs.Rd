@@ -4,7 +4,7 @@
 \alias{freqs}
 \title{Run frequencies for multiple variables.}
 \usage{
-freqs(dataset, ..., nas = TRUE, wt = NULL, prompt = F)
+freqs(dataset, ..., nas = TRUE, wt = NULL, prompt = F, digits = 2)
 }
 \arguments{
 \item{dataset}{A dataframe.}
@@ -16,6 +16,9 @@ freqs(dataset, ..., nas = TRUE, wt = NULL, prompt = F)
 \item{wt}{The unquoted name of a weighting variable in the dataframe.}
 
 \item{prompt}{Boolean, whether or not to include the prompt in the dataframe.}
+
+\item{digits}{Integer, number of significant digits for rounding. Default is 2,
+which results in an integer percentage.}
 }
 \value{
 A dataframe with the variable names, prompts, values, labels, counts,

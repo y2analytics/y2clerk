@@ -8,6 +8,8 @@
 #' @param nas Boolean, whether or not to include NAs in the tabulation.
 #' @param wt The unquoted name of a weighting variable in the dataframe.
 #' @param prompt Boolean, whether or not to include the prompt in the dataframe.
+#' @param digits Integer, number of significant digits for rounding. Default is 2,
+#' which results in an integer percentage.
 #' @return A dataframe with the variable name, prompt, values, labels, counts,
 #' and percents.
 #' @examples
@@ -20,11 +22,11 @@
 #' freq(df, a, nas = FALSE)
 #' freq(df, a, wt = weights)
 #' @export
-freq <- function(dataset, variable, nas = TRUE, wt = NULL, prompt = F) {
+freq <- function(dataset, variable, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   variable <- dplyr::enquo(variable)
   weight <- dplyr::enquo(wt)
   ns(dataset, variable, weight, prompt) %>%
-    percents(nas)
+    percents(nas, digits = digits)
 }
 
 #' Run frequencies for multiple variables.
@@ -34,6 +36,8 @@ freq <- function(dataset, variable, nas = TRUE, wt = NULL, prompt = F) {
 #' @param nas Boolean, whether or not to include NAs in the tabulation.
 #' @param wt The unquoted name of a weighting variable in the dataframe.
 #' @param prompt Boolean, whether or not to include the prompt in the dataframe.
+#' @param digits Integer, number of significant digits for rounding. Default is 2,
+#' which results in an integer percentage.
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' and percents.
 #' @examples
@@ -47,14 +51,24 @@ freq <- function(dataset, variable, nas = TRUE, wt = NULL, prompt = F) {
 #' freq(df, a, b, nas = FALSE)
 #' freq(df, a, b, wt = weights)
 #' @export
-freqs <- function(dataset, ..., nas = TRUE, wt = NULL, prompt = F) {
+freqs <- function(dataset, ..., nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   weight = dplyr::enquo(wt)
   purrr::map_dfr(
     .x = dplyr::quos(...),
     .f = function(variable) {
-      freq(dataset, !!variable, nas, !!weight, prompt)
+      freq(dataset, !!variable, nas, !!weight, prompt, digits)
     }
   )
+}
+
+cross <- function(dataset,
+                  variables,
+                  groups,
+                  nas = T,
+                  wt = NULL,
+                  prompt = F,
+                  digits = 2) {
+  # TO BE CONTINUED...
 }
 
 #' Run frequencies for multiple select survey questions.
@@ -67,12 +81,14 @@ freqs <- function(dataset, ..., nas = TRUE, wt = NULL, prompt = F) {
 #' @param var_name An optional variable name to assign to the results. If
 #' omitted, it will derive a name by slicing off _[digit] suffixes.
 #' @param prompt Boolean, whether or not to include the prompt in the dataframe.
+#' @param digits Integer, number of significant digits for rounding. Default is 2,
+#' which results in an integer percentage.
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' and percents.
 #' @export
-freq_ms <- function(dataset, ..., wt = NULL, var_name = NULL, prompt = F) {
+freq_ms <- function(dataset, ..., wt = NULL, var_name = NULL, prompt = F, digits = 2) {
   weight <- dplyr::enquo(wt)
-  freqs(dataset, ..., wt = !!weight, prompt = prompt) %>%
+  freqs(dataset, ..., wt = !!weight, prompt = prompt, digits = digits) %>%
     filter(
       !is.na(value)
     ) %>%
@@ -116,7 +132,7 @@ ns <- function(dataset, variable, weight, prompt) {
   }
 }
 
-percents <- function(counts, include_nas) {
+percents <- function(counts, include_nas, digits) {
   # Filter out NAs if requested
   if (! include_nas) {
     counts <- counts %>%
@@ -127,7 +143,7 @@ percents <- function(counts, include_nas) {
   # Calculate and round to integer percentages
   counts %>%
     dplyr::mutate(
-      percent = (n / sum(n)) %>% round(2)
+      percent = (n / sum(n)) %>% round(digits)
     )
 }
 
