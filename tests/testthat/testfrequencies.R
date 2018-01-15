@@ -29,7 +29,25 @@ test_that("freq function: WT parameter warning test", {
 })
 
 # expected input freq
-# weighted freq
+test_that("freq function: expected non-weighted input", {
+  df <- data.frame(
+    a = c(1, 2, 2, 3, 4, 2, NA),
+    weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
+  )
+
+  freq(df, a)
+})
+
+# expected weighted freq
+test_that("freq function: expected weighted input", {
+  df <- data.frame(
+    a = c(1, 2, 2, 3, 4, 2, NA),
+    weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
+  )
+
+  freq(df, a, wt = weights)
+})
+
 # character column freq
 # labelled column freq
 # numeric column freq
@@ -64,8 +82,27 @@ test_that("freqs function: NA parameter warning test", {
 test_that("freqs function: WT parameter warning test", {
   expect_error(freqs(mtcars, cyl, disp, hp, wt = 'weights'))
 })
+
 # expected input freq
-# weighted freq
+test_that("freqs function: expected non-weighted input", {
+  df <- data.frame(
+    a = c(1, 2, 2, 3, 4, 2, NA),
+    b = c(1, 2, 2, 3, 4, 1, NA),
+    weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
+  )
+  freqs(df, a, b)
+})
+
+# expected weighted freq
+test_that("freqs function: expected weighted input", {
+  df <- data.frame(
+    a = c(1, 2, 2, 3, 4, 2, NA),
+    b = c(1, 2, 2, 3, 4, 1, NA),
+    weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
+  )
+  freqs(df, a, b, wt = weights)
+})
+
 # character column freq
 # labelled column freq
 # numeric column freq
@@ -115,7 +152,7 @@ test_that("freq_ms function: WT parameter warning test",{
 })
 
 # expected input freq
-# weighted freq
+# expected weighted freq
 # character column freq
 # labelled column freq
 # numeric column freq
