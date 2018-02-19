@@ -1,12 +1,10 @@
 ##### Public functions #####
 
-#' Run a crosstabular frequency for a set of variables and groups. Currently
-#' only runs one crosstab at a time. Next iteration will allow for cross
-#' product interface.
+#' Run a crosstabular frequency for a single variable and a single group.
 #'
 #' @param dataset A dataframe.
 #' @param variable The unquoted name of a variable in the dataframe.
-#' @param groups The unquoted name of a grouping variable in the dataframe.
+#' @param group The unquoted name of a grouping variable in the dataframe.
 #' @param nas Boolean, whether or not to include NAs in the tabulation.
 #' @param wt The unquoted name of a weighting variable in the dataframe.
 #' @param prompt Boolean, whether or not to include the prompt in the dataframe.

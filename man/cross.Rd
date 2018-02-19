@@ -2,9 +2,7 @@
 % Please edit documentation in R/crosstabs.R
 \name{cross}
 \alias{cross}
-\title{Run a crosstabular frequency for a set of variables and groups. Currently
-only runs one crosstab at a time. Next iteration will allow for cross
-product interface.}
+\title{Run a crosstabular frequency for a single variable and a single group.}
 \usage{
 cross(dataset, variable, group, nas = T, wt = NULL, prompt = F,
   digits = 2)
@@ -14,6 +12,8 @@ cross(dataset, variable, group, nas = T, wt = NULL, prompt = F,
 
 \item{variable}{The unquoted name of a variable in the dataframe.}
 
+\item{group}{The unquoted name of a grouping variable in the dataframe.}
+
 \item{nas}{Boolean, whether or not to include NAs in the tabulation.}
 
 \item{wt}{The unquoted name of a weighting variable in the dataframe.}
@@ -22,15 +22,11 @@ cross(dataset, variable, group, nas = T, wt = NULL, prompt = F,
 
 \item{digits}{Integer, number of significant digits for rounding. Default is 2,
 which results in an integer percentage.}
-
-\item{groups}{The unquoted name of a grouping variable in the dataframe.}
 }
 \value{
 A dataframe with the group name, group prompt, group value, group
 label, variable name, prompt, values, labels, counts, and percents.
 }
 \description{
-Run a crosstabular frequency for a set of variables and groups. Currently
-only runs one crosstab at a time. Next iteration will allow for cross
-product interface.
+Run a crosstabular frequency for a single variable and a single group.
 }

@@ -34,7 +34,7 @@ df <- data.frame(
   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
 )
 
-freq(df, a, b)
-freq(df, a, b, nas = FALSE)
-freq(df, a, b, wt = weights)
+freqs(df, a, b)
+freqs(df, a, b, nas = FALSE)
+freqs(df, a, b, wt = weights)
 }
