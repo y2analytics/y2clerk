@@ -85,7 +85,6 @@ freq_ms <- function(dataset, ..., wt = NULL, var_name = NULL, prompt = F, digits
 #' freq(df, a)
 #' freq(df, a, nas = FALSE)
 #' freq(df, a, wt = weights)
-#' @export
 freq <- function(dataset, variable, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   variable <- dplyr::enquo(variable)
   weight <- dplyr::enquo(wt)

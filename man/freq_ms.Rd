@@ -4,7 +4,8 @@
 \alias{freq_ms}
 \title{Run frequencies for multiple select survey questions.}
 \usage{
-freq_ms(dataset, ..., wt = NULL, var_name = NULL, prompt = F)
+freq_ms(dataset, ..., wt = NULL, var_name = NULL, prompt = F,
+  digits = 2)
 }
 \arguments{
 \item{dataset}{A dataframe.}
@@ -19,6 +20,9 @@ should be encoded as non-NA for a selection, NA for no selection.}
 omitted, it will derive a name by slicing off _[digit] suffixes.}
 
 \item{prompt}{Boolean, whether or not to include the prompt in the dataframe.}
+
+\item{digits}{Integer, number of significant digits for rounding. Default is 2,
+which results in an integer percentage.}
 }
 \value{
 A dataframe with the variable names, prompts, values, labels, counts,
