@@ -1,34 +1,6 @@
 
 ##### Public functions #####
 
-#' Run a frequency for a single variable.
-#'
-#' @param dataset A dataframe.
-#' @param variable The unquoted name of a variable in the dataframe.
-#' @param nas Boolean, whether or not to include NAs in the tabulation.
-#' @param wt The unquoted name of a weighting variable in the dataframe.
-#' @param prompt Boolean, whether or not to include the prompt in the dataframe.
-#' @param digits Integer, number of significant digits for rounding. Default is 2,
-#' which results in an integer percentage.
-#' @return A dataframe with the variable name, prompt, values, labels, counts,
-#' and percents.
-#' @examples
-#' df <- data.frame(
-#'   a = c(1, 2, 2, 3, 4, 2, NA),
-#'   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
-#' )
-#'
-#' freq(df, a)
-#' freq(df, a, nas = FALSE)
-#' freq(df, a, wt = weights)
-#' @export
-freq <- function(dataset, variable, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
-  variable <- dplyr::enquo(variable)
-  weight <- dplyr::enquo(wt)
-  ns(dataset, variable, weight, prompt) %>%
-    percents(nas, digits = digits)
-}
-
 #' Run frequencies for multiple variables.
 #'
 #' @param dataset A dataframe.
@@ -92,6 +64,34 @@ freq_ms <- function(dataset, ..., wt = NULL, var_name = NULL, prompt = F, digits
 }
 
 ##### Private functions #####
+
+#' Run a frequency for a single variable.
+#'
+#' @param dataset A dataframe.
+#' @param variable The unquoted name of a variable in the dataframe.
+#' @param nas Boolean, whether or not to include NAs in the tabulation.
+#' @param wt The unquoted name of a weighting variable in the dataframe.
+#' @param prompt Boolean, whether or not to include the prompt in the dataframe.
+#' @param digits Integer, number of significant digits for rounding. Default is 2,
+#' which results in an integer percentage.
+#' @return A dataframe with the variable name, prompt, values, labels, counts,
+#' and percents.
+#' @examples
+#' df <- data.frame(
+#'   a = c(1, 2, 2, 3, 4, 2, NA),
+#'   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
+#' )
+#'
+#' freq(df, a)
+#' freq(df, a, nas = FALSE)
+#' freq(df, a, wt = weights)
+#' @export
+freq <- function(dataset, variable, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+  variable <- dplyr::enquo(variable)
+  weight <- dplyr::enquo(wt)
+  ns(dataset, variable, weight, prompt) %>%
+    percents(nas, digits = digits)
+}
 
 ns <- function(dataset, variable, weight, prompt) {
   counts <- if (class(dataset %>% dplyr::pull(!!variable)) == 'labelled') {
