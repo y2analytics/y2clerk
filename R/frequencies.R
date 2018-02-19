@@ -61,16 +61,6 @@ freqs <- function(dataset, ..., nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   )
 }
 
-cross <- function(dataset,
-                  variables,
-                  groups,
-                  nas = T,
-                  wt = NULL,
-                  prompt = F,
-                  digits = 2) {
-  # TO BE CONTINUED...
-}
-
 #' Run frequencies for multiple select survey questions.
 #'
 #' @param dataset A dataframe.
