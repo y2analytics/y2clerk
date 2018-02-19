@@ -28,10 +28,12 @@ freqs <- function(dataset, ..., nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   purrr::map_dfr(
     .x = dplyr::quos(...),
     .f = function(variable) {
-      freq(dataset, !!variable, nas, !!weight, prompt, digits)
+      freq_var(dataset, !!variable, nas, !!weight, prompt, digits)
     }
   )
 }
+# Create a redundant function for convenience/backwards compatibility.
+freq <- freqs
 
 #' Run frequencies for multiple select survey questions.
 #'
@@ -65,7 +67,7 @@ freq_ms <- function(dataset, ..., wt = NULL, var_name = NULL, prompt = F, digits
 
 ##### Private functions #####
 
-freq <- function(dataset, variable, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freq_var <- function(dataset, variable, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   variable <- dplyr::enquo(variable)
   weight <- dplyr::enquo(wt)
   ns(dataset, variable, weight, prompt) %>%
