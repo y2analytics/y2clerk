@@ -1,5 +1,3 @@
 importFrom(dplyr,"%>%")
 export(freqs)
 export(freq)
-export(freq_ms)
-export(freq_mean)
