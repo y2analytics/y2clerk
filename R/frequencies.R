@@ -4,15 +4,14 @@
 #' Run frequencies for multiple variables.
 #'
 #' @param dataset A dataframe.
-#' @param ... The unquoted names of a set of variables in the dataframe. If nothing
-#' is specified, the function runs a frequency on every column in given dataset.
-#' @param stat Character, stat to run. Currently only 'percent' works (default: 'percent').
-#' @param nas Boolean, whether or not to include NAs in the tabulation (default: T).
-#' @param wt The unquoted name of a weighting variable in the dataframe (default: NULL).
-#' @param prompt Boolean, whether or not to include the prompt in the dataframe (default: F).
-#' @param digits Integer, number of significant digits for rounding (default: 2).
+#' @param ... The unquoted names of a set of variables in the dataframe.
+#' @param nas Boolean, whether or not to include NAs in the tabulation.
+#' @param wt The unquoted name of a weighting variable in the dataframe.
+#' @param prompt Boolean, whether or not to include the prompt in the dataframe.
+#' @param digits Integer, number of significant digits for rounding. Default is 2,
+#' which results in an integer percentage.
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
-#' stats, and resulting calculations.
+#' and percents.
 #' @examples
 #' df <- data.frame(
 #'   a = c(1, 2, 2, 3, 4, 2, NA),
@@ -24,18 +23,12 @@
 #' freqs(df, a, b, nas = FALSE)
 #' freqs(df, a, b, wt = weights)
 #' @export
-freqs <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freqs <- function(dataset, ..., nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   weight = dplyr::enquo(wt)
-  variables = dplyr::quos(...)
-  if (!length(variables)) {
-    # If no variables are specified in the function call,
-    # assume the user wants to run a frequency on all columns.
-    variables <- column_quos(dataset)
-  }
   purrr::map_dfr(
-    .x = variables,
+    .x = dplyr::quos(...),
     .f = function(variable) {
-      freq_var(dataset, !!variable, stat, nas, !!weight, prompt, digits)
+      freq_var(dataset, !!variable, nas, !!weight, prompt, digits)
     }
   )
 }
@@ -44,22 +37,11 @@ freq <- freqs
 
 ##### Private functions #####
 
-column_quos <- function(dataset) {
-  col_names <- dataset %>% colnames()
-  col_syms <- col_names %>% dplyr::syms()
-  col_quos <- purrr::map(col_syms, dplyr::quo)
-  return(col_quos)
-}
-
-freq_var <- function(dataset, variable, stat = 'percent', nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freq_var <- function(dataset, variable, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   variable <- dplyr::enquo(variable)
   weight <- dplyr::enquo(wt)
-  base <- ns(dataset, variable, weight, prompt)
-  if (stat == 'percent') {
-    freq_result <- base %>%
-        percents(nas, digits = digits)
-  }
-  return(freq_result)
+  ns(dataset, variable, weight, prompt) %>%
+    percents(nas, digits = digits)
 }
 
 ns <- function(dataset, variable, weight, prompt) {
@@ -102,8 +84,7 @@ percents <- function(counts, include_nas, digits) {
   # Calculate and round to integer percentages
   counts %>%
     dplyr::mutate(
-      stat = 'percent',
-      result = (n / sum(n)) %>% round(digits)
+      percent = (n / sum(n)) %>% round(digits)
     )
 }
 
