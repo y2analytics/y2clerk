@@ -4,25 +4,28 @@
 \alias{freqs}
 \title{Run frequencies for multiple variables.}
 \usage{
-freqs(dataset, ..., nas = TRUE, wt = NULL, prompt = F, digits = 2)
+freqs(dataset, ..., stat = "percent", nas = TRUE, wt = NULL,
+  prompt = F, digits = 2)
 }
 \arguments{
 \item{dataset}{A dataframe.}
 
-\item{...}{The unquoted names of a set of variables in the dataframe.}
+\item{...}{The unquoted names of a set of variables in the dataframe. If nothing
+is specified, the function runs a frequency on every column in given dataset.}
 
-\item{nas}{Boolean, whether or not to include NAs in the tabulation.}
+\item{stat}{Character, stat to run. Currently only 'percent' works (default: 'percent').}
 
-\item{wt}{The unquoted name of a weighting variable in the dataframe.}
+\item{nas}{Boolean, whether or not to include NAs in the tabulation (default: T).}
 
-\item{prompt}{Boolean, whether or not to include the prompt in the dataframe.}
+\item{wt}{The unquoted name of a weighting variable in the dataframe (default: NULL).}
 
-\item{digits}{Integer, number of significant digits for rounding. Default is 2,
-which results in an integer percentage.}
+\item{prompt}{Boolean, whether or not to include the prompt in the dataframe (default: F).}
+
+\item{digits}{Integer, number of significant digits for rounding (default: 2).}
 }
 \value{
 A dataframe with the variable names, prompts, values, labels, counts,
-and percents.
+stats, and resulting calculations.
 }
 \description{
 Run frequencies for multiple variables.
