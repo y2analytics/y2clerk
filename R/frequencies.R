@@ -46,6 +46,11 @@ freq <- freqs
 
 column_quos <- function(dataset) {
   col_names <- dataset %>% colnames()
+  if (is.grouped_df(dataset)) {
+    # Exclude grouping variables since they cannot be counted independent of groups.
+    grouping_vars <- dplyr::group_vars(dataset)
+    colnames <- setdiff(colnames, grouping_vars)
+  }
   col_syms <- col_names %>% dplyr::syms()
   col_quos <- purrr::map(col_syms, dplyr::quo)
   return(col_quos)
@@ -148,4 +153,3 @@ base_ns <- function(dataset, variable, weight) {
       variable = dplyr::quo_name(variable)
     )
 }
-
