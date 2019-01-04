@@ -63,7 +63,7 @@ freq_var <- function(dataset, variable, stat = 'percent', nas = TRUE, wt = NULL,
 }
 
 ns <- function(dataset, variable, weight, prompt) {
-  counts <- if (class(dataset %>% dplyr::pull(!!variable)) == 'labelled') {
+  counts <- if (class(dataset %>% dplyr::pull(!!variable)) %in% c('labelled','haven_labelled','haven_labelled_spss')) {
     # Metadata is better if the given variable has labels
     labelled_ns(dataset, variable, weight, prompt)
   } else {
