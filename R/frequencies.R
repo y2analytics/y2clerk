@@ -49,7 +49,7 @@ column_quos <- function(dataset) {
   if (is.grouped_df(dataset)) {
     # Exclude grouping variables since they cannot be counted independent of groups.
     grouping_vars <- dplyr::group_vars(dataset)
-    colnames <- setdiff(colnames, grouping_vars)
+    col_names <- setdiff(col_names, grouping_vars)
   }
   col_syms <- col_names %>% dplyr::syms()
   col_quos <- purrr::map(col_syms, dplyr::quo)
