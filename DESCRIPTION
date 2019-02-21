@@ -12,7 +12,7 @@ License: file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
-  dplyr,
+  dplyr (>= 0.8),
   labelled,
   purrr,
   stringr,
