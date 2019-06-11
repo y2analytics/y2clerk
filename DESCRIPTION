@@ -6,9 +6,9 @@ Authors@R: c(
     person('Scotty','Riding', email = 'scott@y2analytics.com', role = c('cre','aut')), 
     person('Luke', 'Carter', email = 'luke@y2analytics.com', role = 'aut'), 
     person('Kyrene', 'Gibb', email = 'kyrene@y2analytics.com', role = 'aut'), 
-    person('Kathryn', 'Riding', email = 'kathryn@y2analytics.com', role = 'aut')),
-    person('Nick', 'Moffitt', email = 'nickmoffittt@y2analytics.com', role = 'aut')),
-    person('Jacob', 'Eliason', email = 'jacob@y2analytics.com', role = 'aut')))
+    person('Kathryn', 'Riding', email = 'kathryn@y2analytics.com', role = 'aut'),
+    person('Nick', 'Moffitt', email = 'nickmoffittt@y2analytics.com', role = 'aut'),
+    person('Jacob', 'Eliason', email = 'jacob@y2analytics.com', role = 'aut'))
 Description: Frequencies functions to speed up our workflow, freeing up time to wile away before the grave.
 License: file LICENSE
 Encoding: UTF-8
