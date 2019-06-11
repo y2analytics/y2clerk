@@ -65,8 +65,8 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
 
   # 2) can't take mean of categorical variable
   check_class <- dataset %>%
-    dplyr::summarise_all(class) %>%
     dplyr::select(!!variable) %>%
+    dplyr::summarise_all(class) %>%
     dplyr::pull()
   if(check_class %in% c("character", "factor")) stop("Can't take mean of non-numeric variable")
 
@@ -111,7 +111,7 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
   if (prompt) {
     mean_df <- mean_df %>%
       dplyr::mutate(
-        prompt = labelled::var_label(value)
+        prompt = dataset %>% dplyr::select(!!variable) %>% labelled::var_label()
       )
   }
 
