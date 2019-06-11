@@ -9,10 +9,23 @@
 #' @return A dataframe with the variable name, prompt, values, labels, counts,
 #' and means.
 #' @examples
-#' df <- data.frame(
-#'   a = c(1, 2, 2, 3, 4, 2, NA),
-#'   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
-#' )
+#' frequencies <-
+#' tibble::tribble(
+#' ~qstreamer_viewers,  ~qyoutube_subscribers,  ~qyoutube_views,  ~qpodcast_subscribe,  ~qpodcast_downloads,
+#' "500",                   "400",             "600",                 "200",                   "6",
+#' "450",                  "1200",           "15000",                 "850",                 "950",
+#' "25",                   "133",             "300",                    NA,                    NA,
+#' NA,                     "3",             "200",                  "86",                  "67",
+#' "8",                     "6",              "13",                   "8",                   "7",
+#' "500",                  "6000",         "2000000",               "10000",                "5000",
+#' "3500",                 "10000",           "40000",                    NA,                    NA,
+#' "159",                  "3852",             "822",                    NA,                    NA,
+#' NA,                      NA,                "50",                    NA,                    NA,
+#' NA,                  "2000",           "30000",                "3000",              "100000",
+#' NA,                   "500",            "2000",                 "500",                 "100",
+#' "50",                   "100",             "400",                    NA,                    NA
+#' ) %>%
+#' mutate_all(as.numeric)
 #'
 #' freq_mean(df, a)
 #' freq_mean(df, a, wt = weights)
