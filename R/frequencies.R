@@ -111,7 +111,10 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
   if (prompt) {
     mean_df <- mean_df %>%
       dplyr::mutate(
-        prompt = dataset %>% dplyr::select(!!variable) %>% labelled::var_label()
+        prompt = dataset %>%
+          dplyr::select(!!variable) %>%
+          labelled::var_label() %>%
+          tibble::deframe()
       )
   }
 
