@@ -6,7 +6,7 @@
 #' @param dataset A dataframe.
 #' @param ... The unquoted names of a set of variables in the dataframe. If nothing
 #' is specified, the function runs a frequency on every column in given dataset.
-#' @param stat Character, stat to run. Currently only 'percent' works (default: 'percent').
+#' @param stat Character, stat to run. Currently only 'percent' and 'mean' work (default: 'percent').
 #' @param nas Boolean, whether or not to include NAs in the tabulation (default: T).
 #' @param wt The unquoted name of a weighting variable in the dataframe (default: NULL).
 #' @param prompt Boolean, whether or not to include the prompt in the dataframe (default: F).
@@ -35,16 +35,15 @@ freqs <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL, prompt 
     variables <- column_quos(dataset)
   }
 
-  suppressWarnings(
-    purrr::map_dfr(
-      .x = variables,
-      .f = function(variable) {
-        freq_var(dataset, !!variable, stat, nas, !!weight, prompt, digits)
-      }
-    ))
+  purrr::map_dfr(
+    .x = variables,
+    .f = function(variable) {
+      freq_var(dataset, !!variable, stat, nas, !!weight, prompt, digits)
+    }
+  )
 }
 # Create a redundant function for convenience/backwards compatibility.
-freq <- freqs
+freq <- freqs_construction()
 
 ##### Private functions #####
 
@@ -110,6 +109,7 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
       )
   }
 
+
   if(!quo_is_null(wt)) {
     mean_df <- mean_df %>%
       filter(variable != quo_name(wt))
@@ -117,8 +117,6 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
 
   return(mean_df)
 }
-frequencies %>%
-  get_means(variable = quo(qyoutube_views), wt = quo(weightvals), digits = 2, prompt = F, nas = F) %>% print()
 
 column_quos <- function(dataset) {
   col_names <- dataset %>% colnames()
@@ -149,16 +147,23 @@ freq_var <- function(dataset, variable, stat, nas, wt, prompt, digits) {
   return(freq_result)
 }
 
-column_quos <- function(dataset) {
-  col_names <- dataset %>% colnames()
-  if (is.grouped_df(dataset)) {
-    # Exclude grouping variables since they cannot be counted independent of groups.
-    grouping_vars <- dplyr::group_vars(dataset)
-    col_names <- setdiff(col_names, grouping_vars)
+freqs_construction <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+  weight = dplyr::enquo(wt)
+  variables = dplyr::quos(...)
+
+  # If no variables are specified in the function call,
+  # assume the user wants to run a frequency on all columns.
+  if (!length(variables)) {
+    variables <- column_quos(dataset)
   }
-  col_syms <- col_names %>% dplyr::syms()
-  col_quos <- purrr::map(col_syms, dplyr::quo)
-  return(col_quos)
+
+  suppressWarnings(
+    purrr::map_dfr(
+      .x = variables,
+      .f = function(variable) {
+        freq_var(dataset, !!variable, stat, nas, !!weight, prompt, digits)
+      }
+    ))
 }
 
 ns <- function(dataset, variable, weight, prompt) {

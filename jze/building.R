@@ -11,22 +11,23 @@ set.seed(99)
 
 frequencies <-
   tibble::tribble(
-  ~qstreamer_viewers, ~qyoutube_subscribers, ~qyoutube_views, ~qpodcast_subscribe, ~qpodcast_downloads, ~gender,
-    "500",                   "400",             "600",                 "200",               "6",        "M",
-    "450",                  "1200",           "15000",                 "850",                 "950",   "M",
-    "25",                   "133",             "300",                    NA,                    NA,     "F",
-    NA,                     "3",             "200",                  "86",                  "67",      "M",
-    "8",                     "6",              "13",                   "8",                   "7",      "F",
-    "500",                  "6000",         "2000000",               "10000",                "5000",      "F",
-    "3500",                 "10000",           "40000",                    NA,                    NA,      "F",
-    "159",                  "3852",             "822",                    NA,                    NA,     "M",
-    NA,                      NA,                "50",                    NA,                    NA,       "M",
-    NA,                  "2000",           "30000",                "3000",              "100000",         "F",
-    NA,                   "500",            "2000",                 "500",                 "100",          "M",
-    "50",                   "100",             "400",                    NA,                    NA,         "F"
+  ~qstreamer_viewers, ~qyoutube_subscribers, ~qyoutube_views, ~qpodcast_subscribe, ~qpodcast_downloads,
+    "500",                   "400",             "600",                 "200",               "6",
+    "450",                  "1200",           "15000",                 "850",                 "950",
+    "25",                   "133",             "300",                    NA,                    NA,
+    NA,                     "3",             "200",                  "86",                  "67",
+    "8",                     "6",              "13",                   "8",                   "7",
+    "500",                  "6000",         "2000000",               "10000",                "5000",
+    "3500",                 "10000",           "40000",                    NA,                    NA,
+    "159",                  "3852",             "822",                    NA,                    NA,
+    NA,                      NA,                "50",                    NA,                    NA,
+    NA,                  "2000",           "30000",                "3000",              "100000",
+    NA,                   "500",            "2000",                 "500",                 "100",
+    "50",                   "100",             "400",                    NA,                    NA
   ) %>%
   mutate_at(vars(starts_with("q")), as.numeric) %>%
-  mutate(weightvals = rnorm(12, mean = 1, sd = 0.1))
+  mutate(gender = sample(c("M","F"), 12, replace = T),
+         weightvals = rnorm(12, mean = 1, sd = 0.1))
 
 
 # building: helper functions ----------------------------------------------
@@ -92,6 +93,7 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
         prompt = labelled::var_label(value)
       )
   }
+
 
   if(!quo_is_null(wt)) {
     mean_df <- mean_df %>%
