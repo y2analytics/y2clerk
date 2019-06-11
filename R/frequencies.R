@@ -109,7 +109,7 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
                   label = '',
                   stat = 'mean',
                   result = mean %>% base::round(digits)) %>%
-    dplyr::select(tidyselect::one_of(grouping_vars), variable, prompt, value, label, stat, n, result) %>%
+    dplyr::select(tidyselect::one_of(grouping_vars), variable, prompt, value, label, n, stat, result) %>%
     tibble::as_tibble()
 
   # fill out prompt column if specified
