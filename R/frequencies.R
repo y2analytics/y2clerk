@@ -85,7 +85,7 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
   # wt exists
   else {
     mean_df <- dataset %>%
-      dplyr::ungroup %>%
+      dplyr::ungroup() %>%
       dplyr::filter(!is.na(!!variable)) %>%
       dplyr::summarise(n = base::sum(!!wt),
                        mean = stats::weighted.mean(!!variable, !!wt)
