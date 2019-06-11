@@ -38,6 +38,7 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL,
     variables <- column_quos(dataset)
   }
 
+  # suppressWarnings added for trivial bind rows warning
   suppressWarnings(
     purrr::map_dfr(
       .x = variables,
@@ -48,41 +49,41 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL,
   )
 }
 
-# Create a redundant function for convenience/backwards compatibility.
-
 ##### Private functions #####
 
 get_means <- function(dataset, variable, nas, wt, prompt, digits) {
 
   # "failing fast"
   # 1) if there are NAs in the data, you should use nas = F
-  if(nas) {
+  if (nas) {
     count_nas <- dataset %>%
       dplyr::filter(is.na(!!variable)) %>%
       base::row()
-    if(count_nas != 0) stop('NAs present in variable(s); to proceed, set nas = F')
+    if (count_nas != 0) stop('NAs present in variable(s); to proceed, set nas = F')
   }
 
   # 2) can't take mean of categorical variable
+  # * need to build more robust way of validating
   check_class <- dataset %>%
     dplyr::select(!!variable) %>%
     dplyr::summarise_all(class) %>%
     dplyr::pull()
-  if(check_class %in% c("character", "factor")) stop("Can't take mean of non-numeric variable")
+  if (check_class %in% c("character", "factor")) stop("Can't take mean of non-numeric variable")
 
-  if(is.null(wt)){
+  # (if wt = NULL) change class so logical test can be performed in all cases:
+  if (is.null(wt)) {
     wt <- dplyr::enquo(wt)
   }
 
-  # wt = NULL
-  if(rlang::quo_is_null(wt)) {
+  # 1) wt = NULL
+  if (rlang::quo_is_null(wt)) {
     mean_df <- dataset %>%
       dplyr::filter(!is.na(!!variable)) %>%
       dplyr::summarise(n = base::length(!!variable),
                        mean = base::mean(!!variable)
       )
   }
-  # wt exists
+  # 2) wt exists in dataset
   else {
     mean_df <- dataset %>%
       dplyr::filter(!is.na(!!variable)) %>%
@@ -91,12 +92,16 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
       )
   }
 
-  # get group column names
+  # 3) [not built] wt is non-null, not in dataset
+
+  # get group column names to later add (if they exist/as necessary)
   grouping_vars <- c("")
   if (dplyr::is.grouped_df(dataset)) {
     grouping_vars <- dplyr::group_vars(dataset)
   }
 
+  # produce means
+  # * what should value and label display here? not as relevant as for freqs(stat='percent') ?
   mean_df <- mean_df %>%
     dplyr::mutate(variable = dplyr::quo_name(variable),
                   prompt = '',
@@ -107,7 +112,7 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
     dplyr::select(tidyselect::one_of(grouping_vars), variable, prompt, value, label, stat, n, result) %>%
     tibble::as_tibble()
 
-  # not built out
+  # fill out prompt column if specified
   if (prompt) {
 
     prompt_text <- dataset %>%
@@ -122,9 +127,10 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
       )
   }
 
-  if(!rlang::quo_is_null(wt)) {
+  # if weights are used, remove weight column rows from output
+  if (!rlang::quo_is_null(wt)) {
     mean_df <- mean_df %>%
-      dplyr::filter(variable != quo_name(wt))
+      dplyr::filter(variable != rlang::quo_name(wt))
   }
 
   return(mean_df)
