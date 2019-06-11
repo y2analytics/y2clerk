@@ -104,12 +104,17 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
   # * what should value and label display here? not as relevant as for freqs(stat='percent') ?
   mean_df <- mean_df %>%
     dplyr::mutate(variable = dplyr::quo_name(variable),
-                  prompt = '',
                   value = '',
                   label = '',
                   stat = 'mean',
                   result = mean %>% base::round(digits)) %>%
-    dplyr::select(tidyselect::one_of(grouping_vars), variable, prompt, value, label, n, stat, result) %>%
+    dplyr::select(tidyselect::one_of(grouping_vars),
+                  variable,
+                  value,
+                  label,
+                  n,
+                  stat,
+                  result) %>%
     tibble::as_tibble()
 
   # fill out prompt column if specified
@@ -124,7 +129,15 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
     mean_df <- mean_df %>%
       dplyr::mutate(
         prompt = prompt_text
-      )
+      ) %>%
+      dplyr::select(tidyselect::one_of(grouping_vars),
+                    variable,
+                    prompt,
+                    value,
+                    label,
+                    n,
+                    stat,
+                    result)
   }
 
   # if weights are used, remove weight column rows from output
