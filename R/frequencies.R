@@ -39,12 +39,12 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL,
   }
 
   suppressWarnings(
-  purrr::map_dfr(
-    .x = variables,
-    .f = function(variable) {
-      freq_var(dataset, !!variable, stat, nas, !!weight, prompt, digits)
-    }
-  )
+    purrr::map_dfr(
+      .x = variables,
+      .f = function(variable) {
+        freq_var(dataset, !!variable, stat, nas, !!weight, prompt, digits)
+      }
+    )
   )
 }
 
@@ -58,16 +58,16 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
   # 1) if there are NAs in the data, you should use nas = F
   if(nas) {
     count_nas <- dataset %>%
-      filter(is.na(!!variable)) %>%
-      nrow()
+      dplyr::filter(is.na(!!variable)) %>%
+      base::row()
     if(count_nas != 0) stop('NAs present in variable(s); to proceed, set nas = F')
   }
 
   # 2) can't take mean of categorical variable
   check_class <- dataset %>%
     dplyr::summarise_all(class) %>%
-    select(!!variable) %>%
-    pull()
+    dplyr::select(!!variable) %>%
+    dplyr::pull()
   if(check_class %in% c("character", "factor")) stop("Can't take mean of non-numeric variable")
 
   if(is.null(wt)){
@@ -77,34 +77,34 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
   # wt = NULL
   if(rlang::quo_is_null(wt)) {
     mean_df <- dataset %>%
-      filter(!is.na(!!variable)) %>%
-      summarise(n = length(!!variable),
-                mean = base::mean(!!variable)
+      dplyr::filter(!is.na(!!variable)) %>%
+      dplyr::summarise(n = base::length(!!variable),
+                       mean = base::mean(!!variable)
       )
   }
   # wt exists
   else {
     mean_df <- dataset %>%
-      filter(!is.na(!!variable)) %>%
-      summarise(n = sum(!!wt),
-                mean = stats::weighted.mean(!!variable, !!wt)
+      dplyr::filter(!is.na(!!variable)) %>%
+      dplyr::summarise(n = base::sum(!!wt),
+                       mean = stats::weighted.mean(!!variable, !!wt)
       )
   }
 
   # get group column names
   grouping_vars <- c("")
-  if (is.grouped_df(dataset)) {
+  if (dplyr::is.grouped_df(dataset)) {
     grouping_vars <- dplyr::group_vars(dataset)
   }
 
   mean_df <- mean_df %>%
-    mutate(variable = dplyr::quo_name(variable),
-           prompt = '',
-           value = '',
-           label = '',
-           stat = 'mean',
-           result = mean %>% round(digits)) %>%
-    select(one_of(grouping_vars), variable, prompt, value, label, stat, n, result) %>%
+    dplyr::mutate(variable = dplyr::quo_name(variable),
+                  prompt = '',
+                  value = '',
+                  label = '',
+                  stat = 'mean',
+                  result = mean %>% base::round(digits)) %>%
+    dplyr::select(tidyselect::one_of(grouping_vars), variable, prompt, value, label, stat, n, result) %>%
     as_tibble()
 
   # not built out
@@ -115,10 +115,9 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
       )
   }
 
-
   if(!rlang::quo_is_null(wt)) {
     mean_df <- mean_df %>%
-      filter(variable != quo_name(wt))
+      dplyr::filter(variable != quo_name(wt))
   }
 
   return(mean_df)
@@ -126,10 +125,10 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
 
 column_quos <- function(dataset) {
   col_names <- dataset %>% colnames()
-  if (is.grouped_df(dataset)) {
+  if (dplyr::is.grouped_df(dataset)) {
     # Exclude grouping variables since they cannot be counted independent of groups.
     grouping_vars <- dplyr::group_vars(dataset)
-    col_names <- setdiff(col_names, grouping_vars)
+    col_names <- base::setdiff(col_names, grouping_vars)
   }
   col_syms <- col_names %>% dplyr::syms()
   col_quos <- purrr::map(col_syms, dplyr::quo)
