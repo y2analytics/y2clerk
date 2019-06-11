@@ -13,7 +13,7 @@ freqs(dataset, ..., stat = "percent", nas = TRUE, wt = NULL,
 \item{...}{The unquoted names of a set of variables in the dataframe. If nothing
 is specified, the function runs a frequency on every column in given dataset.}
 
-\item{stat}{Character, stat to run. Currently only 'percent' works (default: 'percent').}
+\item{stat}{Character, stat to run. Currently only 'percent' and 'mean' work (default: 'percent').}
 
 \item{nas}{Boolean, whether or not to include NAs in the tabulation (default: T).}
 
@@ -40,4 +40,7 @@ df <- data.frame(
 freqs(df, a, b)
 freqs(df, a, b, nas = FALSE)
 freqs(df, a, b, wt = weights)
+freq(df, stat = 'mean', nas = F)
+freq(df, stat = 'mean', nas = F, wt = weights)
+freq(df \%>\% group_by(a), b, stat = 'mean', nas = F, wt = weights)
 }
