@@ -114,7 +114,9 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
         prompt = dataset %>%
           dplyr::select(!!variable) %>%
           labelled::var_label() %>%
-          tibble::deframe()
+          tibble::deframe() %>%
+          dplyr::select(tidyselect::one_of(grouping_vars), variable, prompt, value, label, stat, n, result) %>%
+          tibble::as_tibble()
       )
   }
 
