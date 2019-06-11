@@ -45,7 +45,7 @@ freqs <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL, prompt 
   )
 }
 # Create a redundant function for convenience/backwards compatibility.
-freq <- freqs_construction
+freq <- freqs
 
 ##### Private functions #####
 
@@ -147,25 +147,6 @@ freq_var <- function(dataset, variable, stat, nas, wt, prompt, digits) {
   }
 
   return(freq_result)
-}
-
-freqs_construction <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL, prompt = F, digits = 2) {
-  weight = dplyr::enquo(wt)
-  variables = dplyr::quos(...)
-
-  # If no variables are specified in the function call,
-  # assume the user wants to run a frequency on all columns.
-  if (!length(variables)) {
-    variables <- column_quos(dataset)
-  }
-
-  suppressWarnings(
-    purrr::map_dfr(
-      .x = variables,
-      .f = function(variable) {
-        freq_var(dataset, !!variable, stat, nas, !!weight, prompt, digits)
-      }
-    ))
 }
 
 ns <- function(dataset, variable, weight, prompt) {
