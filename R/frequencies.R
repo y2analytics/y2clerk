@@ -25,7 +25,7 @@
 #' freqs(df, a, b, wt = weights)
 #' @export
 
-freqs <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freqs <- freq <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   weight = dplyr::enquo(wt)
   variables = dplyr::quos(...)
 
@@ -44,8 +44,8 @@ freqs <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL, prompt 
   )
   )
 }
+
 # Create a redundant function for convenience/backwards compatibility.
-freq <- freqs
 
 ##### Private functions #####
 
