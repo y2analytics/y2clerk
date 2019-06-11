@@ -135,6 +135,11 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
       labelled::var_label() %>%
       tibble::deframe()
 
+    # when prompt = T but there is no variable label, output ""
+    if (is.null(prompt_text)) {
+      prompt_text <- ""
+    }
+
     mean_df <- mean_df %>%
       dplyr::mutate(
         prompt = prompt_text
