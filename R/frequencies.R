@@ -135,7 +135,7 @@ column_quos <- function(dataset) {
   return(col_quos)
 }
 
-freq_var <- function(dataset, variable, stat, nas, wt, prompt, digits) {
+freq_var <- function(dataset, variable, stat = 'percent', nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   variable <- dplyr::enquo(variable)
   weight <- dplyr::enquo(wt)
 
