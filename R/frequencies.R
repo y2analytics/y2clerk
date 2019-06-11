@@ -35,15 +35,17 @@ freqs <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL, prompt 
     variables <- column_quos(dataset)
   }
 
+  suppressWarnings(
   purrr::map_dfr(
     .x = variables,
     .f = function(variable) {
       freq_var(dataset, !!variable, stat, nas, !!weight, prompt, digits)
     }
   )
+  )
 }
 # Create a redundant function for convenience/backwards compatibility.
-freq <- freqs_construction()
+freq <- freqs_construction
 
 ##### Private functions #####
 
