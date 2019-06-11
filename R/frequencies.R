@@ -109,14 +109,14 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
 
   # not built out
   if (prompt) {
+    prompt_text <- dataset %>%
+      dplyr::select(!!variable) %>%
+      labelled::var_label() %>%
+      tibble::deframe()
+
     mean_df <- mean_df %>%
       dplyr::mutate(
-        prompt = dataset %>%
-          dplyr::select(!!variable) %>%
-          labelled::var_label() %>%
-          tibble::deframe() %>%
-          dplyr::select(tidyselect::one_of(grouping_vars), variable, prompt, value, label, stat, n, result) %>%
-          tibble::as_tibble()
+        prompt = prompt_text
       )
   }
 
