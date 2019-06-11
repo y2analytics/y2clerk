@@ -23,6 +23,9 @@
 #' freqs(df, a, b)
 #' freqs(df, a, b, nas = FALSE)
 #' freqs(df, a, b, wt = weights)
+#' freq(df, stat = 'mean', nas = F)
+#' freq(df, stat = 'mean', nas = F, wt = weights)
+#' freq(df %>% group_by(a), b, stat = 'mean', nas = F, wt = weights)
 #' @export
 
 freqs <- freq <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL, prompt = F, digits = 2) {
@@ -101,7 +104,8 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
            label = '',
            stat = 'mean',
            result = mean %>% round(digits)) %>%
-    select(one_of(grouping_vars), variable, prompt, value, label, stat, n, result)
+    select(one_of(grouping_vars), variable, prompt, value, label, stat, n, result) %>%
+    as_tibble()
 
   # not built out
   if (prompt) {
