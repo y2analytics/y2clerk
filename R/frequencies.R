@@ -72,7 +72,7 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
   }
 
   # wt = NULL
-  if(quo_is_null(wt)) {
+  if(rlang::quo_is_null(wt)) {
     mean_df <- dataset %>%
       filter(!is.na(!!variable)) %>%
       summarise(n = length(!!variable),
@@ -112,7 +112,7 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
   }
 
 
-  if(!quo_is_null(wt)) {
+  if(!rlang::quo_is_null(wt)) {
     mean_df <- mean_df %>%
       filter(variable != quo_name(wt))
   }
