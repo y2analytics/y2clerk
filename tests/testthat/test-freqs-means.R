@@ -66,12 +66,6 @@ responses <-
 
   as_tibble()
 
-# basic_mean_no_nas <-
-#   tribble(
-#     ~variable, ~value, ~label, ~n, ~stat, ~result,
-#     "q0",         "",     "",  25L, "mean",  55.2
-#   )
-
 # tests -------------------------------------------------------------------
 
 context("check test data")
@@ -82,9 +76,11 @@ test_that("test data is correct", {
   expect_equal(nrow(responses), 25)
 })
 
-context("evaluate mean of numeric variable (no NAs)")
+#
 
-test_that("no NAs present, nas = T", {
+context("numeric variables")
+
+test_that("NAs not present, nas = T: result is correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
                       freqs(stat = "mean") %>%
@@ -95,7 +91,7 @@ test_that("no NAs present, nas = T", {
   )
 })
 
-test_that("NAs not present, nas = F", {
+test_that("NAs not present, nas = F: n & result are correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
                       freqs(stat = "mean", nas = F) %>%
@@ -114,18 +110,16 @@ test_that("NAs not present, nas = F", {
   )
 })
 
-context("evaluate mean of numeric variable (NAs present, nas = T)")
-
-test_that("nas argument set incorrectly results in error", {
+test_that("NAs present, nas = T: throws error", {
   expect_error(responses %>%
-                      select(q1) %>%
-                      freqs(stat = "mean") %>%
-                      select(result) %>%
-                      pull()
+                 select(q1) %>%
+                 freqs(stat = "mean") %>%
+                 select(result) %>%
+                 pull()
   )
 })
 
-test_that("nas argument set correctly yields correct output", {
+test_that("NAs present, nas = F: n & result are correct", {
   expect_equal(responses %>%
                  select(q1) %>%
                  freqs(stat = "mean", nas = F) %>%
@@ -144,12 +138,58 @@ test_that("nas argument set correctly yields correct output", {
   )
 })
 
-context("factor variable results in error")
+#
 
-test_that(
+context("factor variables")
+
+test_that("factor variable input: throws error", {
   expect_error(
     responses %>%
       select(q2) %>%
       freqs(stat = 'mean')
   )
-)
+})
+
+#
+
+context("character variables")
+
+test_that("character variable input: throws error", {
+  expect_error(
+    responses %>%
+      select(q3) %>%
+      freqs(stat = 'mean')
+  )
+})
+
+#
+
+context("value labels")
+
+test_that("column with value labels input: throws error", {
+  expect_error(
+
+  )
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
