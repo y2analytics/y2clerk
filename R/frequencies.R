@@ -75,8 +75,7 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
   check_class <- str_c(check_class, collapse = " ")
 
   # if not one of these types, stop
-  if (! (check_class %in% c("numeric", "integer",
-                            ))) stop("Can't take mean of non-numeric variable")
+  if (! (check_class %in% c("numeric", "integer")) ) stop("Can't take mean of non-numeric variable")
 
 
   check_labels <- dataset %>%
