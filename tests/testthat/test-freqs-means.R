@@ -2,6 +2,9 @@
 
 # setup -------------------------------------------------------------------
 
+rm(list = ls())
+
+library(y2clerk)
 library(tidyverse)
 library(labelled)
 
@@ -50,6 +53,7 @@ responses <-
       `Very unhappy` = "d"
 
     )
+
   ) %>%
   set_variable_labels(
     q1 = "% of males involved in agriculture",
@@ -59,13 +63,14 @@ responses <-
     q5 = "Satisfaction",
     w = "Weights"
   ) %>%
+
   as_tibble()
 
-basic_mean_no_nas <-
-  tribble(
-    ~variable, ~value, ~label, ~n, ~stat, ~result,
-    "q0",         "",     "",  25L, "mean",  55.2
-  )
+# basic_mean_no_nas <-
+#   tribble(
+#     ~variable, ~value, ~label, ~n, ~stat, ~result,
+#     "q0",         "",     "",  25L, "mean",  55.2
+#   )
 
 # tests -------------------------------------------------------------------
 
@@ -77,18 +82,74 @@ test_that("test data is correct", {
   expect_equal(nrow(responses), 25)
 })
 
-
 context("evaluate mean of numeric variable (no NAs)")
 
-test_that("basic mean, no NAs", {
+test_that("no NAs present, nas = T", {
   expect_equivalent(responses %>%
                       select(q0) %>%
                       freqs(stat = "mean") %>%
                       select(result) %>%
                       pull(),
 
-                    55.22
+                    round(mean(responses$q0),2)
   )
 })
 
+test_that("NAs not present, nas = F", {
+  expect_equivalent(responses %>%
+                      select(q0) %>%
+                      freqs(stat = "mean", nas = F) %>%
+                      select(result) %>%
+                      pull(),
 
+                    round(mean(responses$q0),2)
+  )
+  expect_equivalent(responses %>%
+                      select(q0) %>%
+                      freqs(stat = "mean", nas = F) %>%
+                      select(n) %>%
+                      pull(),
+
+                    nrow(responses[!is.na(responses$q0),])
+  )
+})
+
+context("evaluate mean of numeric variable (NAs present, nas = T)")
+
+test_that("nas argument set incorrectly results in error", {
+  expect_error(responses %>%
+                      select(q1) %>%
+                      freqs(stat = "mean") %>%
+                      select(result) %>%
+                      pull()
+  )
+})
+
+test_that("nas argument set correctly yields correct output", {
+  expect_equal(responses %>%
+                 select(q1) %>%
+                 freqs(stat = "mean", nas = F) %>%
+                 select(result) %>%
+                 pull(),
+
+               round(mean(responses$q1, na.rm = T), 2)
+  )
+  expect_equivalent(responses %>%
+                      select(q1) %>%
+                      freqs(stat = "mean", nas = F) %>%
+                      select(n) %>%
+                      pull(),
+
+                    nrow(responses[!is.na(responses$q1),])
+  )
+})
+
+context("factor variable results in error")
+
+test_that(
+  expect_error(
+    responses %>%
+      select(q2) %>%
+      freqs(stat = 'mean')
+  )
+)

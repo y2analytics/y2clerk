@@ -67,17 +67,22 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
 
   check_class <- dataset %>%
     dplyr::select(!!variable) %>%
-    dplyr::summarise_all(class) %>%
-    dplyr::pull()
+    dplyr::pull() %>%
+    base::class()
+
+  # collapse for examples like c("ordered" "factor")
+  check_class <- str_c(check_class, collapse = " ")
 
   # check_labels <- dataset %>%
   #   dplyr::select(!!variable) %>%
   #   labelled::val_labels() %>%
   #   tibble::deframe() %>%
   #   base::is.null()
-
-  if (check_class %in% c("character", "factor")) stop("Can't take mean of non-numeric variable")
   # if (! check_labels) stop("Value labels exist; consider using stat = 'percent'")
+
+
+  # if not one of these types, stop
+  if (! (check_class %in% c("numeric", "integer"))) stop("Can't take mean of non-numeric variable")
 
   # (if wt = NULL) change class so logical test can be performed in all cases:
   if (is.null(wt)) {
