@@ -58,7 +58,7 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
   if (nas) {
     count_nas <- dataset %>%
       dplyr::filter(is.na(!!variable)) %>%
-      base::row()
+      base::nrow()
     if (count_nas != 0) stop('NAs present in variable(s); to proceed, set nas = F')
   }
 
