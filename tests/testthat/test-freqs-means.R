@@ -168,7 +168,9 @@ context("value labels")
 
 test_that("column with value labels input: throws error", {
   expect_error(
-
+    responses %>%
+      select(q4) %>%
+      freqs(stat = 'mean')
   )
 })
 
