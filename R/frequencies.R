@@ -78,6 +78,8 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
   if (! (check_class %in% c("numeric", "integer")) ) stop("Can't take mean of non-numeric variable")
 
 
+  # 3) stop if value labels exist
+
   check_labels <- dataset %>%
     dplyr::select(!!variable) %>%
     labelled::val_labels() %>%
