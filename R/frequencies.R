@@ -155,7 +155,7 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
   # produce dataframe to output
   # * what should value and label display here? not as relevant as for freqs(stat='percent') ?
 
-  # make copy, maybe fix issues?
+  # make copy, maybe fix issues? i think it's mixing up the stat variable and the stat fx argument
   statistic <- stat
   rm(stat)
 

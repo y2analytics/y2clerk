@@ -331,15 +331,5 @@ test_that("output from 'pr = 100' is equivalent to base::max() when weights are 
 
 context("structure")
 
-test_that("output from 'pr = 0' is equivalent to base::min()", {
-  expect_equal(
-    responses %>%
-      freqs(q0, stat = 'quantile', pr = 0) %>%
-      select(result) %>%
-      pull(),
-
-    min(responses$q0)
-  )
-})
 
 

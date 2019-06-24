@@ -16,6 +16,7 @@ Imports:
   labelled,
   purrr,
   stringr,
-  testthat
-RoxygenNote: 6.1.1
+  testthat,
+  reldist
+RoxygenNote: 6.1.2
 Suggests: testthat
