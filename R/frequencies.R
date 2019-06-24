@@ -154,6 +154,11 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   # produce dataframe to output
   # * what should value and label display here? not as relevant as for freqs(stat='percent') ?
+
+  # make copy, maybe fix issues?
+  statistic <- stat
+  rm(stat)
+
   out_df <-
     out_df %>%
     dplyr::mutate(variable = dplyr::quo_name(variable),
@@ -161,15 +166,18 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
                   label = '',
                   # different labels depending on input
                   stat = case_when(
-                    stat == 'mean' ~ 'mean',
-                    stat == 'quantile' & pr == 0 ~ 'quantile - min',
-                    stat == 'quantile' & pr == 50 ~ 'quantile - median',
-                    stat == 'quantile' & pr == 100 ~ 'quantile - max',
-                    stat == 'quantile' & !(pr %in% c(0,50,100)) ~ str_c('quantile - ', pr, '%'),
-                    # add 'weighted' to stat column if relevant
-                    !rlang::quo_is_null(wt) & stat == 'mean' ~ str_c(stat, ' - weighted'),
-                    !rlang::quo_is_null(wt) & stat == 'quantile' & between(pr, 0, 100) ~ str_c(stat, ' - weighted'),
+                    statistic == 'mean' ~ 'mean',
+                    statistic == 'quantile' & pr == 0 ~ 'quantile - min',
+                    statistic == 'quantile' & pr == 50 ~ 'quantile - median',
+                    statistic == 'quantile' & pr == 100 ~ 'quantile - max',
+                    statistic == 'quantile' & !(pr %in% c(0,50,100)) ~ str_c('quantile - ', pr, '%'),
                     TRUE ~ 'error'
+                  ),
+                  # add 'weighted' to stat column if relevant
+                  stat = case_when(
+                    !rlang::quo_is_null(wt) & statistic == 'mean' ~ str_c(stat, ' - weighted'),
+                    !rlang::quo_is_null(wt) & statistic == 'quantile' & between(pr, 0, 100) ~ str_c(stat, ' - weighted'),
+                    TRUE ~ stat
                   ),
                   result = base::round(result,
                                        digits)) %>%
