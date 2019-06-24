@@ -269,7 +269,20 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
       get_quant(dataset, variable, stat = 'quantile', pr = 50, nas, weight, prompt, digits),
       get_quant(dataset, variable, stat = 'quantile', pr = 75, nas, weight, prompt, digits),
       get_quant(dataset, variable, stat = 'quantile', pr = 100, nas, weight, prompt, digits)
-    )
+    ) %>%
+      mutate(stat = forcats::fct_relevel(stat,
+                                         c('quantile - min',
+                                           'quantile - 25%',
+                                           'quantile - 25% - weighted',
+                                           'quantile - median',
+                                           'quantile - median - weighted',
+                                           'mean',
+                                           'mean - weighted',
+                                           'quantile - 75%',
+                                           'quantile - 75% - weighted',
+                                           'quantile - max')
+                                         )
+             )
   }
 
   else if(stat %in% c('mean', 'quantile')) {
