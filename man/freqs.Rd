@@ -4,8 +4,8 @@
 \alias{freqs}
 \title{Run frequencies for multiple variables.}
 \usage{
-freqs(dataset, ..., stat = "percent", nas = TRUE, wt = NULL,
-  prompt = F, digits = 2)
+freqs(dataset, ..., stat = "percent", perc = 50, nas = TRUE,
+  wt = NULL, prompt = F, digits = 2)
 }
 \arguments{
 \item{dataset}{A dataframe.}
@@ -13,7 +13,9 @@ freqs(dataset, ..., stat = "percent", nas = TRUE, wt = NULL,
 \item{...}{The unquoted names of a set of variables in the dataframe. If nothing
 is specified, the function runs a frequency on every column in given dataset.}
 
-\item{stat}{Character, stat to run. Currently only 'percent' and 'mean' work (default: 'percent').}
+\item{stat}{Character, stat to run. Currently accepts 'percent,' 'mean,' and 'percentile' (default: 'percent').}
+
+\item{perc}{Integer, for use when stat = 'percentile.' Median unless otherwise specified. Input should be an integer x such that 0<=x<=100. (default: 50)}
 
 \item{nas}{Boolean, whether or not to include NAs in the tabulation (default: T).}
 
