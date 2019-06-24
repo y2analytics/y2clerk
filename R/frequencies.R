@@ -169,7 +169,7 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
                     TRUE ~ 'error'
                   ),
                   # add 'weighted' to stat column if relevant
-                  stat = ifelse(!rlang::quo_is_null(wt),
+                  stat = ifelse(!rlang::quo_is_null(wt) & (stat == 'mean' | pr %in% c(0,100)),
                                 str_c(stat, ' - weighted'),
                                 stat
                   ),
