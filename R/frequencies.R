@@ -188,6 +188,8 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
                     !rlang::quo_is_null(wt) & statistic == 'quantile' & (0 < pr) & (pr < 100) ~ str_c(stat, ' - weighted'),
                     TRUE ~ stat
                   ),
+                  n = base::round(n,
+                                  digits),
                   result = base::round(result,
                                        digits)) %>%
     dplyr::select(tidyselect::one_of(grouping_vars),
@@ -197,6 +199,7 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
                   n,
                   stat,
                   result) %>%
+    arrange(tidyselect::one_of(grouping_vars)) %>%
     tibble::as_tibble()
 
   # fill out prompt column if specified
