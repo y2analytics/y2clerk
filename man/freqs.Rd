@@ -15,7 +15,7 @@ is specified, the function runs a frequency on every column in given dataset.}
 
 \item{stat}{Character, stat to run. Currently accepts 'percent,' 'mean,' and 'quantile' (default: 'percent').}
 
-\item{pr}{Double, for use when stat = 'quantile.' Stands for percentile rank, which is a quantile relative to a 100-point scale. Returns median unless otherwise specified. As an example, pr = 60 will return a real number such that 60\% of values are lower than that number. pr = 0 and pr = 100 are special cases which will return the minimum and maximum in the data set. Input should be a real number x such that 0<=x<=100. (default: 50)}
+\item{pr}{Double, for use when stat = 'quantile.' Input should be a real number x such that 0<=x<=100. Stands for percentile rank, which is a quantile relative to a 100-point scale. Returns median unless otherwise specified. pr = 0 and pr = 100 are special cases which will return the minimum and maximum respectively. (default: 50)}
 
 \item{nas}{Boolean, whether or not to include NAs in the tabulation (default: T).}
 
@@ -45,4 +45,13 @@ freqs(df, a, b, wt = weights)
 freq(df, stat = 'mean', nas = F)
 freq(df, stat = 'mean', nas = F, wt = weights)
 freq(df \%>\% group_by(a), b, stat = 'mean', nas = F, wt = weights)
+
+# * note that pr = 60 will return a real number such that 60\\\% of values are lower than that number.
+# * note also that minimums and maximums are unaffected by weighting
+freqs(df, a, stat = 'quantile', nas = F)
+freqs(df, a, stat = 'quantile', pr = 60, nas = F)
+freqs(df, a, stat = 'quantile', pr = 0, nas = F)
+freqs(df, a, stat = 'quantile', pr = 100, nas = F)
+freqs(df, a, stat = 'quantile', pr = 100, nas = F, wt = weights)
+freqs(df, a, stat = 'quantile', pr = 95, nas = F, wt = weights)
 }
