@@ -261,6 +261,17 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
       percents(nas, digits = digits)
   }
 
+  else if(stat == 'summary') {
+    freq_result <- bind_rows(
+      get_quant(dataset, variable, stat = 'quantile', pr = 0, nas, weight, prompt, digits),
+      get_quant(dataset, variable, stat = 'quantile', pr = 25, nas, weight, prompt, digits),
+      get_quant(dataset, variable, stat = 'mean', pr, nas, weight, prompt, digits),
+      get_quant(dataset, variable, stat = 'quantile', pr = 50, nas, weight, prompt, digits),
+      get_quant(dataset, variable, stat = 'quantile', pr = 75, nas, weight, prompt, digits),
+      get_quant(dataset, variable, stat = 'quantile', pr = 100, nas, weight, prompt, digits)
+    )
+  }
+
   else if(stat %in% c('mean', 'quantile')) {
     freq_result <- get_quant(dataset, variable, stat, pr, nas, weight, prompt, digits)
   }
