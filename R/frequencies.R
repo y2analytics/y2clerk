@@ -6,7 +6,7 @@
 #' @param dataset A dataframe.
 #' @param ... The unquoted names of a set of variables in the dataframe. If nothing
 #' is specified, the function runs a frequency on every column in given dataset.
-#' @param stat Character, stat to run. Currently accepts 'percent,' 'mean,' and 'quantile' (default: 'percent').
+#' @param stat Character, stat to run. Currently accepts 'percent,' 'mean,' 'quantile,' and 'summary' (default: 'percent').
 #' @param pr Double, for use when stat = 'quantile.' Input should be a real number x such that 0 ≤ x ≤ 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. Returns median unless otherwise specified. pr = 0 and pr = 100 are special cases which will return the minimum and maximum respectively (default: 50).
 #' @param nas Boolean, whether or not to include NAs in the tabulation (default: T).
 #' @param wt The unquoted name of a weighting variable in the dataframe (default: NULL).
@@ -236,6 +236,32 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
   return(out_df)
 }
 
+get_summary <- function(dataset, variable, nas, weight, prompt, digits) {
+  out <- bind_rows(
+    get_quant(dataset, variable, stat = 'quantile', pr = 0,   nas, weight, prompt, digits),
+    get_quant(dataset, variable, stat = 'quantile', pr = 25,  nas, weight, prompt, digits),
+    get_quant(dataset, variable, stat = 'mean',     pr = 50,  nas, weight, prompt, digits),
+    get_quant(dataset, variable, stat = 'quantile', pr = 50,  nas, weight, prompt, digits),
+    get_quant(dataset, variable, stat = 'quantile', pr = 75,  nas, weight, prompt, digits),
+    get_quant(dataset, variable, stat = 'quantile', pr = 100, nas, weight, prompt, digits)
+  ) %>%
+    mutate(stat = forcats::fct_relevel(stat,
+                                       c('quantile - min',
+                                         'quantile - 25%',
+                                         'quantile - 25% - weighted',
+                                         'quantile - median',
+                                         'quantile - median - weighted',
+                                         'mean',
+                                         'mean - weighted',
+                                         'quantile - 75%',
+                                         'quantile - 75% - weighted',
+                                         'quantile - max')
+                                       )
+           )
+
+  return(out)
+}
+
 column_quos <- function(dataset) {
   col_names <- dataset %>% colnames()
   if (dplyr::is.grouped_df(dataset)) {
@@ -253,7 +279,7 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
   weight <- dplyr::enquo(wt)
 
   # check stat argument input
-  #if(!(stat %in% c('percent','mean','quantile','summary'))) stop('"stat" argument must receive a value from c("percent", "mean", "quantile", "summary")')
+  if(!(stat %in% c('percent','mean','quantile','summary'))) stop('"stat" argument must receive a value from c("percent", "mean", "quantile", "summary")')
 
   if (stat == 'percent') {
     base <- ns(dataset, variable, weight, prompt)
@@ -262,27 +288,7 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
   }
 
   else if(stat == 'summary') {
-    freq_result <- bind_rows(
-      get_quant(dataset, variable, stat = 'quantile', pr = 0, nas, weight, prompt, digits),
-      get_quant(dataset, variable, stat = 'quantile', pr = 25, nas, weight, prompt, digits),
-      get_quant(dataset, variable, stat = 'mean', pr, nas, weight, prompt, digits),
-      get_quant(dataset, variable, stat = 'quantile', pr = 50, nas, weight, prompt, digits),
-      get_quant(dataset, variable, stat = 'quantile', pr = 75, nas, weight, prompt, digits),
-      get_quant(dataset, variable, stat = 'quantile', pr = 100, nas, weight, prompt, digits)
-    ) %>%
-      mutate(stat = forcats::fct_relevel(stat,
-                                         c('quantile - min',
-                                           'quantile - 25%',
-                                           'quantile - 25% - weighted',
-                                           'quantile - median',
-                                           'quantile - median - weighted',
-                                           'mean',
-                                           'mean - weighted',
-                                           'quantile - 75%',
-                                           'quantile - 75% - weighted',
-                                           'quantile - max')
-                                         )
-             )
+    freq_result <- get_summary(dataset, variable, nas, weight, prompt, digits)
   }
 
   else if(stat %in% c('mean', 'quantile')) {
