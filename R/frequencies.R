@@ -238,7 +238,7 @@ freq_var <- function(dataset, variable, stat = 'percent', perc = 50, nas = TRUE,
   weight <- dplyr::enquo(wt)
 
   # check stat argument input
-  if(!(stat %in% c('mean','percentile'))) stop('"stat" argument must receive either "mean" or "percentile"')
+  if(!(stat %in% c('mean','quantile'))) stop('"stat" argument must receive either "mean" or "quantile"')
 
   if (stat == 'percent') {
     base <- ns(dataset, variable, weight, prompt)
@@ -246,7 +246,7 @@ freq_var <- function(dataset, variable, stat = 'percent', perc = 50, nas = TRUE,
       percents(nas, digits = digits)
   }
 
-  else if(stat %in% c('mean', 'percentile')) {
+  else if(stat %in% c('mean', 'quantile')) {
     freq_result <- get_quant(dataset, variable, stat, perc, nas, weight, prompt, digits)
   }
 
