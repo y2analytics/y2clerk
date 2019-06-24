@@ -233,12 +233,12 @@ column_quos <- function(dataset) {
   return(col_quos)
 }
 
-freq_var <- function(dataset, variable, stat = 'percent', perc = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   variable <- dplyr::enquo(variable)
   weight <- dplyr::enquo(wt)
 
   # check stat argument input
-  if(!(stat %in% c('mean','percentile'))) stop('"stat" argument must receive either "mean" or "percentile"')
+  if(!(stat %in% c('mean','quantile'))) stop('"stat" argument must receive either "mean" or "quantile"')
 
   if (stat == 'percent') {
     base <- ns(dataset, variable, weight, prompt)
@@ -246,8 +246,8 @@ freq_var <- function(dataset, variable, stat = 'percent', perc = 50, nas = TRUE,
       percents(nas, digits = digits)
   }
 
-  else if(stat %in% c('mean', 'percentile')) {
-    freq_result <- get_quant(dataset, variable, stat, perc, nas, weight, prompt, digits)
+  else if(stat %in% c('mean', 'quantile')) {
+    freq_result <- get_quant(dataset, variable, stat, pr, nas, weight, prompt, digits)
   }
 
   return(freq_result)
