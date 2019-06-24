@@ -247,11 +247,7 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
   }
 
   else if(stat %in% c('mean', 'quantile')) {
-<<<<<<< HEAD
     freq_result <- get_quant(dataset, variable, stat, pr, nas, weight, prompt, digits)
-=======
-    freq_result <- get_quant(dataset, variable, stat, perc, nas, weight, prompt, digits)
->>>>>>> 8d7fdaa364c21d74d6eb6431e2f505a086f50247
   }
 
   return(freq_result)
