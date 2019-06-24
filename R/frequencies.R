@@ -28,7 +28,7 @@
 #' freq(df, stat = 'mean', nas = F, wt = weights)
 #' freq(df %>% group_by(a), b, stat = 'mean', nas = F, wt = weights)
 #'
-#' # note that pr = 60 will return a real number such that 60% of values are lower than that number.
+#' # note that pr = 60 will return a real number such that 60% of values are lower than that number
 #' # note also that minimums and maximums are unaffected by weighting
 #' freqs(df, a, stat = 'quantile', nas = F)
 #' freqs(df, a, stat = 'quantile', pr = 60, nas = F)
@@ -253,7 +253,7 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
   weight <- dplyr::enquo(wt)
 
   # check stat argument input
-  if(!(stat %in% c('mean','quantile'))) stop('"stat" argument must receive either "mean" or "quantile"')
+  if(!(stat %in% c('percent','mean','quantile'))) stop('"stat" argument must receive a value from c("percent", "mean", "quantile")')
 
   if (stat == 'percent') {
     base <- ns(dataset, variable, weight, prompt)
