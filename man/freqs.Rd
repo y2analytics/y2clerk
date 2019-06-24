@@ -15,7 +15,7 @@ is specified, the function runs a frequency on every column in given dataset.}
 
 \item{stat}{Character, stat to run. Currently accepts 'percent,' 'mean,' and 'quantile' (default: 'percent').}
 
-\item{pr}{Double, for use when stat = 'quantile.' Input should be a real number x such that 0<=x<=100. Stands for percentile rank, which is a quantile relative to a 100-point scale. Returns median unless otherwise specified. pr = 0 and pr = 100 are special cases which will return the minimum and maximum respectively. (default: 50)}
+\item{pr}{Double, for use when stat = 'quantile.' Input should be a real number x such that 0 ≤ x ≤ 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. Returns median unless otherwise specified. pr = 0 and pr = 100 are special cases which will return the minimum and maximum respectively. (default: 50)}
 
 \item{nas}{Boolean, whether or not to include NAs in the tabulation (default: T).}
 
