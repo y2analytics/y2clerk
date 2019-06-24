@@ -6,8 +6,8 @@
 #' @param dataset A dataframe.
 #' @param ... The unquoted names of a set of variables in the dataframe. If nothing
 #' is specified, the function runs a frequency on every column in given dataset.
-#' @param stat Character, stat to run. Currently accepts 'percent,' 'mean,' and 'percentile' (default: 'percent').
-#' @param perc Integer, for use when stat = 'percentile.' Median unless otherwise specified. Input should be an integer x such that 0<=x<=100. (default: 50)
+#' @param stat Character, stat to run. Currently accepts 'percent,' 'mean,' and 'quantile' (default: 'percent').
+#' @param pr Double, for use when stat = 'quantile.' Stands for percentile rank, which is a quantile relative to a 100-point scale. Returns median unless otherwise specified. As an example, pr = 60 will return a real number such that 60% of values are lower than that number. pr = 0 and pr = 100 are special cases which will return the minimum and maximum in the data set. Input should be a real number x such that 0<=x<=100. (default: 50)
 #' @param nas Boolean, whether or not to include NAs in the tabulation (default: T).
 #' @param wt The unquoted name of a weighting variable in the dataframe (default: NULL).
 #' @param prompt Boolean, whether or not to include the prompt in the dataframe (default: F).
@@ -29,7 +29,7 @@
 #' freq(df %>% group_by(a), b, stat = 'mean', nas = F, wt = weights)
 #' @export
 
-freqs <- freq <- function(dataset, ..., stat = 'percent', perc = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freqs <- freq <- function(dataset, ..., stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   weight = dplyr::enquo(wt)
   variables = dplyr::quos(...)
 
@@ -44,7 +44,7 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', perc = 50, nas = TRUE,
     purrr::map_dfr(
       .x = variables,
       .f = function(variable) {
-        freq_var(dataset, !!variable, stat, perc, nas, !!weight, prompt, digits)
+        freq_var(dataset, !!variable, stat, pr, nas, !!weight, prompt, digits)
       }
     )
   )
@@ -52,11 +52,12 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', perc = 50, nas = TRUE,
 
 ##### Private functions #####
 
-calculate_from_cont_var <- function(dataset, variable, stat, perc, wt) {
+calculate_from_cont_var <- function(dataset, variable, stat, pr, wt) {
   # (if wt = NULL) change class so logical test can be performed in all cases:
   if (is.null(wt)) {
     wt <- dplyr::enquo(wt)
   }
+
   if (stat == 'mean') {
     # 1) wt = NULL
     if (rlang::quo_is_null(wt)) {
@@ -76,10 +77,10 @@ calculate_from_cont_var <- function(dataset, variable, stat, perc, wt) {
     }
     # 3) [not built] wt is non-null, not in dataset (might be good to just build a verbose error)
   }
-  if (stat == 'percentile') {
+  if (stat == 'quantile') {
 
-    # check percentile input (accept integers only)
-    if(perc %% 1 != 0) stop("Percentile argument input is not an integer")
+    # check quantile input (accept integers only)
+    # if(pr %% 1 != 0) stop("quantile argument input is not an integer")
 
     # 1) wt = NULL
     if (rlang::quo_is_null(wt)) {
@@ -87,7 +88,7 @@ calculate_from_cont_var <- function(dataset, variable, stat, perc, wt) {
         dplyr::filter(!is.na(!!variable)) %>%
         dplyr::summarise(n = base::length(!!variable),
                          result = stats::quantile(x = !!variable,
-                                                  probs = perc / 100)
+                                                  probs = pr / 100)
         )
     }
     # 2) wt exists in dataset
@@ -96,7 +97,7 @@ calculate_from_cont_var <- function(dataset, variable, stat, perc, wt) {
         dplyr::filter(!is.na(!!variable)) %>%
         dplyr::summarise(n = base::length(!!variable),
                          result = reldist::wtd.quantile(!!variable,
-                                                        q = perc / 100,
+                                                        q = pr / 100,
                                                         weight = !!wt)
         )
     }
@@ -105,7 +106,7 @@ calculate_from_cont_var <- function(dataset, variable, stat, perc, wt) {
   return(out_df)
 }
 
-get_quant <- function(dataset, variable, stat, perc, nas, wt, prompt, digits) {
+get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   # "failing fast"
 
@@ -143,7 +144,7 @@ get_quant <- function(dataset, variable, stat, perc, nas, wt, prompt, digits) {
 
   if (! check_labels) stop("Value labels exist; consider converting values to labels or using stat = 'percent'")
 
-  out_df <- calculate_from_cont_var(dataset, variable, stat, perc, wt)
+  out_df <- calculate_from_cont_var(dataset, variable, stat, pr, wt)
 
   # get group column names to later add (if they exist/as necessary)
   grouping_vars <- c("")
@@ -161,15 +162,15 @@ get_quant <- function(dataset, variable, stat, perc, nas, wt, prompt, digits) {
                   # different labels depending on input
                   stat = case_when(
                     stat == 'mean' ~ 'mean',
-                    stat == 'percentile' & perc == 0 ~ 'min',
-                    stat == 'percentile' & perc == 50 ~ 'median',
-                    stat == 'percentile' & perc == 100 ~ 'max',
-                    stat == 'percentile' & !(perc %in% c(0,50,100)) ~ str_c(perc,'th percentile'),
+                    stat == 'quantile' & pr == 0 ~ 'quantile - min',
+                    stat == 'quantile' & pr == 50 ~ 'quantile - median',
+                    stat == 'quantile' & pr == 100 ~ 'quantile - max',
+                    stat == 'quantile' & !(pr %in% c(0,50,100)) ~ str_c('quantile - ', pr, '%'),
                     TRUE ~ 'error'
                   ),
                   # add 'weighted' to stat column if relevant
                   stat = ifelse(!rlang::quo_is_null(wt),
-                                str_c('weighted ', stat),
+                                str_c(stat, '- weighted'),
                                 stat
                   ),
                   result = base::round(result,
