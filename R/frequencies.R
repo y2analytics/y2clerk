@@ -7,7 +7,7 @@
 #' @param ... The unquoted names of a set of variables in the dataframe. If nothing
 #' is specified, the function runs a frequency on every column in given dataset.
 #' @param stat Character, stat to run. Currently accepts 'percent,' 'mean,' and 'quantile' (default: 'percent').
-#' @param pr Double, for use when stat = 'quantile.' Stands for percentile rank, which is a quantile relative to a 100-point scale. Returns median unless otherwise specified. As an example, pr = 60 will return a real number such that 60% of values are lower than that number. pr = 0 and pr = 100 are special cases which will return the minimum and maximum in the data set. Input should be a real number x such that 0<=x<=100. (default: 50)
+#' @param pr Double, for use when stat = 'quantile.' Stands for percentile rank, which is a quantile relative to a 100-point scale. Returns median unless otherwise specified. As an example, pr = 60 will return a real number such that 60\% of values are lower than that number. pr = 0 and pr = 100 are special cases which will return the minimum and maximum in the data set. Input should be a real number x such that 0<=x<=100. (default: 50)
 #' @param nas Boolean, whether or not to include NAs in the tabulation (default: T).
 #' @param wt The unquoted name of a weighting variable in the dataframe (default: NULL).
 #' @param prompt Boolean, whether or not to include the prompt in the dataframe (default: F).
