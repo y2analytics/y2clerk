@@ -28,7 +28,7 @@
 #' freq(df %>% group_by(a), b, stat = 'mean', nas = F, wt = weights)
 #' @export
 
-freqs <- freq <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freqs <- freq <- function(dataset, ..., stat = 'percent', perc = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   weight = dplyr::enquo(wt)
   variables = dplyr::quos(...)
 
@@ -51,9 +51,63 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', nas = TRUE, wt = NULL,
 
 ##### Private functions #####
 
-get_means <- function(dataset, variable, nas, wt, prompt, digits) {
+calculate_from_cont_var <- function(dataset, variable, stat, perc, wt) {
+  # (if wt = NULL) change class so logical test can be performed in all cases:
+  if (is.null(wt)) {
+    wt <- dplyr::enquo(wt)
+  }
+  if (stat == 'mean') {
+    # 1) wt = NULL
+    if (rlang::quo_is_null(wt)) {
+      out_df <- dataset %>%
+        dplyr::filter(!is.na(!!variable)) %>%
+        dplyr::summarise(n = base::length(!!variable),
+                         result = base::mean(!!variable)
+        )
+    }
+    # 2) wt exists in dataset
+    else {
+      out_df <- dataset %>%
+        dplyr::filter(!is.na(!!variable)) %>%
+        dplyr::summarise(n = base::sum(!!wt),
+                         result = stats::weighted.mean(!!variable, !!wt)
+        )
+    }
+    # 3) [not built] wt is non-null, not in dataset (might be good to just build a verbose error)
+  }
+  if (stat == 'percentile') {
+
+    # check percentile input (accept integers only)
+    if(perc %% 1 != 0) stop("Percentile argument input is not an integer")
+
+    # 1) wt = NULL
+    if (rlang::quo_is_null(wt)) {
+      out_df <- dataset %>%
+        dplyr::filter(!is.na(!!variable)) %>%
+        dplyr::summarise(n = base::length(!!variable),
+                         result = stats::quantile(x = !!variable,
+                                                  probs = perc / 100)
+        )
+    }
+    # 2) wt exists in dataset
+    else {
+      out_df <- dataset %>%
+        dplyr::filter(!is.na(!!variable)) %>%
+        dplyr::summarise(n = base::length(!!variable),
+                         result = reldist::wtd.quantile(!!variable,
+                                                        q = perc / 100,
+                                                        weight = !!wt)
+        )
+    }
+    # 3) [not built] wt is non-null, not in dataset (might be good to just build a verbose error)
+  }
+  return(out_df)
+}
+
+get_quant <- function(dataset, variable, stat, perc, nas, wt, prompt, digits) {
 
   # "failing fast"
+
   # 1) if there are NAs in the data, you should use nas = F
   if (nas) {
     count_nas <- dataset %>%
@@ -88,30 +142,7 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
 
   if (! check_labels) stop("Value labels exist; consider converting values to labels or using stat = 'percent'")
 
-
-  # (if wt = NULL) change class so logical test can be performed in all cases:
-  if (is.null(wt)) {
-    wt <- dplyr::enquo(wt)
-  }
-
-  # 1) wt = NULL
-  if (rlang::quo_is_null(wt)) {
-    mean_df <- dataset %>%
-      dplyr::filter(!is.na(!!variable)) %>%
-      dplyr::summarise(n = base::length(!!variable),
-                       mean = base::mean(!!variable)
-      )
-  }
-  # 2) wt exists in dataset
-  else {
-    mean_df <- dataset %>%
-      dplyr::filter(!is.na(!!variable)) %>%
-      dplyr::summarise(n = base::sum(!!wt),
-                       mean = stats::weighted.mean(!!variable, !!wt)
-      )
-  }
-
-  # 3) [not built] wt is non-null, not in dataset
+  out_df <- calculate_from_cont_var(dataset, variable, stat, perc, wt)
 
   # get group column names to later add (if they exist/as necessary)
   grouping_vars <- c("")
@@ -119,14 +150,29 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
     grouping_vars <- dplyr::group_vars(dataset)
   }
 
-  # produce means
+  # produce dataframe to output
   # * what should value and label display here? not as relevant as for freqs(stat='percent') ?
-  mean_df <- mean_df %>%
+  out_df <-
+    out_df %>%
     dplyr::mutate(variable = dplyr::quo_name(variable),
                   value = '',
                   label = '',
-                  stat = 'mean',
-                  result = mean %>% base::round(digits)) %>%
+                  # different labels depending on input
+                  stat = case_when(
+                    stat == 'mean' ~ 'mean',
+                    stat == 'percentile' & perc == 0 ~ 'min',
+                    stat == 'percentile' & perc == 50 ~ 'median',
+                    stat == 'percentile' & perc == 100 ~ 'max',
+                    stat == 'percentile' & !(perc %in% c(0,50,100)) ~ str_c(perc,'th percentile'),
+                    TRUE ~ 'error'
+                  ),
+                  # add 'weighted' to stat column if relevant
+                  stat = ifelse(!rlang::quo_is_null(wt),
+                                str_c('weighted ', stat),
+                                stat
+                  ),
+                  result = base::round(result,
+                                       digits)) %>%
     dplyr::select(tidyselect::one_of(grouping_vars),
                   variable,
                   value,
@@ -150,7 +196,7 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
       prompt_text <- ""
     }
 
-    mean_df <- mean_df %>%
+    out_df <- out_df %>%
       dplyr::mutate(
         prompt = prompt_text
       ) %>%
@@ -166,11 +212,11 @@ get_means <- function(dataset, variable, nas, wt, prompt, digits) {
 
   # if weights are used, remove weight column rows from output
   if (!rlang::quo_is_null(wt)) {
-    mean_df <- mean_df %>%
+    out_df <- out_df %>%
       dplyr::filter(variable != rlang::quo_name(wt))
   }
 
-  return(mean_df)
+  return(out_df)
 }
 
 column_quos <- function(dataset) {
@@ -185,9 +231,12 @@ column_quos <- function(dataset) {
   return(col_quos)
 }
 
-freq_var <- function(dataset, variable, stat = 'percent', nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freq_var <- function(dataset, variable, stat = 'percent', perc = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   variable <- dplyr::enquo(variable)
   weight <- dplyr::enquo(wt)
+
+  # check stat argument input
+  if(!(stat %in% c('mean','percentile'))) stop('"stat" argument must receive either "mean" or "percentile"')
 
   if (stat == 'percent') {
     base <- ns(dataset, variable, weight, prompt)
@@ -195,8 +244,8 @@ freq_var <- function(dataset, variable, stat = 'percent', nas = TRUE, wt = NULL,
       percents(nas, digits = digits)
   }
 
-  else if(stat == 'mean') {
-    freq_result <- get_means(dataset, variable, nas, weight, prompt, digits)
+  else if(stat %in% c('mean', 'percentile')) {
+    freq_result <- get_quant(dataset, variable, stat, perc, nas, weight, prompt, digits)
   }
 
   return(freq_result)
