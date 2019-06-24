@@ -166,13 +166,10 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
                     stat == 'quantile' & pr == 50 ~ 'quantile - median',
                     stat == 'quantile' & pr == 100 ~ 'quantile - max',
                     stat == 'quantile' & !(pr %in% c(0,50,100)) ~ str_c('quantile - ', pr, '%'),
-                    TRUE ~ 'error'
-                  ),
-                  # add 'weighted' to stat column if relevant
-                  stat = case_when(
+                    # add 'weighted' to stat column if relevant
                     !rlang::quo_is_null(wt) & stat == 'mean' ~ str_c(stat, ' - weighted'),
-                    !rlang::quo_is_null(wt) & pr %in% c(0,100) ~ str_c(stat, ' - weighted'),
-                    TRUE ~ stat
+                    !rlang::quo_is_null(wt) & stat == 'quantile' & between(pr, 0, 100) ~ str_c(stat, ' - weighted')
+                    TRUE ~ 'error'
                   ),
                   result = base::round(result,
                                        digits)) %>%
