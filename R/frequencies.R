@@ -242,8 +242,8 @@ get_summary <- function(dataset, variable, nas, weight, prompt, digits) {
   out <- bind_rows(
     get_quant(dataset, variable, stat = 'quantile', pr = 0,   nas, weight, prompt, digits),
     get_quant(dataset, variable, stat = 'quantile', pr = 25,  nas, weight, prompt, digits),
-    get_quant(dataset, variable, stat = 'mean',     pr = 50,  nas, weight, prompt, digits),
     get_quant(dataset, variable, stat = 'quantile', pr = 50,  nas, weight, prompt, digits),
+    get_quant(dataset, variable, stat = 'mean',     pr = 50,  nas, weight, prompt, digits),
     get_quant(dataset, variable, stat = 'quantile', pr = 75,  nas, weight, prompt, digits),
     get_quant(dataset, variable, stat = 'quantile', pr = 100, nas, weight, prompt, digits)
   ) %>%
