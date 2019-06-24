@@ -283,10 +283,10 @@ test_that("using digits: output is precise to multiple decimal places", {
 
 context("minimums and maximums")
 
-test_that("output from 'perc = 0' is equivalent to base::min()", {
+test_that("output from 'pr = 0' is equivalent to base::min()", {
   expect_equal(
     responses %>%
-      freqs(q0, stat = 'quantile', perc = 0) %>%
+      freqs(q0, stat = 'quantile', pr = 0) %>%
       select(result) %>%
       pull(),
 
@@ -294,10 +294,10 @@ test_that("output from 'perc = 0' is equivalent to base::min()", {
   )
 })
 
-test_that("output from 'perc = 0' is equivalent to base::min() when weights are provided", {
+test_that("output from 'pr = 0' is equivalent to base::min() when weights are provided", {
   expect_equal(
     responses %>%
-      freqs(q0, stat = 'quantile', perc = 0, wt = w) %>%
+      freqs(q0, stat = 'quantile', pr = 0, wt = w) %>%
       select(result) %>%
       pull(),
 
@@ -305,10 +305,10 @@ test_that("output from 'perc = 0' is equivalent to base::min() when weights are 
   )
 })
 
-test_that("output from 'perc = 100' is equivalent to base::max()", {
+test_that("output from 'pr = 100' is equivalent to base::max()", {
   expect_equal(
     responses %>%
-      freqs(q0, stat = 'quantile', perc = 100) %>%
+      freqs(q0, stat = 'quantile', pr = 100) %>%
       select(result) %>%
       pull(),
 
@@ -316,13 +316,30 @@ test_that("output from 'perc = 100' is equivalent to base::max()", {
   )
 })
 
-test_that("output from 'perc = 100' is equivalent to base::max() when weights are provided", {
+test_that("output from 'pr = 100' is equivalent to base::max() when weights are provided", {
   expect_equal(
     responses %>%
-      freqs(q0, stat = 'quantile', perc = 100, wt = w) %>%
+      freqs(q0, stat = 'quantile', pr = 100, wt = w) %>%
       select(result) %>%
       pull(),
 
     max(responses$q0)
   )
 })
+
+#
+
+context("structure")
+
+test_that("output from 'pr = 0' is equivalent to base::min()", {
+  expect_equal(
+    responses %>%
+      freqs(q0, stat = 'quantile', pr = 0) %>%
+      select(result) %>%
+      pull(),
+
+    min(responses$q0)
+  )
+})
+
+

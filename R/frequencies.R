@@ -170,7 +170,7 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
                   ),
                   # add 'weighted' to stat column if relevant
                   stat = ifelse(!rlang::quo_is_null(wt),
-                                str_c(stat, '- weighted'),
+                                str_c(stat, ' - weighted'),
                                 stat
                   ),
                   result = base::round(result,
