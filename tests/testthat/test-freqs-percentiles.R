@@ -78,16 +78,28 @@ test_that("test data is correct", {
 
 #
 
+context("check input mistakes")
+
+test_that("stat != mean & stat != percentile", {
+  expect_error(
+    responses %>%
+      select(q0) %>%
+      y2clerk::freqs(stat = "perc")
+  )
+})
+
+#
+
 context("numeric variables")
 
 test_that("NAs not present, nas = T: n & result are correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      y2clerk::freqs(stat = "mean") %>%
+                      y2clerk::freqs(stat = "percentile") %>%
                       select(result) %>%
                       pull(),
 
-                    round(mean(responses$q0),2)
+                    round(median(responses$q0),2)
   )
 
   expect_equivalent(responses %>%
@@ -103,15 +115,15 @@ test_that("NAs not present, nas = T: n & result are correct", {
 test_that("NAs not present, nas = F: n & result are correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs(stat = "mean", nas = F) %>%
+                      freqs(stat = "percentile", nas = F) %>%
                       select(result) %>%
                       pull(),
 
-                    round(mean(responses$q0),2)
+                    round(median(responses$q0),2)
   )
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs(stat = "mean", nas = F) %>%
+                      freqs(stat = "percentile", nas = F) %>%
                       select(n) %>%
                       pull(),
 
@@ -122,22 +134,22 @@ test_that("NAs not present, nas = F: n & result are correct", {
 test_that("NAs present, nas = T: throws error", {
   expect_error(responses %>%
                  select(q1) %>%
-                 freqs(stat = "mean")
+                 freqs(stat = "percentile")
   )
 })
 
 test_that("NAs present, nas = F: n & result are correct", {
   expect_equal(responses %>%
                  select(q1) %>%
-                 freqs(stat = "mean", nas = F) %>%
+                 freqs(stat = "percentile", nas = F) %>%
                  select(result) %>%
                  pull(),
 
-               round(mean(responses$q1, na.rm = T), 2)
+               round(median(responses$q1, na.rm = T), 2)
   )
   expect_equivalent(responses %>%
                       select(q1) %>%
-                      freqs(stat = "mean", nas = F) %>%
+                      freqs(stat = "percentile", nas = F) %>%
                       select(n) %>%
                       pull(),
 
@@ -153,7 +165,7 @@ test_that("factor variable input: throws error", {
   expect_error(
     responses %>%
       select(q2) %>%
-      freqs(stat = 'mean')
+      freqs(stat = 'percentile')
   )
 })
 
@@ -165,7 +177,7 @@ test_that("character variable input: throws error", {
   expect_error(
     responses %>%
       select(q3) %>%
-      freqs(stat = 'mean')
+      freqs(stat = 'percentile')
   )
 })
 
@@ -177,7 +189,7 @@ test_that("column with value labels input: throws error", {
   expect_error(
     responses %>%
       select(q4) %>%
-      freqs(stat = 'mean')
+      freqs(stat = 'percentile')
   )
 })
 
@@ -187,10 +199,10 @@ test_that("column with value labels input: (potentially misleading) result is co
     responses %>%
       mutate(q4 = as.numeric(q4)) %>%
       select(q4) %>%
-      freqs(stat = 'mean') %>%
+      freqs(stat = 'percentile') %>%
       select(result) %>%
       pull(),
-    mean(responses$q4)
+    median(as.numeric(responses$q4))
   )
 })
 
@@ -199,10 +211,10 @@ test_that("column with value labels input: answer is correct after labels remove
     responses %>%
       select(q4) %>%
       remove_labels() %>%
-      freqs(stat = 'mean') %>%
+      freqs(stat = 'percentile') %>%
       select(result) %>%
       pull(),
-    mean(responses$q4)
+    median(as.numeric(responses$q4))
   )
 })
 
@@ -210,18 +222,20 @@ test_that("column with value labels input: answer is correct after labels remove
 
 context("weights")
 
-test_that("using weights: equivalent to weighted.mean() output", {
+test_that("using weights: equivalent to wtd.quantile() output", {
   expect_equal(
     responses %>%
       select(q1, w) %>%
-      freqs(stat = 'mean', nas = F, wt = w) %>%
+      freqs(stat = 'percentile', nas = F, wt = w) %>%
       select(result) %>%
       pull(),
 
-    stats::weighted.mean(x = responses$q1,
-                         w = responses$w,
-                         na.rm = T) %>%
-      round(2)
+    reldist::wtd.quantile(x = responses$q1,
+                          q = 0.5,
+                          weight = responses$w,
+                          na.rm = T) %>%
+      round(2) %>%
+      as.numeric()
   )
 })
 
@@ -233,7 +247,7 @@ test_that("using prompt: variable label is correctly output", {
   expect_equal(
     responses %>%
       select(q1) %>%
-      freqs(stat = 'mean', nas = F, prompt = T) %>%
+      freqs(stat = 'percentile', nas = F, prompt = T) %>%
       select(prompt) %>%
       pull(),
 
@@ -253,14 +267,62 @@ test_that("using digits: output is precise to multiple decimal places", {
   expect_equal(
     responses %>%
       select(w) %>%
-      freqs(stat = 'mean', digits = 6, nas = F) %>%
+      freqs(stat = 'percentile', digits = 6, nas = F) %>%
       select(result) %>%
       pull(),
 
     responses %>%
       select(w) %>%
       pull() %>%
-      mean(na.rm = T) %>%
+      median(na.rm = T) %>%
       round(digits = 6)
+  )
+})
+
+#
+
+context("minimums and maximums")
+
+test_that("output from 'perc = 0' is equivalent to base::min()", {
+  expect_equal(
+    responses %>%
+      freqs(q0, stat = 'percentile', perc = 0) %>%
+      select(result) %>%
+      pull(),
+
+    min(responses$q0)
+  )
+})
+
+test_that("output from 'perc = 0' is equivalent to base::min() when weights are provided", {
+  expect_equal(
+    responses %>%
+      freqs(q0, stat = 'percentile', perc = 0, wt = w) %>%
+      select(result) %>%
+      pull(),
+
+    min(responses$q0)
+  )
+})
+
+test_that("output from 'perc = 100' is equivalent to base::max()", {
+  expect_equal(
+    responses %>%
+      freqs(q0, stat = 'percentile', perc = 100) %>%
+      select(result) %>%
+      pull(),
+
+    max(responses$q0)
+  )
+})
+
+test_that("output from 'perc = 100' is equivalent to base::max() when weights are provided", {
+  expect_equal(
+    responses %>%
+      freqs(q0, stat = 'percentile', perc = 100, wt = w) %>%
+      select(result) %>%
+      pull(),
+
+    max(responses$q0)
   )
 })

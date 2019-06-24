@@ -6,8 +6,8 @@
 #' @param dataset A dataframe.
 #' @param ... The unquoted names of a set of variables in the dataframe. If nothing
 #' is specified, the function runs a frequency on every column in given dataset.
-#' @param stat Character, stat to run. Currently only 'percent' and 'mean' work (default: 'percent').
-#' @param perc In production.
+#' @param stat Character, stat to run. Currently accepts 'percent,' 'mean,' and 'percentile' (default: 'percent').
+#' @param perc Percentile for use when stat = 'percentile.' Median unless otherwise specified. Input should be an integer x such that 0<=x<=100. (default: 50)
 #' @param nas Boolean, whether or not to include NAs in the tabulation (default: T).
 #' @param wt The unquoted name of a weighting variable in the dataframe (default: NULL).
 #' @param prompt Boolean, whether or not to include the prompt in the dataframe (default: F).
