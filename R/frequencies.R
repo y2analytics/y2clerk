@@ -119,6 +119,11 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   # "failing fast"
 
+  # 0) validate percentile rank
+  if(stat == "quantile") {
+    if(pr < 0 | pr > 100) stop('Percentile rank should be between 0 and 100, inclusive')
+  }
+
   # 1) if there are NAs in the data, you should use nas = F
   if (nas) {
     count_nas <- dataset %>%
