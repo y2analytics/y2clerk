@@ -199,7 +199,6 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
                   n,
                   stat,
                   result) %>%
-    dplyr::arrange_at(1, desc) %>%
     tibble::as_tibble()
 
   # fill out prompt column if specified
