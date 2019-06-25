@@ -137,7 +137,7 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   check_class <- dataset %>%
     dplyr::select(!!variable) %>%
-    remove_labels() %>%
+    labelled::remove_labels() %>%
     dplyr::pull() %>%
     base::class()
 
