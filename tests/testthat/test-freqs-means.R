@@ -7,6 +7,7 @@ rm(list = ls())
 library(y2clerk)
 library(tidyverse)
 library(labelled)
+library(testthat)
 
 set.seed(1)
 

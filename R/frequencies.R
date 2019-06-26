@@ -157,10 +157,10 @@ validate_data <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) 
 
   if(! check_labels) stop("Value labels exist; consider converting values to labels or using stat = 'percent'")
 
-  # 4) warn as reminder if pr input given and stat = 'mean' simultaneously
+  # 4) give reminder: warn if pr input given when stat = 'mean'
 
   if(stat == 'mean') {
-    if(pr != 50) warning("Remember that the percentile rank argument is relevant only when stat = 'quantile'")
+    if(pr != 50) rlang::warn("Remember that the percentile rank argument is relevant only when stat = 'quantile'")
   }
 
 
