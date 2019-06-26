@@ -62,10 +62,14 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', pr = 50, nas = TRUE, w
 ##### Private functions #####
 
 calculate_for_cont_var <- function(dataset, variable, stat, pr, wt) {
-  # (if wt = NULL) change class so logical test can be performed in all cases:
-  if(is.null(wt)) {
+
+  # first: (if wt = NULL) change class so logical test can be performed in all cases:
+  if(base::is.null(wt)) {
     wt <- dplyr::enquo(wt)
   }
+
+  # next: separate, verbose specifications for mean and quantile when weight is provided/not provided
+  # (I wanted to be really clear about what we want)
 
   if(stat == 'mean') {
     # 1) wt = NULL
@@ -84,13 +88,8 @@ calculate_for_cont_var <- function(dataset, variable, stat, pr, wt) {
                          result = stats::weighted.mean(!!variable, !!wt)
         )
     }
-    # 3) [not built] wt is non-null, not in dataset (might be good to just build a verbose error)
   }
   if(stat == 'quantile') {
-
-    # check quantile input (accept integers only)
-    # if(pr %% 1 != 0) stop("quantile argument input is not an integer")
-
     # 1) wt = NULL
     if(rlang::quo_is_null(wt)) {
       out_df <- dataset %>%
@@ -110,12 +109,12 @@ calculate_for_cont_var <- function(dataset, variable, stat, pr, wt) {
                                                         weight = !!wt)
         )
     }
-    # 3) [not built] wt is non-null, not in dataset (might be good to just build a verbose error)
   }
   return(out_df)
 }
 
 validate_data <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
+
   # "failing fast"
 
   # 0) validate percentile rank
@@ -132,66 +131,60 @@ validate_data <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) 
   }
 
   # 2) can't take mean of categorical variable
-  # * probably need to build more robust way of validating class
-
   check_class <- dataset %>%
     dplyr::select(!!variable) %>%
     labelled::remove_labels() %>%
     dplyr::pull() %>%
     base::class()
 
-  # collapse for examples like c("ordered" "factor")
-  check_class <- str_c(check_class, collapse = " ")
+  # make length = 1: collapse c("ordered", "factor") ==> c("ordered factor") as necessary
+  check_class <- stringr::str_c(check_class, collapse = " ")
 
   # if not one of these types, stop
   if(! (check_class %in% c("numeric", "integer")) ) stop("Can't take mean of non-numeric variable")
 
 
   # 3) stop if value labels exist
-
   check_labels <- dataset %>%
     dplyr::select(!!variable) %>%
     labelled::val_labels() %>%
     tibble::deframe() %>%
     base::is.null()
-
   if(! check_labels) stop("Value labels exist; consider converting values to labels or using stat = 'percent'")
 
-  # 4) give reminder if pr input given when stat = 'mean'
-
+  # 4) give reminder if pr input given when stat is not set to 'quantile'
   if(stat != 'quantile') {
     if(pr != 50) rlang::inform("Remember that the percentile rank argument is relevant only when stat = 'quantile'")
   }
-
-
 }
 
 get_output_for_continuous_var <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
+  # validation & checks
   validate_data(dataset, variable, stat, pr, nas, wt, prompt, digits)
 
+  # get mean or quantile
   out_df <- calculate_for_cont_var(dataset, variable, stat, pr, wt)
 
-  # get group column names to later add (if they exist/as necessary)
+  # get group column names to add later (if they exist/as necessary)
   grouping_vars <- c("")
   if(dplyr::is.grouped_df(dataset)) {
     grouping_vars <- dplyr::group_vars(dataset)
   }
 
   # produce dataframe to output
-  # * what should value and label display here? not as relevant as for freqs(stat='percent') ?
 
-  # make copy, maybe fix issues? i think it's mixing up the stat variable and the stat fx argument
+  # make copy of stat. the stat variable in the output data frame and the
+  # stat function argument don't play well together here
   statistic <- stat
   rm(stat)
 
-  out_df <-
-    out_df %>%
+  out_df <- out_df %>%
     dplyr::mutate(variable = dplyr::quo_name(variable),
                   value = '',
                   label = '',
                   # different labels depending on input
-                  stat = case_when(
+                  stat = dplyr::case_when(
                     statistic == 'mean' ~ 'mean',
                     statistic == 'quantile' & pr == 0 ~ 'quantile - min',
                     statistic == 'quantile' & pr == 50 ~ 'quantile - median',
@@ -200,9 +193,9 @@ get_output_for_continuous_var <- function(dataset, variable, stat, pr, nas, wt, 
                     TRUE ~ 'error'
                   ),
                   # add 'weighted' to stat column if relevant
-                  stat = case_when(
-                    !rlang::quo_is_null(wt) & statistic == 'mean' ~ str_c(stat, ' - weighted'),
-                    !rlang::quo_is_null(wt) & statistic == 'quantile' & (0 < pr) & (pr < 100) ~ str_c(stat, ' - weighted'),
+                  stat = dplyr::case_when(
+                    !rlang::quo_is_null(wt) & statistic == 'mean' ~ stringr::str_c(stat, ' - weighted'),
+                    !rlang::quo_is_null(wt) & statistic == 'quantile' & (0 < pr) & (pr < 100) ~ stringr::str_c(stat, ' - weighted'),
                     TRUE ~ stat
                   ),
                   n = base::round(n,

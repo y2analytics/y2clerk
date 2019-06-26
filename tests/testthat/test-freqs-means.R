@@ -266,14 +266,14 @@ test_that("using digits: output is precise to multiple decimal places", {
   )
 })
 
-context("miscellaneous")
+context("validation")
 
-test_that("freqs(stat = 'mean') gives warnings when pr value is provided", {
-  expect_warning(
+test_that("stat other than 'quantile' gives message when pr value is provided", {
+  expect_message(
     responses %>%
       freqs(q1,
-            stat = 'mean',
             pr = 75,
+            stat = 'mean',
             nas = F)
   )
 })
@@ -287,3 +287,14 @@ test_that("stat argument only accepts percent, mean, quantile, or summary", {
             nas = F)
   )
 })
+
+test_that("function stops when value labels exist", {
+  expect_error(
+    responses %>%
+      freqs(q4,
+            stat = 'mean',
+            nas = F)
+  )
+})
+
+
