@@ -166,7 +166,7 @@ validate_data <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) 
 
 get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
-  validate_data()
+  validate_data(dataset, variable, stat, pr, nas, wt, prompt, digits)
 
   out_df <- calculate_from_cont_var(dataset, variable, stat, pr, wt)
 
