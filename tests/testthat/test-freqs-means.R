@@ -264,3 +264,25 @@ test_that("using digits: output is precise to multiple decimal places", {
       round(digits = 6)
   )
 })
+
+context("miscellaneous")
+
+test_that("freqs(stat = 'mean') gives warnings when pr value is provided", {
+  expect_warning(
+    responses %>%
+      freqs(q1,
+            stat = 'mean',
+            pr = 75,
+            nas = F)
+  )
+})
+
+test_that("stat argument only accepts percent, mean, quantile, or summary", {
+  expect_error(
+    responses %>%
+      freqs(q1,
+            stat = 'means',
+            pr = 75,
+            nas = F)
+  )
+})

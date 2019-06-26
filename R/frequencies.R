@@ -44,7 +44,7 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', pr = 50, nas = TRUE, w
 
   # If no variables are specified in the function call,
   # assume the user wants to run a frequency on all columns.
-  if (!length(variables)) {
+  if(!length(variables)) {
     variables <- column_quos(dataset)
   }
 
@@ -61,15 +61,15 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', pr = 50, nas = TRUE, w
 
 ##### Private functions #####
 
-calculate_from_cont_var <- function(dataset, variable, stat, pr, wt) {
+calculate_for_cont_var <- function(dataset, variable, stat, pr, wt) {
   # (if wt = NULL) change class so logical test can be performed in all cases:
-  if (is.null(wt)) {
+  if(is.null(wt)) {
     wt <- dplyr::enquo(wt)
   }
 
-  if (stat == 'mean') {
+  if(stat == 'mean') {
     # 1) wt = NULL
-    if (rlang::quo_is_null(wt)) {
+    if(rlang::quo_is_null(wt)) {
       out_df <- dataset %>%
         dplyr::filter(!is.na(!!variable)) %>%
         dplyr::summarise(n = base::length(!!variable),
@@ -86,13 +86,13 @@ calculate_from_cont_var <- function(dataset, variable, stat, pr, wt) {
     }
     # 3) [not built] wt is non-null, not in dataset (might be good to just build a verbose error)
   }
-  if (stat == 'quantile') {
+  if(stat == 'quantile') {
 
     # check quantile input (accept integers only)
     # if(pr %% 1 != 0) stop("quantile argument input is not an integer")
 
     # 1) wt = NULL
-    if (rlang::quo_is_null(wt)) {
+    if(rlang::quo_is_null(wt)) {
       out_df <- dataset %>%
         dplyr::filter(!is.na(!!variable)) %>%
         dplyr::summarise(n = base::length(!!variable),
@@ -124,11 +124,11 @@ validate_data <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) 
   }
 
   # 1) if there are NAs in the data, you should use nas = F
-  if (nas) {
+  if(nas) {
     count_nas <- dataset %>%
       dplyr::filter(is.na(!!variable)) %>%
       base::nrow()
-    if (count_nas != 0) stop('NAs present in variable(s); to proceed, set nas = F')
+    if(count_nas != 0) stop('NAs present in variable(s); to proceed, set nas = F')
   }
 
   # 2) can't take mean of categorical variable
@@ -144,7 +144,7 @@ validate_data <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) 
   check_class <- str_c(check_class, collapse = " ")
 
   # if not one of these types, stop
-  if (! (check_class %in% c("numeric", "integer")) ) stop("Can't take mean of non-numeric variable")
+  if(! (check_class %in% c("numeric", "integer")) ) stop("Can't take mean of non-numeric variable")
 
 
   # 3) stop if value labels exist
@@ -155,24 +155,26 @@ validate_data <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) 
     tibble::deframe() %>%
     base::is.null()
 
-  if (! check_labels) stop("Value labels exist; consider converting values to labels or using stat = 'percent'")
+  if(! check_labels) stop("Value labels exist; consider converting values to labels or using stat = 'percent'")
 
   # 4) warn as reminder if pr input given and stat = 'mean' simultaneously
 
-  if (stat == 'mean' & pr != 50) warning("Remember that the percentile rank argument is relevant only when stat = 'quantile'")
+  if(stat == 'mean') {
+    if(pr != 50) warning("Remember that the percentile rank argument is relevant only when stat = 'quantile'")
+  }
 
 
 }
 
-get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
+get_output_for_continuous_var <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   validate_data(dataset, variable, stat, pr, nas, wt, prompt, digits)
 
-  out_df <- calculate_from_cont_var(dataset, variable, stat, pr, wt)
+  out_df <- calculate_for_cont_var(dataset, variable, stat, pr, wt)
 
   # get group column names to later add (if they exist/as necessary)
   grouping_vars <- c("")
-  if (dplyr::is.grouped_df(dataset)) {
+  if(dplyr::is.grouped_df(dataset)) {
     grouping_vars <- dplyr::group_vars(dataset)
   }
 
@@ -217,7 +219,7 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
     tibble::as_tibble()
 
   # fill out prompt column if specified
-  if (prompt) {
+  if(prompt) {
 
     prompt_text <- dataset %>%
       dplyr::ungroup() %>%
@@ -226,7 +228,7 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
       tibble::deframe()
 
     # when prompt = T but there is no variable label, output ""
-    if (is.null(prompt_text)) {
+    if(is.null(prompt_text)) {
       prompt_text <- ""
     }
 
@@ -245,7 +247,7 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
   }
 
   # if weights are used, remove weight column rows from output
-  if (!rlang::quo_is_null(wt)) {
+  if(!rlang::quo_is_null(wt)) {
     out_df <- out_df %>%
       dplyr::filter(variable != rlang::quo_name(wt))
   }
@@ -253,14 +255,14 @@ get_quant <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
   return(out_df)
 }
 
-get_summary <- function(dataset, variable, nas, weight, prompt, digits) {
+get_summary_output <- function(dataset, variable, nas, weight, prompt, digits) {
   out <- bind_rows(
-    get_quant(dataset, variable, stat = 'quantile', pr = 0,   nas, weight, prompt, digits),
-    get_quant(dataset, variable, stat = 'quantile', pr = 25,  nas, weight, prompt, digits),
-    get_quant(dataset, variable, stat = 'quantile', pr = 50,  nas, weight, prompt, digits),
-    get_quant(dataset, variable, stat = 'mean',     pr = 50,  nas, weight, prompt, digits),
-    get_quant(dataset, variable, stat = 'quantile', pr = 75,  nas, weight, prompt, digits),
-    get_quant(dataset, variable, stat = 'quantile', pr = 100, nas, weight, prompt, digits)
+    get_output_for_continuous_var(dataset, variable, stat = 'quantile', pr = 0,   nas, weight, prompt, digits),
+    get_output_for_continuous_var(dataset, variable, stat = 'quantile', pr = 25,  nas, weight, prompt, digits),
+    get_output_for_continuous_var(dataset, variable, stat = 'quantile', pr = 50,  nas, weight, prompt, digits),
+    get_output_for_continuous_var(dataset, variable, stat = 'mean',     pr = 50,  nas, weight, prompt, digits),
+    get_output_for_continuous_var(dataset, variable, stat = 'quantile', pr = 75,  nas, weight, prompt, digits),
+    get_output_for_continuous_var(dataset, variable, stat = 'quantile', pr = 100, nas, weight, prompt, digits)
   ) %>%
     mutate(stat = forcats::fct_relevel(stat,
                                        c('quantile - min',
@@ -281,7 +283,7 @@ get_summary <- function(dataset, variable, nas, weight, prompt, digits) {
 
 column_quos <- function(dataset) {
   col_names <- dataset %>% colnames()
-  if (dplyr::is.grouped_df(dataset)) {
+  if(dplyr::is.grouped_df(dataset)) {
     # Exclude grouping variables since they cannot be counted independent of groups.
     grouping_vars <- dplyr::group_vars(dataset)
     col_names <- base::setdiff(col_names, grouping_vars)
@@ -298,25 +300,25 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
   # check stat argument input
   if(!(stat %in% c('percent','mean','quantile','summary'))) stop('"stat" argument must receive a value from c("percent", "mean", "quantile", "summary")')
 
-  if (stat == 'percent') {
+  if(stat == 'percent') {
     base <- ns(dataset, variable, weight, prompt)
     freq_result <- base %>%
       percents(nas, digits = digits)
   }
 
   else if(stat == 'summary') {
-    freq_result <- get_summary(dataset, variable, nas, weight, prompt, digits)
+    freq_result <- get_summary_output(dataset, variable, nas, weight, prompt, digits)
   }
 
   else if(stat %in% c('mean', 'quantile')) {
-    freq_result <- get_quant(dataset, variable, stat, pr, nas, weight, prompt, digits)
+    freq_result <- get_output_for_continuous_var(dataset, variable, stat, pr, nas, weight, prompt, digits)
   }
 
   return(freq_result)
 }
 
 ns <- function(dataset, variable, weight, prompt) {
-  counts <- if (class(dataset %>% dplyr::pull(!!variable)) %in% c('labelled','haven_labelled','haven_labelled_spss')) {
+  counts <- if(class(dataset %>% dplyr::pull(!!variable)) %in% c('labelled','haven_labelled','haven_labelled_spss')) {
     # Metadata is better if the given variable has labels
     labelled_ns(dataset, variable, weight, prompt)
   } else {
@@ -324,7 +326,7 @@ ns <- function(dataset, variable, weight, prompt) {
     unlabelled_ns(dataset, variable, weight, prompt)
   }
   # Reorder because Scotty is OCD
-  if (prompt) {
+  if(prompt) {
     counts %>%
       dplyr::select(
         variable,
@@ -346,7 +348,7 @@ ns <- function(dataset, variable, weight, prompt) {
 
 percents <- function(counts, include_nas, digits) {
   # Filter out NAs if requested
-  if (! include_nas) {
+  if(! include_nas) {
     counts <- counts %>%
       dplyr::filter(
         !is.na(value)
@@ -363,7 +365,7 @@ percents <- function(counts, include_nas, digits) {
 labelled_ns <- function(dataset, variable, weight, prompt) {
   # Extract the metadata from the labelled class
   counts <- base_ns(dataset, variable, weight)
-  if (prompt) {
+  if(prompt) {
     counts <- counts %>%
       dplyr::mutate(
         prompt = labelled::var_label(value)
@@ -383,7 +385,7 @@ unlabelled_ns <- function(dataset, variable, weight, prompt) {
       label = value %>% as.character,
       value = value %>% as.character
     )
-  if (prompt) {
+  if(prompt) {
     counts <- counts %>%
       dplyr::mutate(
         prompt = ''
