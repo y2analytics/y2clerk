@@ -28,10 +28,10 @@ responses <- {
     # character, no value labels
     q3 = sample(stringr::fruit, 25, prob = 1/(1:80 * sum(1/(1:80))), replace = T),
 
-    # numeric values, discrete value labels
+    # numeric values, discrete numeric value labels
     q4 = sample(1:8, 25, replace = T),
 
-    # character values, discrete value labels
+    # character values, discrete character value labels
     q5 = sample(letters[1:4], 25, prob = c(0.4,0.3,0.2,0.1), replace = T),
 
     # numeric weights
@@ -296,5 +296,3 @@ test_that("function stops when value labels exist", {
             nas = F)
   )
 })
-
-
