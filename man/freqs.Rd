@@ -54,4 +54,5 @@ freqs(df, a, stat = 'quantile', pr = 0, nas = F)
 freqs(df, a, stat = 'quantile', pr = 100, nas = F)
 freqs(df, a, stat = 'quantile', pr = 100, nas = F, wt = weights)
 freqs(df, a, stat = 'quantile', pr = 95, nas = F, wt = weights)
+freqs(df, a, stat = 'summary', nas = F, wt = weights)
 }

@@ -36,6 +36,7 @@
 #' freqs(df, a, stat = 'quantile', pr = 100, nas = F)
 #' freqs(df, a, stat = 'quantile', pr = 100, nas = F, wt = weights)
 #' freqs(df, a, stat = 'quantile', pr = 95, nas = F, wt = weights)
+#' freqs(df, a, stat = 'summary', nas = F, wt = weights)
 #' @export
 
 freqs <- freq <- function(dataset, ..., stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
@@ -49,14 +50,15 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', pr = 50, nas = TRUE, w
   }
 
   # suppressWarnings added for trivial bind rows warning
-  #suppressWarnings(
+  # i used messages instead of warnings to still communicate my own conditional output
+  suppressWarnings(
     purrr::map_dfr(
       .x = variables,
       .f = function(variable) {
         freq_var(dataset, !!variable, stat, pr, nas, !!weight, prompt, digits)
       }
     )
-  #)
+  )
 }
 
 ##### Private functions #####
