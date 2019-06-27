@@ -49,14 +49,14 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', pr = 50, nas = TRUE, w
   }
 
   # suppressWarnings added for trivial bind rows warning
-  suppressWarnings(
+  #suppressWarnings(
     purrr::map_dfr(
       .x = variables,
       .f = function(variable) {
         freq_var(dataset, !!variable, stat, pr, nas, !!weight, prompt, digits)
       }
     )
-  )
+  #)
 }
 
 ##### Private functions #####
@@ -69,12 +69,14 @@ calculate_for_cont_var <- function(dataset, variable, stat, pr, wt) {
   }
 
   # next: separate, verbose specifications for mean and quantile when weight is provided/not provided
-  # (I wanted to be really clear about what we want)
+  # (these if-else structures are inefficient but I wanted to be really clear about what we want)
 
   if(stat == 'mean') {
     # 1) wt = NULL
     if(rlang::quo_is_null(wt)) {
       out_df <- dataset %>%
+        # always filter nas because the function previously checked
+        # to ensure nas = F is set if necessary
         dplyr::filter(!is.na(!!variable)) %>%
         dplyr::summarise(n = base::length(!!variable),
                          result = base::mean(!!variable)
@@ -85,7 +87,8 @@ calculate_for_cont_var <- function(dataset, variable, stat, pr, wt) {
       out_df <- dataset %>%
         dplyr::filter(!is.na(!!variable)) %>%
         dplyr::summarise(n = base::sum(!!wt),
-                         result = stats::weighted.mean(!!variable, !!wt)
+                         result = stats::weighted.mean(!!variable,
+                                                       !!wt)
         )
     }
   }
@@ -93,6 +96,8 @@ calculate_for_cont_var <- function(dataset, variable, stat, pr, wt) {
     # 1) wt = NULL
     if(rlang::quo_is_null(wt)) {
       out_df <- dataset %>%
+        # always filter nas because the function previously checked
+        # to ensure nas = F is set if necessary
         dplyr::filter(!is.na(!!variable)) %>%
         dplyr::summarise(n = base::length(!!variable),
                          result = stats::quantile(x = !!variable,
@@ -161,10 +166,21 @@ validate_data <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) 
 get_output_for_continuous_var <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   # validation & checks
-  validate_data(dataset, variable, stat, pr, nas, wt, prompt, digits)
+  validate_data(dataset,
+                variable,
+                stat,
+                pr,
+                nas,
+                wt,
+                prompt,
+                digits)
 
   # get mean or quantile
-  out_df <- calculate_for_cont_var(dataset, variable, stat, pr, wt)
+  out_df <- calculate_for_cont_var(dataset,
+                                   variable,
+                                   stat,
+                                   pr,
+                                   wt)
 
   # get group column names to add later (if they exist/as necessary)
   grouping_vars <- c("")
@@ -186,16 +202,23 @@ get_output_for_continuous_var <- function(dataset, variable, stat, pr, nas, wt, 
                   # different labels depending on input
                   stat = dplyr::case_when(
                     statistic == 'mean' ~ 'mean',
-                    statistic == 'quantile' & pr == 0 ~ 'quantile - min',
-                    statistic == 'quantile' & pr == 50 ~ 'quantile - median',
-                    statistic == 'quantile' & pr == 100 ~ 'quantile - max',
-                    statistic == 'quantile' & !(pr %in% c(0,50,100)) ~ str_c('quantile - ', pr, '%'),
+                    statistic == 'quantile' &
+                      pr == 0 ~ 'quantile - min',
+                    statistic == 'quantile' &
+                      pr == 50 ~ 'quantile - median',
+                    statistic == 'quantile' &
+                      pr == 100 ~ 'quantile - max',
+                    statistic == 'quantile' &
+                      !(pr %in% c(0,50,100)) ~ str_c('quantile - ', pr, '%'),
                     TRUE ~ 'error'
                   ),
                   # add 'weighted' to stat column if relevant
                   stat = dplyr::case_when(
-                    !rlang::quo_is_null(wt) & statistic == 'mean' ~ stringr::str_c(stat, ' - weighted'),
-                    !rlang::quo_is_null(wt) & statistic == 'quantile' & (0 < pr) & (pr < 100) ~ stringr::str_c(stat, ' - weighted'),
+                    !rlang::quo_is_null(wt) &
+                      statistic == 'mean' ~ stringr::str_c(stat, ' - weighted'),
+                    !rlang::quo_is_null(wt) &
+                      statistic == 'quantile' &
+                      (0 < pr) & (pr < 100) ~ stringr::str_c(stat, ' - weighted'),
                     TRUE ~ stat
                   ),
                   n = base::round(n,
