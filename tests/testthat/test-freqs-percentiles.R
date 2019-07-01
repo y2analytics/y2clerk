@@ -371,7 +371,15 @@ test_that("setting a pr value when stat = 'summary' does not affect output", {
   )
 })
 
-
+test_that("stat = 'summary gives message when pr value is provided", {
+  expect_message(
+    responses %>%
+      freqs(q1,
+            pr = 75,
+            stat = 'summary',
+            nas = F)
+  )
+})
 
 
 

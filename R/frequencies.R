@@ -272,9 +272,9 @@ get_output_for_continuous_var <- function(dataset, variable, stat, pr, nas, wt, 
   return(out_df)
 }
 
-get_summary_output <- function(dataset, variable, nas, weight, prompt, digits) {
+get_summary_output <- function(dataset, variable, pr, nas, weight, prompt, digits) {
 
-  # add redundant reminder because the following code overrides user inputs [also present in validate_inputs()]
+  # add redundant reminder because the following code overrides user inputs [reminder is also present in validate_inputs()]
   # reminder if pr input given when stat is not set to 'quantile'
   if(pr != 50) rlang::inform("Remember that the percentile rank argument is relevant only when stat = 'quantile'")
 
