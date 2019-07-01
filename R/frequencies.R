@@ -275,7 +275,7 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
   return(out_df)
 }
 
-get_summary_output_for_cont_var <- function(dataset, variable, pr, nas, wt, prompt, digits) {
+get_summary_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   # add redundant reminder because  subsequent code overrides user inputs for stat & pr
   # [for other cases, this reminder is also present in validate_inputs()]
@@ -332,7 +332,7 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
   }
 
   else if(stat == 'summary') {
-    freq_result <- get_summary_output_for_cont_var(dataset, variable, pr, nas, wt, prompt, digits)
+    freq_result <- get_summary_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
   }
 
   else if(stat %in% c('mean', 'quantile')) {
