@@ -7,8 +7,9 @@ rm(list = ls())
 library(y2clerk)
 library(tidyverse)
 library(labelled)
+library(testthat)
 
-set.seed(1)
+set.seed(100)
 
 # test data ---------------------------------------------------------------
 
@@ -19,7 +20,7 @@ responses <- {
     q0 = sample(x = datasets::swiss$Agriculture, size = 25, replace = T),
 
     # continuous numeric, variable label, incl. NA
-    q1 = sample(x = c(datasets::swiss$Agriculture, NA), size = 25, prob = c(rep(.9/47,47), 0.1), replace = T),
+    q1 = sample(x = c(datasets::swiss$Agriculture, NA), size = 25, prob = c(rep(.8/47,47), 0.2), replace = T),
 
     # factor (numbers), no value labels
     q2 = sample(x = datasets::Orange$Tree, size = 25, replace = T),
@@ -132,9 +133,10 @@ test_that("NAs not present, nas = F: n & result are correct", {
 })
 
 test_that("NAs present, nas = T: throws error", {
-  expect_error(responses %>%
-                 select(q1) %>%
-                 freqs(stat = "quantile")
+  expect_error(
+    responses %>%
+      select(q1) %>%
+      freqs(stat = "quantile")
   )
 })
 
@@ -330,6 +332,47 @@ test_that("output from 'pr = 100' is equivalent to base::max() when weights are 
 #
 
 context("structure")
+
+#
+
+context("stat = summary")
+
+test_that("there are 6 lines of output (min, 1st quartile, median, mean, 3rd quartile, max)", {
+  expect_equal(
+    responses %>%
+      freqs(q0, stat = 'summary') %>%
+      nrow(),
+    6
+  )
+
+  expect_equal(
+    responses %>%
+      freqs(q1, stat = 'summary', nas = F) %>%
+      nrow(),
+    6
+  )
+
+  expect_equal(
+    responses %>%
+      freqs(q1, stat = 'summary',
+            nas = F, wt = w) %>%
+      nrow(),
+    6
+  )
+})
+
+test_that("setting a pr value when stat = 'summary' does not affect output", {
+  expect_equal(
+    responses %>%
+      freqs(q0, stat = 'summary',
+            pr = 0),
+    responses %>%
+      freqs(q0, stat = 'summary')
+  )
+})
+
+
+
 
 
 

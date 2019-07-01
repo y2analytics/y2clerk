@@ -61,7 +61,7 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', pr = 50, nas = TRUE, w
 
 ##### Private functions #####
 
-calculate_for_cont_var <- function(dataset, variable, stat, pr, wt) {
+calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
 
   # first: (if wt = NULL) change class so logical test can be performed in all cases:
   if(base::is.null(wt)) {
@@ -118,7 +118,7 @@ calculate_for_cont_var <- function(dataset, variable, stat, pr, wt) {
   return(out_df)
 }
 
-validate_data <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
+validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   # "failing fast"
 
@@ -166,21 +166,21 @@ validate_data <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) 
 get_output_for_continuous_var <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   # validation & checks
-  validate_data(dataset,
-                variable,
-                stat,
-                pr,
-                nas,
-                wt,
-                prompt,
-                digits)
+  validate_inputs(dataset,
+                  variable,
+                  stat,
+                  pr,
+                  nas,
+                  wt,
+                  prompt,
+                  digits)
 
   # get mean or quantile
-  out_df <- calculate_for_cont_var(dataset,
-                                   variable,
-                                   stat,
-                                   pr,
-                                   wt)
+  out_df <- calculate_result_for_cont_var(dataset,
+                                          variable,
+                                          stat,
+                                          pr,
+                                          wt)
 
   # get group column names to add later (if they exist/as necessary)
   grouping_vars <- c("")
@@ -273,6 +273,11 @@ get_output_for_continuous_var <- function(dataset, variable, stat, pr, nas, wt, 
 }
 
 get_summary_output <- function(dataset, variable, nas, weight, prompt, digits) {
+
+  # add redundant reminder because the following code overrides user inputs [also present in validate_inputs()]
+  # reminder if pr input given when stat is not set to 'quantile'
+  if(pr != 50) rlang::inform("Remember that the percentile rank argument is relevant only when stat = 'quantile'")
+
   out <- bind_rows(
     get_output_for_continuous_var(dataset, variable, stat = 'quantile', pr = 0,   nas, weight, prompt, digits),
     get_output_for_continuous_var(dataset, variable, stat = 'quantile', pr = 25,  nas, weight, prompt, digits),
@@ -292,8 +297,8 @@ get_summary_output <- function(dataset, variable, nas, weight, prompt, digits) {
                                          'quantile - 75%',
                                          'quantile - 75% - weighted',
                                          'quantile - max')
-                                       )
-           )
+    )
+    )
 
   return(out)
 }

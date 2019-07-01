@@ -9,7 +9,7 @@ library(tidyverse)
 library(labelled)
 library(testthat)
 
-set.seed(1)
+set.seed(100)
 
 # test data ---------------------------------------------------------------
 
@@ -20,7 +20,7 @@ responses <- {
     q0 = sample(x = datasets::swiss$Agriculture, size = 25, replace = T),
 
     # continuous numeric, variable label, incl. NA
-    q1 = sample(x = c(datasets::swiss$Agriculture, NA), size = 25, prob = c(rep(.9/47,47), 0.1), replace = T),
+    q1 = sample(x = c(datasets::swiss$Agriculture, NA), size = 25, prob = c(rep(.8/47,47), 0.2), replace = T),
 
     # factor (numbers), no value labels
     q2 = sample(x = datasets::Orange$Tree, size = 25, replace = T),
