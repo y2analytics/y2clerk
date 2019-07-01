@@ -128,7 +128,7 @@ validate_inputs <-                 function(dataset, variable, stat, pr, nas, wt
   }
 
   # 1) if there are NAs in the data, you should use nas = F
-  if(nas) {
+  if(T) {
     count_nas <- dataset %>%
       dplyr::filter(is.na(!!variable)) %>%
       base::nrow()
