@@ -163,7 +163,7 @@ validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits
   }
 }
 
-get_output_for_continuous_var <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
+get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   # validation & checks
   validate_inputs(dataset,
@@ -190,10 +190,13 @@ get_output_for_continuous_var <- function(dataset, variable, stat, pr, nas, wt, 
 
   # produce dataframe to output
 
-  # make copy of stat. the stat variable in the output data frame and the
-  # stat function argument don't play well together here
+  # make copy of "stat". the stat variable in the output data frame and the
+  # stat function argument don't play well together here.
   statistic <- stat
   rm(stat)
+  # this is not a great fix imo but it's been a pretty resilient problem.
+  # if possible, i would rename either the column or the argument, but
+  # on the other hand, either of those would presumably be breaking changes
 
   out_df <- out_df %>%
     dplyr::mutate(variable = dplyr::quo_name(variable),
@@ -212,7 +215,7 @@ get_output_for_continuous_var <- function(dataset, variable, stat, pr, nas, wt, 
                       !(pr %in% c(0,50,100)) ~ str_c('quantile - ', pr, '%'),
                     TRUE ~ 'error'
                   ),
-                  # add 'weighted' to stat column if relevant
+                  # add 'weighted' string to existing value in stat column as relevant
                   stat = dplyr::case_when(
                     !rlang::quo_is_null(wt) &
                       statistic == 'mean' ~ stringr::str_c(stat, ' - weighted'),
@@ -272,19 +275,19 @@ get_output_for_continuous_var <- function(dataset, variable, stat, pr, nas, wt, 
   return(out_df)
 }
 
-get_summary_output <- function(dataset, variable, pr, nas, weight, prompt, digits) {
+get_summary_output_for_cont_var <- function(dataset, variable, pr, nas, weight, prompt, digits) {
 
-  # add redundant reminder because the following code overrides user inputs [reminder is also present in validate_inputs()]
-  # reminder if pr input given when stat is not set to 'quantile'
+  # add redundant reminder because  subsequent code overrides user inputs for stat & pr
+  # [for other cases, this reminder is also present in validate_inputs()]
   if(pr != 50) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
 
   out <- bind_rows(
-    get_output_for_continuous_var(dataset, variable, stat = 'quantile', pr = 0,   nas, weight, prompt, digits),
-    get_output_for_continuous_var(dataset, variable, stat = 'quantile', pr = 25,  nas, weight, prompt, digits),
-    get_output_for_continuous_var(dataset, variable, stat = 'quantile', pr = 50,  nas, weight, prompt, digits),
-    get_output_for_continuous_var(dataset, variable, stat = 'mean',     pr = 50,  nas, weight, prompt, digits),
-    get_output_for_continuous_var(dataset, variable, stat = 'quantile', pr = 75,  nas, weight, prompt, digits),
-    get_output_for_continuous_var(dataset, variable, stat = 'quantile', pr = 100, nas, weight, prompt, digits)
+    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 0,   nas, weight, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 25,  nas, weight, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 50,  nas, weight, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'mean',               nas, weight, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 75,  nas, weight, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 100, nas, weight, prompt, digits)
   ) %>%
     mutate(stat = forcats::fct_relevel(stat,
                                        c('quantile - min',
@@ -329,11 +332,11 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
   }
 
   else if(stat == 'summary') {
-    freq_result <- get_summary_output(dataset, variable, pr, nas, weight, prompt, digits)
+    freq_result <- get_summary_output_for_cont_var(dataset, variable, pr, nas, weight, prompt, digits)
   }
 
   else if(stat %in% c('mean', 'quantile')) {
-    freq_result <- get_output_for_continuous_var(dataset, variable, stat, pr, nas, weight, prompt, digits)
+    freq_result <- get_output_for_cont_var(dataset, variable, stat, pr, nas, weight, prompt, digits)
   }
 
   return(freq_result)
