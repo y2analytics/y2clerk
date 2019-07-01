@@ -377,7 +377,7 @@ test_that("stat = 'summary' gives message when pr value is provided", {
       freqs(q1,
             pr = 75,
             stat = 'summary',
-            nas = F)
+            nas = F, wt = w)
   )
 })
 

@@ -159,7 +159,7 @@ validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits
 
   # 4) give reminder if pr input given when stat is not set to 'quantile'
   if(stat != 'quantile') {
-    if(pr != 50) rlang::inform("Remember that the percentile rank argument is relevant only when stat = 'quantile'")
+    if(pr != 50) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
   }
 }
 
@@ -276,7 +276,7 @@ get_summary_output <- function(dataset, variable, pr, nas, weight, prompt, digit
 
   # add redundant reminder because the following code overrides user inputs [reminder is also present in validate_inputs()]
   # reminder if pr input given when stat is not set to 'quantile'
-  if(pr != 50) rlang::inform("Remember that the percentile rank argument is relevant only when stat = 'quantile'")
+  if(pr != 50) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
 
   out <- bind_rows(
     get_output_for_continuous_var(dataset, variable, stat = 'quantile', pr = 0,   nas, weight, prompt, digits),
