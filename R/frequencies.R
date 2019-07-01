@@ -128,7 +128,7 @@ validate_inputs <-                 function(dataset, variable, stat, pr, nas, wt
   }
 
   # 1) if there are NAs in the data, you should use nas = F
-  if(T) {
+  if(nas) {
     count_nas <- dataset %>%
       dplyr::filter(is.na(!!variable)) %>%
       base::nrow()
@@ -285,7 +285,7 @@ get_summary_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 0,   nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 25,  nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 50,  nas, wt, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'mean',               nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'mean',     pr = 50,  nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 75,  nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 100, nas, wt, prompt, digits)
   ) %>%
