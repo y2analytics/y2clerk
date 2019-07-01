@@ -329,7 +329,7 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
   }
 
   else if(stat == 'summary') {
-    freq_result <- get_summary_output(dataset, variable, nas, weight, prompt, digits)
+    freq_result <- get_summary_output(dataset, variable, pr, nas, weight, prompt, digits)
   }
 
   else if(stat %in% c('mean', 'quantile')) {
