@@ -61,7 +61,7 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', pr = 50, nas = TRUE, w
 
 ##### Private functions #####
 
-calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
+calculate_result_for_cont_var <-   function(dataset, variable, stat, pr,      wt) {
 
   # first: (if wt = NULL) change class so logical test can be performed in all cases:
   if(base::is.null(wt)) {
@@ -118,7 +118,7 @@ calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
   return(out_df)
 }
 
-validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
+validate_inputs <-                 function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   # "failing fast"
 
@@ -163,7 +163,7 @@ validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits
   }
 }
 
-get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
+get_output_for_cont_var <-         function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   # validation & checks
   validate_inputs(dataset,
