@@ -275,19 +275,19 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
   return(out_df)
 }
 
-get_summary_output_for_cont_var <- function(dataset, variable, pr, nas, weight, prompt, digits) {
+get_summary_output_for_cont_var <- function(dataset, variable, pr, nas, wt, prompt, digits) {
 
   # add redundant reminder because  subsequent code overrides user inputs for stat & pr
   # [for other cases, this reminder is also present in validate_inputs()]
   if(pr != 50) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
 
   out <- bind_rows(
-    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 0,   nas, weight, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 25,  nas, weight, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 50,  nas, weight, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'mean',               nas, weight, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 75,  nas, weight, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 100, nas, weight, prompt, digits)
+    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 0,   nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 25,  nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 50,  nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'mean',               nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 75,  nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 100, nas, wt, prompt, digits)
   ) %>%
     mutate(stat = forcats::fct_relevel(stat,
                                        c('quantile - min',
@@ -320,23 +320,23 @@ column_quos <- function(dataset) {
 
 freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   variable <- dplyr::enquo(variable)
-  weight <- dplyr::enquo(wt)
+  wt <- dplyr::enquo(wt)
 
   # check stat argument input
   if(!(stat %in% c('percent','mean','quantile','summary'))) stop('"stat" argument must receive a value from c("percent", "mean", "quantile", "summary")')
 
   if(stat == 'percent') {
-    base <- ns(dataset, variable, weight, prompt)
+    base <- ns(dataset, variable, wt, prompt)
     freq_result <- base %>%
       percents(nas, digits = digits)
   }
 
   else if(stat == 'summary') {
-    freq_result <- get_summary_output_for_cont_var(dataset, variable, pr, nas, weight, prompt, digits)
+    freq_result <- get_summary_output_for_cont_var(dataset, variable, pr, nas, wt, prompt, digits)
   }
 
   else if(stat %in% c('mean', 'quantile')) {
-    freq_result <- get_output_for_cont_var(dataset, variable, stat, pr, nas, weight, prompt, digits)
+    freq_result <- get_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
   }
 
   return(freq_result)
