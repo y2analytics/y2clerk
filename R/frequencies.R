@@ -61,7 +61,7 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', pr = 50, nas = TRUE, w
 
 ##### Private functions #####
 
-calculate_result_for_cont_var <-   function(dataset, variable, stat, pr,      wt) {
+calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
 
   # first: (if wt = NULL) change class so logical test can be performed in all cases:
   if(base::is.null(wt)) {
@@ -92,7 +92,17 @@ calculate_result_for_cont_var <-   function(dataset, variable, stat, pr,      wt
         )
     }
   }
-  if(stat == 'quantile') {
+
+  if(stat %in% c('quantile', 'median', 'min', 'max')) {
+
+    if(stat == 'median'){
+      pr <- 50
+    } else if(stat == 'min') {
+      pr <- 0
+    } else if(stat == 'max') {
+      pr <- 100
+    }
+
     # 1) wt = NULL
     if(rlang::quo_is_null(wt)) {
       out_df <- dataset %>%
@@ -118,12 +128,12 @@ calculate_result_for_cont_var <-   function(dataset, variable, stat, pr,      wt
   return(out_df)
 }
 
-validate_inputs <-                 function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
+validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   # "failing fast"
 
   # 0) validate percentile rank
-  if(stat == "quantile") {
+  if(stat %in% c('quantile')) {
     if(pr < 0 | pr > 100) stop('Percentile rank should be between 0 and 100, inclusive')
   }
 
@@ -163,7 +173,7 @@ validate_inputs <-                 function(dataset, variable, stat, pr, nas, wt
   }
 }
 
-get_output_for_cont_var <-         function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
+get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
 
   # validation & checks
   validate_inputs(dataset,
@@ -205,23 +215,19 @@ get_output_for_cont_var <-         function(dataset, variable, stat, pr, nas, wt
                   # different labels depending on input
                   stat = dplyr::case_when(
                     statistic == 'mean' ~ 'mean',
+                    statistic == 'min' ~ 'min',
+                    statistic == 'median' ~ 'median',
+                    statistic == 'max' ~ 'max',
                     statistic == 'quantile' &
-                      pr == 0 ~ 'quantile - min',
-                    statistic == 'quantile' &
-                      pr == 50 ~ 'quantile - median',
-                    statistic == 'quantile' &
-                      pr == 100 ~ 'quantile - max',
-                    statistic == 'quantile' &
-                      !(pr %in% c(0,50,100)) ~ str_c('quantile - ', pr, '%'),
+                      !(pr %in% c(0,50,100)) ~ str_c('q', pr, '%'),
+                    statistic == 'quantile' & pr == 0 ~ 'min',
+                    statistic == 'quantile' & pr == 50 ~ 'median',
+                    statistic == 'quantile' & pr == 100 ~ 'max',
                     TRUE ~ 'error'
                   ),
                   # add 'weighted' string to existing value in stat column as relevant
                   stat = dplyr::case_when(
-                    !rlang::quo_is_null(wt) &
-                      statistic == 'mean' ~ stringr::str_c(stat, ' - weighted'),
-                    !rlang::quo_is_null(wt) &
-                      statistic == 'quantile' &
-                      (0 < pr) & (pr < 100) ~ stringr::str_c(stat, ' - weighted'),
+                    !rlang::quo_is_null(wt) & !(stat %in% c('min', 'max')) ~ stringr::str_c(stat, ' - weighted'),
                     TRUE ~ stat
                   ),
                   n = base::round(n,
