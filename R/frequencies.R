@@ -329,7 +329,8 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
   wt <- dplyr::enquo(wt)
 
   # check stat argument input
-  if(!(stat %in% c('percent','mean','quantile','summary'))) stop('"stat" argument must receive a value from c("percent", "mean", "quantile", "summary")')
+  if(!(stat %in% c('percent','mean','quantile',
+                   'summary','min','max','median'))) stop('"stat" argument must receive a value from c("percent", "mean", "quantile", "summary", "min", "median", "max")')
 
   if(stat == 'percent') {
     base <- ns(dataset, variable, wt, prompt)
@@ -341,7 +342,7 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
     freq_result <- get_summary_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
   }
 
-  else if(stat %in% c('mean', 'quantile')) {
+  else if(stat %in% c('mean', 'quantile', 'min', 'median', 'max')) {
     freq_result <- get_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
   }
 
