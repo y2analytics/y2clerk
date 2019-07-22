@@ -213,6 +213,12 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
   # if possible, i would rename either the column or the argument, but
   # on the other hand, either of those would presumably be breaking changes
 
+  # for convenience:
+  if(is.null(pr)) {
+    pr <- -99
+  }
+
+
   out_df <- out_df %>%
     dplyr::mutate(variable = dplyr::quo_name(variable),
                   value = '',

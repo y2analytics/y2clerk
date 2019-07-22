@@ -116,7 +116,7 @@ test_that("NAs not present, nas = T: n & result are correct", {
 test_that("NAs not present, nas = F: n & result are correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs(stat = "quantile", nas = F) %>%
+                      freqs(stat = "quantile", nas = F, pr = 50) %>%
                       select(result) %>%
                       pull(),
 
@@ -124,7 +124,7 @@ test_that("NAs not present, nas = F: n & result are correct", {
   )
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs(stat = "quantile", nas = F) %>%
+                      freqs(stat = "quantile", nas = F, pr = 50) %>%
                       select(n) %>%
                       pull(),
 
@@ -136,18 +136,18 @@ test_that("NAs present, nas = T: throws error", {
   expect_error(
     responses %>%
       select(q1) %>%
-      freqs(stat = "quantile")
+      freqs(stat = "quantile", pr = 95)
   )
 })
 
 test_that("NAs present, nas = F: n & result are correct", {
   expect_equal(responses %>%
                  select(q1) %>%
-                 freqs(stat = "quantile", nas = F) %>%
+                 freqs(stat = "quantile", nas = F, pr = 95) %>%
                  select(result) %>%
                  pull(),
 
-               round(median(responses$q1, na.rm = T), 2)
+               round(quantile(responses$q1, 0.95, na.rm = T), 2) %>% as.numeric()
   )
   expect_equivalent(responses %>%
                       select(q1) %>%
