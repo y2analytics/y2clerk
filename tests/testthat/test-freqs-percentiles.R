@@ -376,7 +376,7 @@ test_that("stat = 'summary' gives message when pr value is provided", {
     responses %>%
       select(q0,q1,w) %>%
       freqs(pr = 75,
-            stat = 'quantile',
+            stat = 'summary',
             wt = w,
             nas = F)
   )
