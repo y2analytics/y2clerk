@@ -220,7 +220,6 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
     pr <- -99
   }
 
-
   out_df <- out_df %>%
     dplyr::mutate(variable = dplyr::quo_name(variable),
                   value = '',
@@ -306,24 +305,24 @@ get_summary_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt
   if(!is.null(pr)) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
 
   out <- bind_rows(
-    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 0,   nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'min',                nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 25,  nas, wt, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 50,  nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'median',             nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'mean',               nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 75,  nas, wt, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 100, nas, wt, prompt, digits)
+    get_output_for_cont_var(dataset, variable, stat = 'max',                nas, wt, prompt, digits)
   ) %>%
     mutate(stat = forcats::fct_relevel(stat,
-                                       c('quantile - min',
-                                         'quantile - 25%',
-                                         'quantile - 25% - weighted',
-                                         'quantile - median',
-                                         'quantile - median - weighted',
+                                       c('min',
+                                         'q25%',
+                                         'q25% - weighted',
+                                         'median',
+                                         'median - weighted',
                                          'mean',
                                          'mean - weighted',
-                                         'quantile - 75%',
-                                         'quantile - 75% - weighted',
-                                         'quantile - max')
+                                         'q75%',
+                                         'q75% - weighted',
+                                         'max')
     )
     )
 
