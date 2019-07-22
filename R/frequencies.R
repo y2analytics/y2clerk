@@ -37,7 +37,7 @@
 #' freqs(df, a, stat = 'summary', nas = F, wt = weights)
 #' @export
 
-freqs <- freq <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freqs_ <- freq_ <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   weight = dplyr::enquo(wt)
   variables = dplyr::quos(...)
 
