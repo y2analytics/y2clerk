@@ -175,7 +175,7 @@ validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits
   if(! check_labels) stop("Value labels exist; consider converting values to labels or using stat = 'percent'")
 
   # 4) give reminder if pr input given when stat is not set to 'quantile'
-  if(stat != 'quantile') {
+  if(!(stat %in% c('quantile', 'summary'))) {
     if(!is.null(pr)) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
   }
 }
