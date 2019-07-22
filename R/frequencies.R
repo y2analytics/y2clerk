@@ -134,12 +134,14 @@ validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits
 
   # 0) validate percentile rank
   if(stat == 'quantile' & is.null(pr)) stop("No input given for pr (percentile rank)")
-  # if(stat == 'quantile' & missing(pr)) {
-  #   pr <- 95
-  # }
+
 
   if(stat == 'quantile' & !is.null(pr)) {
     if(pr < 0 | pr > 100) stop('Percentile rank should be between 0 and 100, inclusive')
+  }
+
+  if(stat == 'quantile' & !is.null(pr)) {
+    if(pr < 1) rlang::inform('Remember that pr ranges between 0 and 100. pr = 0.5 returns the bottom half percentile, whereas pr = 50 returns the median.')
   }
 
   # 1) if there are NAs in the data, you should use nas = F

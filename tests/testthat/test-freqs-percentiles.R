@@ -151,7 +151,7 @@ test_that("NAs present, nas = F: n & result are correct", {
   )
   expect_equivalent(responses %>%
                       select(q1) %>%
-                      freqs(stat = "quantile", nas = F) %>%
+                      freqs(stat = "quantile", nas = F, pr = 95) %>%
                       select(n) %>%
                       pull(),
 
@@ -201,10 +201,10 @@ test_that("column with value labels input: (potentially misleading) result is co
     responses %>%
       mutate(q4 = as.numeric(q4)) %>%
       select(q4) %>%
-      freqs(stat = 'quantile') %>%
+      freqs(stat = 'quantile', pr = 95) %>%
       select(result) %>%
       pull(),
-    median(as.numeric(responses$q4))
+    quantile(as.numeric(responses$q4), 0.95)
   )
 })
 
@@ -213,10 +213,10 @@ test_that("column with value labels input: answer is correct after labels remove
     responses %>%
       select(q4) %>%
       remove_labels() %>%
-      freqs(stat = 'quantile') %>%
+      freqs(stat = 'quantile', pr = 95) %>%
       select(result) %>%
       pull(),
-    median(as.numeric(responses$q4))
+    quantile(as.numeric(responses$q4), 0.95)
   )
 })
 
@@ -228,12 +228,12 @@ test_that("using weights: equivalent to wtd.quantile() output", {
   expect_equal(
     responses %>%
       select(q1, w) %>%
-      freqs(stat = 'quantile', nas = F, wt = w) %>%
+      freqs(stat = 'quantile', nas = F, wt = w, pr = 95) %>%
       select(result) %>%
       pull(),
 
     reldist::wtd.quantile(x = responses$q1,
-                          q = 0.5,
+                          q = 0.95,
                           weight = responses$w,
                           na.rm = T) %>%
       round(2) %>%
@@ -249,7 +249,7 @@ test_that("using prompt: variable label is correctly output", {
   expect_equal(
     responses %>%
       select(q1) %>%
-      freqs(stat = 'quantile', nas = F, prompt = T) %>%
+      freqs(stat = 'quantile', nas = F, prompt = T, pr = 0.95) %>%
       select(prompt) %>%
       pull(),
 
@@ -269,15 +269,16 @@ test_that("using digits: output is precise to multiple decimal places", {
   expect_equal(
     responses %>%
       select(w) %>%
-      freqs(stat = 'quantile', digits = 6, nas = F) %>%
+      freqs(stat = 'quantile', pr = 95, digits = 6, nas = F) %>%
       select(result) %>%
       pull(),
 
     responses %>%
       select(w) %>%
       pull() %>%
-      median(na.rm = T) %>%
-      round(digits = 6)
+      quantile(0.95, na.rm = T) %>%
+      round(digits = 6) %>%
+      as.numeric()
   )
 })
 
