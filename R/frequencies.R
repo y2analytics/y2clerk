@@ -314,14 +314,14 @@ get_summary_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt
   ) %>%
     mutate(stat = forcats::fct_relevel(stat,
                                        c('min',
-                                         'q25%',
-                                         'q25% - weighted',
+                                         'q25',
+                                         'q25 - weighted',
                                          'median',
                                          'median - weighted',
                                          'mean',
                                          'mean - weighted',
-                                         'q75%',
-                                         'q75% - weighted',
+                                         'q75',
+                                         'q75 - weighted',
                                          'max')
     )
     )
