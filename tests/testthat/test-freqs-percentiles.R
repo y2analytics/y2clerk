@@ -81,7 +81,7 @@ test_that("test data is correct", {
 
 context("check input mistakes")
 
-test_that("stat != mean & stat != percentile", {
+test_that("bad input throws error", {
   expect_error(
     responses %>%
       select(q0) %>%

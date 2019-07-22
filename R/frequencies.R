@@ -37,7 +37,7 @@
 #' freqs(df, a, stat = 'summary', nas = F, wt = weights)
 #' @export
 
-freqs <- freq <- function(dataset, ..., stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freqs <- freq <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   weight = dplyr::enquo(wt)
   variables = dplyr::quos(...)
 
@@ -136,6 +136,10 @@ validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits
   if(stat %in% c('quantile')) {
     if(pr < 0 | pr > 100) stop('Percentile rank should be between 0 and 100, inclusive')
   }
+  if(stat == 'quantile' & missing(pr)) rlang::inform("No input given for pr (percentile rank); defaulting to 95th percentile")
+  if(stat == 'quantile' & missing(pr)) {
+    pr <- 95
+  }
 
   # 1) if there are NAs in the data, you should use nas = F
   if(nas) {
@@ -169,7 +173,7 @@ validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits
 
   # 4) give reminder if pr input given when stat is not set to 'quantile'
   if(stat != 'quantile') {
-    if(pr != 50) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
+    if(!missing(pr)) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
   }
 }
 
@@ -291,7 +295,7 @@ get_summary_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 0,   nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 25,  nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 50,  nas, wt, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'mean',     pr = 50,  nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'mean',               nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 75,  nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 100, nas, wt, prompt, digits)
   ) %>%
