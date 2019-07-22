@@ -7,7 +7,7 @@
 #' @param ... The unquoted names of a set of variables in the dataframe. If nothing
 #' is specified, the function runs a frequency on every column in given dataset.
 #' @param stat Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').
-#' @param pr Double, for use when stat = 'quantile.' Input should be a real number x such that 0 ≤ x ≤ 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. Returns median unless otherwise specified. pr = 0 and pr = 100 are special cases which will return the minimum and maximum respectively (default: 50).
+#' @param pr Double, for use when stat = 'quantile.' Input should be a real number x such that 0 ≤ x ≤ 100. Stands for percentile rank, which is a quantile relative to a 100-point scale.
 #' @param nas Boolean, whether or not to include NAs in the tabulation (default: T).
 #' @param wt The unquoted name of a weighting variable in the dataframe (default: NULL).
 #' @param prompt Boolean, whether or not to include the prompt in the dataframe (default: F).
@@ -21,20 +21,20 @@
 #'   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
 #' )
 #'
-#' freqs(df, a, b)
-#' freqs(df, a, b, nas = FALSE)
-#' freqs(df, a, b, wt = weights)
-#' freq(df, stat = 'mean', nas = F)
-#' freq(df, stat = 'mean', nas = F, wt = weights)
-#' freq(df %>% group_by(a), b, stat = 'mean', nas = F, wt = weights)
+#' freqs_(df, a, b)
+#' freqs_(df, a, b, nas = FALSE)
+#' freqs_(df, a, b, wt = weights)
+#' freq_(df, stat = 'mean', nas = F)
+#' freq_(df, stat = 'mean', nas = F, wt = weights)
+#' freq_(df %>% group_by(a), b, stat = 'mean', nas = F, wt = weights)
 #'
 #' # note that pr = 60 will return an estimate of the real number such that 60% of values are lower than that number
 #' # note also that minimums and maximums are unaffected by weighting
-#' freqs(df, a, stat = 'quantile', pr = 0, nas = F)
-#' freqs(df, a, stat = 'quantile', nas = F)
-#' freqs(df, a, stat = 'quantile', pr = 60, nas = F)
-#' freqs(df, a, stat = 'quantile', pr = 100, nas = F, wt = weights)
-#' freqs(df, a, stat = 'summary', nas = F, wt = weights)
+#' freqs_(df, a, stat = 'min', nas = F)
+#' freqs_(df, a, stat = 'median', nas = F)
+#' freqs_(df, a, stat = 'quantile', pr = 95, nas = F)
+#' freqs_(df, a, stat = 'max', nas = F, wt = weights)
+#' freqs_(df, a, stat = 'summary', nas = F, wt = weights)
 #' @export
 
 freqs_ <- freq_ <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
