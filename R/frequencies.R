@@ -133,12 +133,12 @@ validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits
   # "failing fast"
 
   # 0) validate percentile rank
-  if(stat == 'quantile' & missing(pr)) rlang::inform("No input given for pr (percentile rank); defaulting to 95th percentile")
-  if(stat == 'quantile' & missing(pr)) {
-    pr <- 95
-  }
+  if(stat == 'quantile' & is.null(pr)) stop("No input given for pr (percentile rank)")
+  # if(stat == 'quantile' & missing(pr)) {
+  #   pr <- 95
+  # }
 
-  if(stat == 'quantile' & !missing(pr)) {
+  if(stat == 'quantile' & !is.null(pr)) {
     if(pr < 0 | pr > 100) stop('Percentile rank should be between 0 and 100, inclusive')
   }
 
@@ -174,7 +174,7 @@ validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits
 
   # 4) give reminder if pr input given when stat is not set to 'quantile'
   if(stat != 'quantile') {
-    if(!missing(pr)) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
+    if(!is.null(pr)) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
   }
 }
 

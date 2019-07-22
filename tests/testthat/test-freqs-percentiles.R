@@ -96,11 +96,11 @@ context("numeric variables")
 test_that("NAs not present, nas = T: n & result are correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      y2clerk::freqs(stat = "quantile") %>%
+                      y2clerk::freqs(stat = "quantile", pr = 95) %>%
                       select(result) %>%
                       pull(),
 
-                    round(median(responses$q0),2)
+                    round(quantile(responses$q0, 0.95),2)
   )
 
   expect_equivalent(responses %>%
