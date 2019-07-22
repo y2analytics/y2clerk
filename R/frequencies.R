@@ -291,6 +291,11 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
       dplyr::filter(variable != rlang::quo_name(wt))
   }
 
+  # for convenience:
+  if(pr == -99) {
+    pr <- NULL
+  }
+
   return(out_df)
 }
 
