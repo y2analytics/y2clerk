@@ -298,7 +298,7 @@ get_summary_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt
 
   # add redundant reminder because  subsequent code overrides user inputs for stat & pr
   # [for other cases, this reminder is also present in validate_inputs()]
-  if(pr != 50) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
+  if(!is.null(pr)) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
 
   out <- bind_rows(
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 0,   nas, wt, prompt, digits),
