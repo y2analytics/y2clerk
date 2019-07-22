@@ -104,7 +104,7 @@ test_that("NAs not present, nas = T: n & result are correct", {
 test_that("NAs not present, nas = F: n & result are correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs__(stat = "mean", nas = F) %>%
+                      freqs_(stat = "mean", nas = F) %>%
                       select(result) %>%
                       pull(),
 
