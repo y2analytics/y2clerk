@@ -231,7 +231,7 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
                     statistic == 'median' ~ 'median',
                     statistic == 'max' ~ 'max',
                     statistic == 'quantile' &
-                      !(pr %in% c(0,50,100)) ~ str_c('q', pr, '%'),
+                      !(pr %in% c(0,50,100)) ~ str_c('q', pr),
                     statistic == 'quantile' & pr == 0 ~ 'min',
                     statistic == 'quantile' & pr == 50 ~ 'median',
                     statistic == 'quantile' & pr == 100 ~ 'max',
