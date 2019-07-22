@@ -305,12 +305,12 @@ get_summary_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt
   if(!is.null(pr)) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
 
   out <- bind_rows(
-    get_output_for_cont_var(dataset, variable, stat = 'min',                nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'min', pr,            nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 25,  nas, wt, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'median',             nas, wt, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'mean',               nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'median', pr,         nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'mean', pr,           nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 75,  nas, wt, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'max',                nas, wt, prompt, digits)
+    get_output_for_cont_var(dataset, variable, stat = 'max', pr,            nas, wt, prompt, digits)
   ) %>%
     mutate(stat = forcats::fct_relevel(stat,
                                        c('min',
