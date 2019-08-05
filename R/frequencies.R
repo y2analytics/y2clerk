@@ -122,11 +122,11 @@ calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
     }
 
     if(stat == 'min') {
-      out_df %>%
-        mutate(result = min(dataset %>% select(!!variable) %>% pull(), na.rm = T))
+      out_df <- out_df %>%
+        mutate(result = responses %>% select(!!quo(q0)) %>% pull() %>% min(na.rm = T))
     } else if(stat == 'max') {
-      out_df %>%
-        mutate(result = max(dataset %>% select(!!variable) %>% pull(), na.rm = T))
+      out_df <- out_df %>%
+        mutate(result = responses %>% select(!!quo(q0)) %>% pull() %>% max(na.rm = T))
     }
   }
   return(out_df)
