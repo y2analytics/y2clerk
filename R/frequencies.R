@@ -359,12 +359,12 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
       percents(nas, digits = digits)
   }
 
-  else if(stat == 'summary') {
-    freq_result <- get_summary_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
-  }
-
   else if(stat %in% c('mean', 'quantile', 'min', 'median', 'max')) {
     freq_result <- get_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
+  }
+
+  else if(stat == 'summary') {
+    freq_result <- get_summary_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
   }
 
   return(freq_result)
