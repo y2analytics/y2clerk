@@ -104,7 +104,7 @@ calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
     }
 
     if(stat %in% c('min', 'max')) {
-      # mins and maxes are never weighted
+      # mins and maxes are never weighted, per our decision
       wt <- quo(NULL)
     }
 
