@@ -97,10 +97,6 @@ calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
 
     if(stat == 'median'){
       pr <- 50
-    } else if(stat == 'min') {
-      pr <- 0
-    } else if(stat == 'max') {
-      pr <- 100
     }
 
     # 1) wt = NULL
@@ -123,6 +119,12 @@ calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
                                                         q = pr / 100,
                                                         weight = !!wt)
         )
+    }
+
+    if(stat == 'min') {
+      out_df$result <- min(dataset %>% select(!!variable), na.rm = T)
+    } else if(stat == 'max') {
+      out_df$result <- max(dataset %>% select(!!variable), na.rm = T)
     }
   }
   return(out_df)
