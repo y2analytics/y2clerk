@@ -122,9 +122,11 @@ calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
     }
 
     if(stat == 'min') {
-      out_df$result <- min(dataset %>% select(!!variable), na.rm = T)
+      out_df %>%
+        mutate(result = min(dataset %>% select(!!variable), na.rm = T))
     } else if(stat == 'max') {
-      out_df$result <- max(dataset %>% select(!!variable), na.rm = T)
+      out_df %>%
+        mutate(result = max(dataset %>% select(!!variable), na.rm = T))
     }
   }
   return(out_df)
