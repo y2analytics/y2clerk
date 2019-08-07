@@ -1,3 +1,3 @@
 importFrom(dplyr,"%>%")
-export(freqs_)
-export(freq_)
+export(freqs)
+export(freq)

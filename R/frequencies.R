@@ -21,23 +21,23 @@
 #'   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
 #' )
 #'
-#' freqs_(df, a, b)
-#' freqs_(df, a, b, nas = FALSE)
-#' freqs_(df, a, b, wt = weights)
-#' freq_(df, stat = 'mean', nas = F)
-#' freq_(df, stat = 'mean', nas = F, wt = weights)
-#' freq_(df %>% group_by(a), b, stat = 'mean', nas = F, wt = weights)
+#' freqs(df, a, b)
+#' freqs(df, a, b, nas = FALSE)
+#' freqs(df, a, b, wt = weights)
+#' freq(df, stat = 'mean', nas = F)
+#' freq(df, stat = 'mean', nas = F, wt = weights)
+#' freq(df %>% group_by(a), b, stat = 'mean', nas = F, wt = weights)
 #'
 #' # note that pr = 60 will return an estimate of the real number such that 60% of values are lower than that number
 #' # note also that minimums and maximums are unaffected by weighting
-#' freqs_(df, a, stat = 'min', nas = F)
-#' freqs_(df, a, stat = 'median', nas = F)
-#' freqs_(df, a, stat = 'quantile', pr = 95, nas = F)
-#' freqs_(df, a, stat = 'max', nas = F, wt = weights)
-#' freqs_(df, a, stat = 'summary', nas = F, wt = weights)
+#' freqs(df, a, stat = 'min', nas = F)
+#' freqs(df, a, stat = 'median', nas = F)
+#' freqs(df, a, stat = 'quantile', pr = 95, nas = F)
+#' freqs(df, a, stat = 'max', nas = F, wt = weights)
+#' freqs(df, a, stat = 'summary', nas = F, wt = weights)
 #' @export
 
-freqs_ <- freq_ <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freqs <- freq <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   weight = dplyr::enquo(wt)
   variables = dplyr::quos(...)
 
@@ -53,7 +53,7 @@ freqs_ <- freq_ <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRU
     purrr::map_dfr(
       .x = variables,
       .f = function(variable) {
-        freq_var(dataset, !!variable, stat, pr, nas, !!weight, prompt, digits)
+        freqvar(dataset, !!variable, stat, pr, nas, !!weight, prompt, digits)
       }
     )
   )
@@ -346,7 +346,7 @@ column_quos <- function(dataset) {
   return(col_quos)
 }
 
-freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freqvar <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   variable <- dplyr::enquo(variable)
   wt <- dplyr::enquo(wt)
 
@@ -356,19 +356,19 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
 
   if(stat == 'percent') {
     base <- ns(dataset, variable, wt, prompt)
-    freq_result <- base %>%
+    freqresult <- base %>%
       percents(nas, digits = digits)
   }
 
   else if(stat %in% c('mean', 'quantile', 'min', 'median', 'max')) {
-    freq_result <- get_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
+    freqresult <- get_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
   }
 
   else if(stat == 'summary') {
-    freq_result <- get_summary_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
+    freqresult <- get_summary_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
   }
 
-  return(freq_result)
+  return(freqresult)
 }
 
 ns <- function(dataset, variable, weight, prompt) {
