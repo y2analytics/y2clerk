@@ -40,6 +40,8 @@
 #' @export
 
 freqs <- freq <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE, wt = NULL, prompt = F, digits = 2, nas_group = TRUE) {
+  # options(warn=-1)
+
   dataset <- group_factor(dataset, nas_group)
   weight = dplyr::enquo(wt)
   variables = dplyr::quos(...)
@@ -60,8 +62,10 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE,
       }
     )
   )
-  suppressWarnings(frequencies <- group_rename(frequencies))
-  suppressWarnings(return(frequencies))
+  frequencies <- group_rename(frequencies)
+
+  return(frequencies)
+  # options(warn=0)
 }
 
 
@@ -341,6 +345,8 @@ get_summary_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt
 }
 
 group_factor <- function(dataset, nas_group){
+  # suppressWarnings() to sidestep this:
+  # Warning messages: Factor `[varname]` contains implicit NA, consider using `forcats::fct_explicit_na`
   grouping_vars <- dplyr::group_vars(dataset)
   if(length(grouping_vars) > 1){ #if there are 2+ grouping vars
     dataset <- group2_factors(dataset, grouping_vars, nas_group)
@@ -349,6 +355,7 @@ group_factor <- function(dataset, nas_group){
   } else{ # no grouping vars
     dataset <- dataset
   }
+  return(dataset)
 }
 
 group2_factors <- function(dataset, grouping_vars, nas_group) {
@@ -373,6 +380,7 @@ group2_factors <- function(dataset, grouping_vars, nas_group) {
       !!group_flag,
       !!group_flag2
     )
+  return(dataset)
 }
 
 group1_factor <- function(dataset, grouping_vars, nas_group){
@@ -394,6 +402,7 @@ group1_factor <- function(dataset, grouping_vars, nas_group){
     dplyr::group_by(
       !!group_flag
     )
+  return(dataset)
 }
 
 group_rename <- function(dataset){
@@ -412,6 +421,7 @@ group_rename <- function(dataset){
   } else{
     dataset <- dataset
   }
+  return(dataset)
 }
 
 freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {

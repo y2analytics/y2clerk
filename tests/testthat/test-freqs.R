@@ -62,8 +62,8 @@ test_that("nas - label", {
 test_that("nas - group", {
   df <- data.frame(
     a = c(1, 2, 2, 3, 4, 2, NA),
-    group = c(1, 1, 2, 2, 3, NA, 2)
-  ) %>% dplyr::group_by(group)
+    g = c(1, 1, 2, 2, 3, NA, 2)
+  ) %>% dplyr::group_by(g)
 
   yes_nas <- freq(df, a)
   no_nas <- freqs(df, a, nas_group = F)
