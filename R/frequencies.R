@@ -22,7 +22,6 @@
 #' )
 #'
 #' freqs(df, a, b)
-#' freqs(df, a, b, nas = FALSE)
 #' freqs(df, a, b, wt = weights)
 #' freq(df, stat = 'mean', nas = F)
 #' freq(df, stat = 'mean', nas = F, wt = weights)
@@ -33,11 +32,11 @@
 #' freqs(df, a, stat = 'min', nas = F)
 #' freqs(df, a, stat = 'median', nas = F)
 #' freqs(df, a, stat = 'quantile', pr = 95, nas = F)
-#' freqs(df, a, stat = 'max', nas = F, wt = weights)
 #' freqs(df, a, stat = 'summary', nas = F, wt = weights)
 #' @export
 
 freqs <- freq <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+
   weight = dplyr::enquo(wt)
   variables = dplyr::quos(...)
 
@@ -53,7 +52,7 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE,
     purrr::map_dfr(
       .x = variables,
       .f = function(variable) {
-        freqvar(dataset, !!variable, stat, pr, nas, !!weight, prompt, digits)
+        freq_var(dataset, !!variable, stat, pr, nas, !!weight, prompt, digits)
       }
     )
   )
@@ -346,7 +345,7 @@ column_quos <- function(dataset) {
   return(col_quos)
 }
 
-freqvar <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
   variable <- dplyr::enquo(variable)
   wt <- dplyr::enquo(wt)
 
@@ -356,19 +355,19 @@ freqvar <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, wt
 
   if(stat == 'percent') {
     base <- ns(dataset, variable, wt, prompt)
-    freqresult <- base %>%
+    freq_result <- base %>%
       percents(nas, digits = digits)
   }
 
   else if(stat %in% c('mean', 'quantile', 'min', 'median', 'max')) {
-    freqresult <- get_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
+    freq_result <- get_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
   }
 
   else if(stat == 'summary') {
-    freqresult <- get_summary_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
+    freq_result <- get_summary_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
   }
 
-  return(freqresult)
+  return(freq_result)
 }
 
 ns <- function(dataset, variable, weight, prompt) {
