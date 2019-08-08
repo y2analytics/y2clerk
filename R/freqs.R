@@ -1,4 +1,3 @@
-
 ##### Public functions #####
 
 #' Run frequencies for multiple variables.
@@ -12,6 +11,7 @@
 #' @param wt The unquoted name of a weighting variable in the dataframe (default: NULL).
 #' @param prompt Boolean, whether or not to include the prompt in the dataframe (default: F).
 #' @param digits Integer, number of significant digits for rounding (default: 2).
+#' @param nas_group Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: T).
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations.
 #' @examples
@@ -35,30 +35,33 @@
 #' freqs(df, a, stat = 'summary', nas = F, wt = weights)
 #' @export
 
-freqs <- freq <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
-
+freqs <- freq <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE, wt = NULL, prompt = F, digits = 2, nas_group = TRUE) {
+  dataset <- group_factor(dataset, nas_group)
   weight = dplyr::enquo(wt)
   variables = dplyr::quos(...)
 
   # If no variables are specified in the function call,
   # assume the user wants to run a frequency on all columns.
   if(!length(variables)) {
-    variables <- column_quos(dataset)
+    variables <- column_quos(dataset, !!weight)
   }
 
   # suppressWarnings added for trivial bind rows warning
   # i used messages instead of warnings to still communicate my own conditional output
   suppressWarnings(
-    purrr::map_dfr(
+    frequencies <- purrr::map_dfr(
       .x = variables,
       .f = function(variable) {
         freq_var(dataset, !!variable, stat, pr, nas, !!weight, prompt, digits)
       }
     )
   )
+  frequencies <- group_rename(frequencies)
+  return(frequencies)
 }
 
-##### Private functions #####
+
+# Private functions -------------------------------------------------------
 
 calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
 
@@ -333,16 +336,78 @@ get_summary_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt
   return(out)
 }
 
-column_quos <- function(dataset) {
-  col_names <- dataset %>% colnames()
-  if(dplyr::is.grouped_df(dataset)) {
-    # Exclude grouping variables since they cannot be counted independent of groups.
-    grouping_vars <- dplyr::group_vars(dataset)
-    col_names <- base::setdiff(col_names, grouping_vars)
+group_factor <- function(dataset, nas_group){
+  grouping_vars <- dplyr::group_vars(dataset)
+  if(length(grouping_vars) > 1){ #if there are 2+ grouping vars
+    dataset <- group2_factors(dataset, grouping_vars, nas_group)
+  } else if(length(grouping_vars) == 1){ #1 grouping var
+    dataset <- group1_factor(dataset, grouping_vars, nas_group)
+  } else{ # no grouping vars
+    dataset <- dataset
   }
-  col_syms <- col_names %>% dplyr::syms()
-  col_quos <- purrr::map(col_syms, dplyr::quo)
-  return(col_quos)
+}
+
+group2_factors <- function(dataset, grouping_vars, nas_group) {
+  group_flag <- dplyr::group_vars(dataset)[1] %>% as.symbol()
+  group_flag2 <- dplyr::group_vars(dataset)[2] %>% as.symbol()
+  if(nas_group == FALSE){
+    dataset <- dataset %>%
+      dplyr::filter(
+        !is.na(!!group_flag),
+        !is.na(!!group_flag2)
+      )
+  }
+  dataset <- dataset %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate_at(
+      dplyr::vars(
+        grouping_vars
+      ),
+      list(~forcats::as_factor(.))
+    ) %>%
+    dplyr::group_by(
+      !!group_flag,
+      !!group_flag2
+    )
+}
+
+group1_factor <- function(dataset, grouping_vars, nas_group){
+  group_flag <- dplyr::group_vars(dataset)[1] %>% as.symbol()
+  if(nas_group == FALSE){
+    dataset <- dataset %>%
+      dplyr::filter(
+        !is.na(!!group_flag)
+      )
+  }
+  dataset <- dataset %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate_at(
+      dplyr::vars(
+        grouping_vars
+      ),
+      list(~forcats::as_factor(.))
+    ) %>%
+    dplyr::group_by(
+      !!group_flag
+    )
+}
+
+group_rename <- function(dataset){
+  if(names(dataset)[1] != 'variable'){
+    if(names(dataset)[2] != 'variable'){ #if there are 2 grouping vars
+      dataset <- dataset %>%
+        dplyr::rename(
+          group_var = names(dataset)[1],
+          group_var2 = names(dataset)[2]
+        )
+    }else{ #if there is 1 grouping var
+      dataset <- dataset %>%
+        dplyr::rename(group_var = names(dataset)[1])
+    }
+    #NOT GROUPED
+  } else{
+    dataset <- dataset
+  }
 }
 
 freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
@@ -368,6 +433,23 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
   }
 
   return(freq_result)
+}
+
+column_quos <- function(dataset, wt) {
+  col_names <- dataset %>% colnames()
+  if (dplyr::is.grouped_df(dataset)) {
+    # Exclude grouping variables since they cannot be counted independent of groups.
+    grouping_vars <- dplyr::group_vars(dataset)
+    col_names <- setdiff(col_names, grouping_vars)
+  }
+  # Exclude weighting varaible from freqs in select
+  weight_name <- dplyr::enquo(wt) %>% as.character()
+  weight_name2 <- weight_name[2]
+  col_names <- setdiff(col_names, weight_name2)
+
+  col_syms <- col_names %>% dplyr::syms()
+  col_quos <- purrr::map(col_syms, dplyr::quo)
+  return(col_quos)
 }
 
 ns <- function(dataset, variable, weight, prompt) {
@@ -456,3 +538,4 @@ base_ns <- function(dataset, variable, weight) {
       variable = dplyr::quo_name(variable)
     )
 }
+

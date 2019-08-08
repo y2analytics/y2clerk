@@ -5,7 +5,7 @@
 \title{Run frequencies for multiple variables.}
 \usage{
 freqs(dataset, ..., stat = "percent", pr = NULL, nas = TRUE,
-  wt = NULL, prompt = F, digits = 2)
+  wt = NULL, prompt = F, digits = 2, nas_group = TRUE)
 }
 \arguments{
 \item{dataset}{A dataframe.}
@@ -24,6 +24,8 @@ is specified, the function runs a frequency on every column in given dataset.}
 \item{prompt}{Boolean, whether or not to include the prompt in the dataframe (default: F).}
 
 \item{digits}{Integer, number of significant digits for rounding (default: 2).}
+
+\item{nas_group}{Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: T).}
 }
 \value{
 A dataframe with the variable names, prompts, values, labels, counts,

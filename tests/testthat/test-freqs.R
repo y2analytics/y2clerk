@@ -107,3 +107,4 @@ test_that("freqs function: expected weighted input", {
 # labelled column freq
 # numeric column freq
 # factor column freq
+

@@ -2,9 +2,9 @@
 
 # setup -------------------------------------------------------------------
 
-rm(list = ls())
+# rm(list = ls())
 
-library(y2clerk)
+# library(y2clerk)
 library(tidyverse)
 library(labelled)
 library(testthat)
@@ -85,7 +85,7 @@ test_that("bad input throws error", {
   expect_error(
     responses %>%
       select(q0) %>%
-      y2clerk::freqs_(stat = "perc")
+      y2clerk::freqs(stat = "perc")
   )
 })
 
@@ -96,7 +96,7 @@ context("numeric variables")
 test_that("NAs not present, nas = T: n & result are correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      y2clerk::freqs_(stat = "quantile", pr = 95) %>%
+                      freqs(stat = "quantile", pr = 95) %>%
                       select(result) %>%
                       pull(),
 
@@ -105,7 +105,7 @@ test_that("NAs not present, nas = T: n & result are correct", {
 
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs_(stat = "mean", nas = T) %>%
+                      freqs(stat = "mean", nas = T) %>%
                       select(n) %>%
                       pull(),
 
@@ -116,7 +116,7 @@ test_that("NAs not present, nas = T: n & result are correct", {
 test_that("NAs not present, nas = F: n & result are correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs_(stat = "quantile", nas = F, pr = 50) %>%
+                      freqs(stat = "quantile", nas = F, pr = 50) %>%
                       select(result) %>%
                       pull(),
 
@@ -124,7 +124,7 @@ test_that("NAs not present, nas = F: n & result are correct", {
   )
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs_(stat = "quantile", nas = F, pr = 50) %>%
+                      freqs(stat = "quantile", nas = F, pr = 50) %>%
                       select(n) %>%
                       pull(),
 
@@ -136,14 +136,14 @@ test_that("NAs present, nas = T: throws error", {
   expect_error(
     responses %>%
       select(q1) %>%
-      freqs_(stat = "quantile", pr = 95)
+      freqs(stat = "quantile", pr = 95)
   )
 })
 
 test_that("NAs present, nas = F: n & result are correct", {
   expect_equal(responses %>%
                  select(q1) %>%
-                 freqs_(stat = "quantile", nas = F, pr = 95) %>%
+                 freqs(stat = "quantile", nas = F, pr = 95) %>%
                  select(result) %>%
                  pull(),
 
@@ -151,7 +151,7 @@ test_that("NAs present, nas = F: n & result are correct", {
   )
   expect_equivalent(responses %>%
                       select(q1) %>%
-                      freqs_(stat = "quantile", nas = F, pr = 95) %>%
+                      freqs(stat = "quantile", nas = F, pr = 95) %>%
                       select(n) %>%
                       pull(),
 
@@ -167,7 +167,7 @@ test_that("factor variable input: throws error", {
   expect_error(
     responses %>%
       select(q2) %>%
-      freqs_(stat = 'quantile')
+      freqs(stat = 'quantile')
   )
 })
 
@@ -179,7 +179,7 @@ test_that("character variable input: throws error", {
   expect_error(
     responses %>%
       select(q3) %>%
-      freqs_(stat = 'quantile')
+      freqs(stat = 'quantile')
   )
 })
 
@@ -191,7 +191,7 @@ test_that("column with value labels input: throws error", {
   expect_error(
     responses %>%
       select(q4) %>%
-      freqs_(stat = 'quantile')
+      freqs(stat = 'quantile')
   )
 })
 
@@ -201,7 +201,7 @@ test_that("column with value labels input: (potentially misleading) result is co
     responses %>%
       mutate(q4 = as.numeric(q4)) %>%
       select(q4) %>%
-      freqs_(stat = 'quantile', pr = 95) %>%
+      freqs(stat = 'quantile', pr = 95) %>%
       select(result) %>%
       pull(),
     quantile(as.numeric(responses$q4), 0.95)
@@ -213,7 +213,7 @@ test_that("column with value labels input: answer is correct after labels remove
     responses %>%
       select(q4) %>%
       remove_labels() %>%
-      freqs_(stat = 'quantile', pr = 95) %>%
+      freqs(stat = 'quantile', pr = 95) %>%
       select(result) %>%
       pull(),
     quantile(as.numeric(responses$q4), 0.95)
@@ -228,7 +228,7 @@ test_that("using weights: equivalent to wtd.quantile() output", {
   expect_equal(
     responses %>%
       select(q1, w) %>%
-      freqs_(stat = 'quantile', nas = F, wt = w, pr = 95) %>%
+      freqs(stat = 'quantile', nas = F, wt = w, pr = 95) %>%
       select(result) %>%
       pull(),
 
@@ -249,7 +249,7 @@ test_that("using prompt: variable label is correctly output", {
   expect_equal(
     responses %>%
       select(q1) %>%
-      freqs_(stat = 'quantile', nas = F, prompt = T, pr = 0.95) %>%
+      freqs(stat = 'quantile', nas = F, prompt = T, pr = 0.95) %>%
       select(prompt) %>%
       pull(),
 
@@ -269,7 +269,7 @@ test_that("using digits: output is precise to multiple decimal places", {
   expect_equal(
     responses %>%
       select(w) %>%
-      freqs_(stat = 'quantile', pr = 95, digits = 6, nas = F) %>%
+      freqs(stat = 'quantile', pr = 95, digits = 6, nas = F) %>%
       select(result) %>%
       pull(),
 
@@ -289,7 +289,7 @@ context("minimums and maximums")
 test_that("output from 'pr = 0' is equivalent to base::min()", {
   expect_equal(
     responses %>%
-      freqs_(q0, stat = 'quantile', pr = 0) %>%
+      freqs(q0, stat = 'quantile', pr = 0) %>%
       select(result) %>%
       pull(),
 
@@ -300,7 +300,7 @@ test_that("output from 'pr = 0' is equivalent to base::min()", {
 test_that("output from 'pr = 0' is equivalent to base::min() when weights are provided", {
   expect_equal(
     responses %>%
-      freqs_(q0, stat = 'quantile', pr = 0, wt = w) %>%
+      freqs(q0, stat = 'quantile', pr = 0, wt = w) %>%
       select(result) %>%
       pull(),
 
@@ -311,7 +311,7 @@ test_that("output from 'pr = 0' is equivalent to base::min() when weights are pr
 test_that("output from 'pr = 100' is equivalent to base::max()", {
   expect_equal(
     responses %>%
-      freqs_(q0, stat = 'quantile', pr = 100) %>%
+      freqs(q0, stat = 'quantile', pr = 100) %>%
       select(result) %>%
       pull(),
 
@@ -322,7 +322,7 @@ test_that("output from 'pr = 100' is equivalent to base::max()", {
 test_that("output from 'pr = 100' is equivalent to base::max() when weights are provided", {
   expect_equal(
     responses %>%
-      freqs_(q0, stat = 'quantile', pr = 100, wt = w) %>%
+      freqs(q0, stat = 'quantile', pr = 100, wt = w) %>%
       select(result) %>%
       pull(),
 
@@ -341,21 +341,21 @@ context("stat = summary")
 test_that("there are 6 lines of output (min, 1st quartile, median, mean, 3rd quartile, max)", {
   expect_equal(
     responses %>%
-      freqs_(q0, stat = 'summary') %>%
+      freqs(q0, stat = 'summary') %>%
       nrow(),
     6
   )
 
   expect_equal(
     responses %>%
-      freqs_(q1, stat = 'summary', nas = F) %>%
+      freqs(q1, stat = 'summary', nas = F) %>%
       nrow(),
     6
   )
 
   expect_equal(
     responses %>%
-      freqs_(q1, stat = 'summary',
+      freqs(q1, stat = 'summary',
             nas = F, wt = w) %>%
       nrow(),
     6
@@ -365,10 +365,10 @@ test_that("there are 6 lines of output (min, 1st quartile, median, mean, 3rd qua
 test_that("setting a pr value when stat = 'summary' does not affect output", {
   expect_equal(
     responses %>%
-      freqs_(q0, stat = 'summary',
+      freqs(q0, stat = 'summary',
             pr = 0),
     responses %>%
-      freqs_(q0, stat = 'summary')
+      freqs(q0, stat = 'summary')
   )
 })
 
@@ -376,7 +376,7 @@ test_that("stat = 'summary' gives message when pr value is provided", {
   expect_message(
     responses %>%
       select(q0,q1,w) %>%
-      freqs_(pr = 75,
+      freqs(pr = 75,
             stat = 'summary',
             wt = w,
             nas = F)
