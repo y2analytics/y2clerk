@@ -84,7 +84,7 @@ context("numeric variables")
 test_that("NAs not present, nas = T: n & result are correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      y2clerk::freqs_(stat = "mean") %>%
+                      y2clerk::freqs(stat = "mean") %>%
                       select(result) %>%
                       pull(),
 
@@ -93,7 +93,7 @@ test_that("NAs not present, nas = T: n & result are correct", {
 
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs_(stat = "mean", nas = T) %>%
+                      freqs(stat = "mean", nas = T) %>%
                       select(n) %>%
                       pull(),
 
@@ -104,7 +104,7 @@ test_that("NAs not present, nas = T: n & result are correct", {
 test_that("NAs not present, nas = F: n & result are correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs_(stat = "mean", nas = F) %>%
+                      freqs(stat = "mean", nas = F) %>%
                       select(result) %>%
                       pull(),
 
@@ -112,7 +112,7 @@ test_that("NAs not present, nas = F: n & result are correct", {
   )
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs_(stat = "mean", nas = F) %>%
+                      freqs(stat = "mean", nas = F) %>%
                       select(n) %>%
                       pull(),
 
@@ -123,14 +123,14 @@ test_that("NAs not present, nas = F: n & result are correct", {
 test_that("NAs present, nas = T: throws error", {
   expect_error(responses %>%
                  select(q1) %>%
-                 freqs_(stat = "mean")
+                 freqs(stat = "mean")
   )
 })
 
 test_that("NAs present, nas = F: n & result are correct", {
   expect_equal(responses %>%
                  select(q1) %>%
-                 freqs_(stat = "mean", nas = F) %>%
+                 freqs(stat = "mean", nas = F) %>%
                  select(result) %>%
                  pull(),
 
@@ -138,7 +138,7 @@ test_that("NAs present, nas = F: n & result are correct", {
   )
   expect_equivalent(responses %>%
                       select(q1) %>%
-                      freqs_(stat = "mean", nas = F) %>%
+                      freqs(stat = "mean", nas = F) %>%
                       select(n) %>%
                       pull(),
 
@@ -154,7 +154,7 @@ test_that("factor variable input: throws error", {
   expect_error(
     responses %>%
       select(q2) %>%
-      freqs_(stat = 'mean')
+      freqs(stat = 'mean')
   )
 })
 
@@ -166,7 +166,7 @@ test_that("character variable input: throws error", {
   expect_error(
     responses %>%
       select(q3) %>%
-      freqs_(stat = 'mean')
+      freqs(stat = 'mean')
   )
 })
 
@@ -178,7 +178,7 @@ test_that("column with value labels input: throws error", {
   expect_error(
     responses %>%
       select(q4) %>%
-      freqs_(stat = 'mean')
+      freqs(stat = 'mean')
   )
 })
 
@@ -188,7 +188,7 @@ test_that("column with value labels input: (potentially misleading) result is co
     responses %>%
       mutate(q4 = as.numeric(q4)) %>%
       select(q4) %>%
-      freqs_(stat = 'mean') %>%
+      freqs(stat = 'mean') %>%
       select(result) %>%
       pull(),
     mean(responses$q4)
@@ -200,7 +200,7 @@ test_that("column with value labels input: answer is correct after labels remove
     responses %>%
       select(q4) %>%
       remove_labels() %>%
-      freqs_(stat = 'mean') %>%
+      freqs(stat = 'mean') %>%
       select(result) %>%
       pull(),
     mean(responses$q4)
@@ -215,7 +215,7 @@ test_that("using weights: equivalent to weighted.mean() output", {
   expect_equal(
     responses %>%
       select(q1, w) %>%
-      freqs_(stat = 'mean', nas = F, wt = w) %>%
+      freqs(stat = 'mean', nas = F, wt = w) %>%
       select(result) %>%
       pull(),
 
@@ -234,7 +234,7 @@ test_that("using prompt: variable label is correctly output", {
   expect_equal(
     responses %>%
       select(q1) %>%
-      freqs_(stat = 'mean', nas = F, prompt = T) %>%
+      freqs(stat = 'mean', nas = F, prompt = T) %>%
       select(prompt) %>%
       pull(),
 
@@ -254,7 +254,7 @@ test_that("using digits: output is precise to multiple decimal places", {
   expect_equal(
     responses %>%
       select(w) %>%
-      freqs_(stat = 'mean', digits = 6, nas = F) %>%
+      freqs(stat = 'mean', digits = 6, nas = F) %>%
       select(result) %>%
       pull(),
 
@@ -271,7 +271,7 @@ context("validation")
 test_that("stat other than 'quantile' gives message when pr value is provided", {
   expect_message(
     responses %>%
-      freqs_(q1,
+      freqs(q1,
             pr = 75,
             stat = 'mean',
             nas = F)
@@ -281,7 +281,7 @@ test_that("stat other than 'quantile' gives message when pr value is provided", 
 test_that("stat argument only accepts percent, mean, quantile, or summary", {
   expect_error(
     responses %>%
-      freqs_(q1,
+      freqs(q1,
             stat = 'means',
             pr = 75,
             nas = F)
@@ -291,7 +291,7 @@ test_that("stat argument only accepts percent, mean, quantile, or summary", {
 test_that("function stops when value labels exist", {
   expect_error(
     responses %>%
-      freqs_(q4,
+      freqs(q4,
             stat = 'mean',
             nas = F)
   )
