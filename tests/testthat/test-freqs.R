@@ -1,110 +1,166 @@
+#### freqs ####
 context("Tests on frequencies functions")
 
-### freq tests ------------
 
-# parameter testing
-test_that("freq function: Dataframe/Tibble parameter warning test class character", {
+
+### Incorrect parameter testing
+#dataframes
+test_that("Not a dataframe error - vectors", {
   df <- c('This', 'is', 'not', 'a', 'dataframe')
   a = c(1, 1, 2, 3, 1)
-  expect_error(freq(df, a), "no applicable method for 'pull' applied to an object of class \"character\"")
-  })
-
-test_that("freq function: Dataframe/Tibble parameter warning test class matrix/double/integer", {
+  expect_error(freq(df, a))
+})
+test_that("Not a dataframe error - matrix", {
   column_a <- c(1,1,1,1,2,2,3)
   column_b <- c(0.5, 1.2, 0.8, 0.5, 0.2, 0.1, 1)
   table <- rbind(column_a, column_b)
   expect_error(freq(table, column_a))
 })
-
-test_that("freq function: Variable parameter warning test", {
-  expect_error(freq(mtcars, 10), "`value` = 10 must be a symbol or a string, not a double vector")
+#variables
+test_that("Runs on variables, not integers", {
+  expect_error(freq(mtcars, 10))
 })
-
-test_that("freq function: NA parameter warning test", {
-  expect_error(freq(mtcars, cyl, nas = 'True'), "invalid argument type")
+#nas
+test_that("Incorrect nas argument", {
+  expect_error(freq(mtcars, cyl, nas = 'True'))
 })
-
-test_that("freq function: WT parameter warning test", {
+#weights
+test_that("Incorrect wt argument", {
   expect_error(freq(mtcars, cyl, wt = 'True'))
 })
 
-# expected input freq
-test_that("freq function: expected non-weighted input", {
+
+
+### weights
+test_that("Weights", {
   df <- data.frame(
     a = c(1, 2, 2, 3, 4, 2, NA),
     weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
   )
 
-  freq(df, a)
+  freqs_weighted <- freq(df, a, wt = weights)
+  expect_equal(freqs_weighted$n[1], .9)
 })
 
-# expected weighted freq
-test_that("freq function: expected weighted input", {
+
+
+### nas
+#label
+test_that("nas - label", {
   df <- data.frame(
     a = c(1, 2, 2, 3, 4, 2, NA),
     weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
   )
 
-  freq(df, a, wt = weights)
+  yes_nas <- freq(df, a)
+  no_nas <- freqs(df, a, nas = F)
+
+  expect_equal(nrow(yes_nas), 5)
+  expect_equal(nrow(no_nas), 4)
 })
-
-# character column freq
-# labelled column freq
-# numeric column freq
-# factor column freq
-
-
-### freqs tests ===========
-
-# parameter testing
-test_that("freqs function: Dataframe/Tibble parameter warning test class character", {
-  df <- c('This', 'is', 'not', 'a', 'dataframe')
-  a = c(1, 1, 2, 3, 1)
-  b = c(0, 7, 1, 2, 8)
-  expect_error(freqs(df, a, b), "no applicable method for 'pull' applied to an object of class \"character\"")
-  })
-
-test_that("freqs function: Dataframe/Tibble parameter warning test class matrix/double/integer", {
-  column_a <- c(1,1,1,1,2,2,3)
-  column_b <- c(0.5, 1.2, 0.8, 0.5, 0.2, 0.1, 1)
-  table <- rbind(column_a, column_b)
-  expect_error(freqs(table, column_a, column_b))
-})
-
-test_that("freqs function: Variable parameter warning test", {
-  expect_error(freqs(mtcars, 'Not a column'))
-})
-
-test_that("freqs function: NA parameter warning test", {
-  expect_error(freqs(mtcars, cyl, disp, hp, nas = 'True'), "invalid argument type")
-})
-
-test_that("freqs function: WT parameter warning test", {
-  expect_error(freqs(mtcars, cyl, disp, hp, wt = 'weights'))
-})
-
-# expected input freq
-test_that("freqs function: expected non-weighted input", {
+#group
+test_that("nas - group", {
   df <- data.frame(
     a = c(1, 2, 2, 3, 4, 2, NA),
-    b = c(1, 2, 2, 3, 4, 1, NA),
-    weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
-  )
-  freqs(df, a, b)
+    group = c(1, 1, 2, 2, 3, NA, 2)
+  ) %>% dplyr::group_by(group)
+
+  yes_nas <- freq(df, a)
+  no_nas <- freqs(df, a, nas_group = F)
+
+  expect_equal(nrow(yes_nas), 7)
+  expect_equal(nrow(no_nas), 6)
+  expect_equal(names(yes_nas)[1], 'group_var')
 })
 
-# expected weighted freq
-test_that("freqs function: expected weighted input", {
+
+
+###Digits
+test_that("Digits", {
   df <- data.frame(
-    a = c(1, 2, 2, 3, 4, 2, NA),
-    b = c(1, 2, 2, 3, 4, 1, NA),
-    weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
+    a = c(.1, .2, .3)
   )
-  freqs(df, a, b, wt = weights)
+
+  dig1 <- freq(df, a, digits = 1)
+  dig2 <- freq(df, a)
+  dig3 <- freq(df, a, digits = 3)
+
+  expect_equal(dig1$result[1], .3)
+  expect_equal(dig2$result[1], .33)
+  expect_equal(dig3$result[1], .333)
 })
 
-# character column freq
-# labelled column freq
-# numeric column freq
-# factor column freq
 
+
+###Prompt
+test_that("Prompt", {
+  df <- data.frame(
+    a = c('Yes', 'No', NA)
+  )
+  Hmisc::label(df$a) <- "Does this work?"
+  frequencies <- freqs(df, a, prompt = T)
+  expect_equal(frequencies$prompt[1], 'Does this work?')
+})
+
+
+
+###Differing classes of variables
+#character column freq
+test_that("character vars", {
+  df <- data.frame(
+    a = c('Character', '1', 'test')
+  )
+  frequencies <- freqs(df, a)
+  expect_equal(is.data.frame(frequencies), T)
+})
+#numeric column freq
+test_that("numeric vars", {
+  df <- data.frame(
+    a = c(1, 2, 3)
+  )
+  frequencies <- freqs(df, a)
+  expect_equal(is.data.frame(frequencies), T)
+})
+#factored/labelled column freq
+test_that("factor vars with missing values", {
+  df <- data.frame(
+    a = c(1, 2, 3)
+  )
+  labelled::val_label(df$a, 1) <- 'Yes'
+  labelled::val_label(df$a, 2) <- 'No'
+  labelled::val_label(df$a, 3) <- 'Idk'
+  labelled::val_label(df$a, 4) <- 'Do I show up?'
+  df$a <- forcats::as_factor(df$a)
+
+  frequencies <- freqs(df, a)
+  expect_equal(nrow(frequencies), 4)
+})
+
+###Select function
+#filter groups
+test_that("filter out groups from vars", {
+  df <- data.frame(
+    a = c(1, 1, 3, 4, 5),
+    b = c(1, 1, 1, 2, 2),
+    c = c(2, 3, 4, 5, 6)
+  )
+  frequencies <- df %>%
+    dplyr::select(a, b) %>%
+    dplyr::group_by(b) %>%
+    freqs()
+
+  expect_equal(nrow(frequencies), 4)
+})
+#filter weights
+test_that("filter out weights from vars", {
+  df <- data.frame(
+    a = c(1, 1, 3, 4, 5),
+    b = c(1, 1, 1, 2, 2),
+    c = c(2, 3, 4, 5, 6)
+  )
+  frequencies <- df %>%
+    dplyr::select(a, b) %>%
+    freqs(wt = b)
+
+  expect_equal(nrow(frequencies), 4)
+})
