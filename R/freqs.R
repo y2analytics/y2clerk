@@ -27,8 +27,12 @@
 #' freq(df, stat = 'mean', nas = F, wt = weights)
 #' freq(df %>% group_by(a), b, stat = 'mean', nas = F, wt = weights)
 #'
-#' # note that pr = 60 will return an estimate of the real number such that 60% of values are lower than that number
-#' # note also that minimums and maximums are unaffected by weighting
+#' # * note that pr = 60 will return an estimate
+#' # of the real number such that 60% of values
+#' # are lower than that number
+#'
+#' # * note also that minimums and maximums are
+#' # unaffected by weighting
 #' freqs(df, a, stat = 'min', nas = F)
 #' freqs(df, a, stat = 'median', nas = F)
 #' freqs(df, a, stat = 'quantile', pr = 95, nas = F)
@@ -56,8 +60,8 @@ freqs <- freq <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE,
       }
     )
   )
-  frequencies <- group_rename(frequencies)
-  return(frequencies)
+  suppressWarnings(frequencies <- group_rename(frequencies))
+  suppressWarnings(return(frequencies))
 }
 
 
