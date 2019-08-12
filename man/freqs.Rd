@@ -4,13 +4,9 @@
 \alias{freqs}
 \title{Run frequencies for multiple variables.}
 \usage{
-<<<<<<< HEAD
-freqs(dataset, ..., stat = "percent", nas = TRUE, wt = NULL,
-  prompt = F, digits = 2, nas_group = TRUE)
-=======
+
 freqs(dataset, ..., stat = "percent", pr = NULL, nas = TRUE,
   wt = NULL, prompt = F, digits = 2, nas_group = TRUE)
->>>>>>> b8e4bc250bb267273efb35feaa06d2f0002a307c
 }
 \arguments{
 \item{dataset}{A dataframe.}
