@@ -4,8 +4,9 @@
 \alias{freqs}
 \title{Run frequencies for multiple variables.}
 \usage{
-freqs(dataset, ..., stat = "percent", nas = TRUE, wt = NULL,
-  prompt = F, digits = 2, nas_group = TRUE)
+
+freqs(dataset, ..., stat = "percent", pr = NULL, nas = TRUE,
+  wt = NULL, prompt = F, digits = 2, nas_group = TRUE)
 }
 \arguments{
 \item{dataset}{A dataframe.}
@@ -13,7 +14,9 @@ freqs(dataset, ..., stat = "percent", nas = TRUE, wt = NULL,
 \item{...}{The unquoted names of a set of variables in the dataframe. If nothing
 is specified, the function runs a frequency on every column in given dataset.}
 
-\item{stat}{Character, stat to run. Currently only 'percent' works (default: 'percent').}
+\item{stat}{Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').}
+
+\item{pr}{Double, for use when stat = 'quantile.' Input should be a real number x such that 0 ≤ x ≤ 100. Stands for percentile rank, which is a quantile relative to a 100-point scale.}
 
 \item{nas}{Boolean, whether or not to include NAs in the tabulation (default: T).}
 
@@ -40,6 +43,19 @@ df <- data.frame(
 )
 
 freqs(df, a, b)
-freqs(df, a, b, nas = FALSE)
 freqs(df, a, b, wt = weights)
+freq(df, stat = 'mean', nas = F)
+freq(df, stat = 'mean', nas = F, wt = weights)
+freq(df \%>\% group_by(a), b, stat = 'mean', nas = F, wt = weights)
+
+# * note that pr = 60 will return an estimate
+# of the real number such that 60\% of values
+# are lower than that number
+
+# * note also that minimums and maximums are
+# unaffected by weighting
+freqs(df, a, stat = 'min', nas = F)
+freqs(df, a, stat = 'median', nas = F)
+freqs(df, a, stat = 'quantile', pr = 95, nas = F)
+freqs(df, a, stat = 'summary', nas = F, wt = weights)
 }

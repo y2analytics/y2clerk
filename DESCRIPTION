@@ -1,13 +1,14 @@
 Package: y2clerk
 Type: Package
 Title: Our Resident Tabulation Expert
-Version: 0.2.4.1
+Version: 0.3.0.1
 Authors@R: c(
     person('Scotty','Riding', email = 'scott@y2analytics.com', role = c('cre','aut')), 
     person('Luke', 'Carter', email = 'luke@y2analytics.com', role = 'aut'), 
     person('Kyrene', 'Gibb', email = 'kyrene@y2analytics.com', role = 'aut'), 
     person('Kathryn', 'Riding', email = 'kathryn@y2analytics.com', role = 'aut'),
-    person('Nick', 'Moffitt', email = 'nickmoffitt@y2analytics.com', role = 'aut'))
+    person('Nick', 'Moffitt', email = 'nickmoffitt@y2analytics.com', role = 'aut'),
+    person('Jacob', 'Eliason', email = 'jacob@y2analytics.com', role = 'aut'))
 Description: Frequencies functions to speed up our workflow, freeing up time to wile away before the grave.
 License: file LICENSE
 Encoding: UTF-8
@@ -21,5 +22,5 @@ Imports:
   tidyr,
   forcats,
   reldist
-RoxygenNote: 6.1.1
+RoxygenNote: 6.1.2
 Suggests: testthat
