@@ -19,6 +19,7 @@ Imports:
   stringr,
   testthat,
   tidyr,
-  forcats
+  forcats,
+  reldist
 RoxygenNote: 6.1.1
 Suggests: testthat
