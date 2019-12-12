@@ -12,6 +12,7 @@
 #' @param prompt Boolean, whether or not to include the prompt in the dataframe (default: F).
 #' @param digits Integer, number of significant digits for rounding (default: 2).
 #' @param nas_group Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: T).
+#' @param factor_group Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: F)
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations.
 #' @examples
@@ -39,10 +40,22 @@
 #' freqs(df, a, stat = 'summary', nas = F, wt = weights)
 #' @export
 
-freqs <- freq <- function(dataset, ..., stat = 'percent', pr = NULL, nas = TRUE, wt = NULL, prompt = F, digits = 2, nas_group = TRUE) {
+freqs <- freq <- function(
+  dataset,
+  ...,
+  stat = 'percent',
+  pr = NULL,
+  nas = TRUE,
+  wt = NULL,
+  prompt = F,
+  digits = 2,
+  nas_group = TRUE,
+  factor_group = FALSE
+  ) {
   # options(warn=-1)
 
-  dataset <- group_factor(dataset, nas_group)
+  if(factor_group == TRUE){dataset <- group_factor(dataset)}
+  if(nas_group == FALSE){dataset <- remove_group_nas(dataset)}
   weight = dplyr::enquo(wt)
   variables = dplyr::quos(...)
 
@@ -344,64 +357,65 @@ get_summary_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt
   return(out)
 }
 
-group_factor <- function(dataset, nas_group){
-  # suppressWarnings() to sidestep this:
-  # Warning messages: Factor `[varname]` contains implicit NA, consider using `forcats::fct_explicit_na`
+group_factor <- function(dataset){
   grouping_vars <- dplyr::group_vars(dataset)
   if(length(grouping_vars) > 1){ #if there are 2+ grouping vars
-    dataset <- group2_factors(dataset, grouping_vars, nas_group)
-  } else if(length(grouping_vars) == 1){ #1 grouping var
-    dataset <- group1_factor(dataset, grouping_vars, nas_group)
-  } else{ # no grouping vars
-    dataset <- dataset
-  }
+    group_flag <- dplyr::group_vars(dataset)[1] %>% as.symbol()
+    group_flag2 <- dplyr::group_vars(dataset)[2] %>% as.symbol()
+    dataset <- dataset %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate_at(
+        dplyr::vars(
+          grouping_vars
+        ),
+        list(~forcats::as_factor(.))
+      ) %>%
+      dplyr::group_by(
+        !!group_flag,
+        !!group_flag2
+      )
+    return(dataset)
+    } else if(length(grouping_vars) == 1){ #1 grouping var
+      group_flag <- dplyr::group_vars(dataset)[1] %>% as.symbol()
+      dataset <- dataset %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate_at(
+          dplyr::vars(
+            grouping_vars
+          ),
+          list(~forcats::as_factor(.))
+        ) %>%
+        dplyr::group_by(
+          !!group_flag
+        )
+      return(dataset)
+    } else{ # no grouping vars
+      dataset <- dataset
+    }
   return(dataset)
-}
+  }
 
-group2_factors <- function(dataset, grouping_vars, nas_group) {
-  group_flag <- dplyr::group_vars(dataset)[1] %>% as.symbol()
-  group_flag2 <- dplyr::group_vars(dataset)[2] %>% as.symbol()
-  if(nas_group == FALSE){
+remove_group_nas <- function(dataset){
+  grouping_vars <- dplyr::group_vars(dataset)
+  if(length(grouping_vars) > 1){ #if there are 2+ grouping vars
+    group_flag <- dplyr::group_vars(dataset)[1] %>% as.symbol()
+    group_flag2 <- dplyr::group_vars(dataset)[2] %>% as.symbol()
     dataset <- dataset %>%
       dplyr::filter(
         !is.na(!!group_flag),
         !is.na(!!group_flag2)
       )
-  }
-  dataset <- dataset %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate_at(
-      dplyr::vars(
-        grouping_vars
-      ),
-      list(~forcats::as_factor(.))
-    ) %>%
-    dplyr::group_by(
-      !!group_flag,
-      !!group_flag2
-    )
-  return(dataset)
-}
-
-group1_factor <- function(dataset, grouping_vars, nas_group){
-  group_flag <- dplyr::group_vars(dataset)[1] %>% as.symbol()
-  if(nas_group == FALSE){
+    return(dataset)
+  } else if(length(grouping_vars) == 1){ #1 grouping var
+    group_flag <- dplyr::group_vars(dataset)[1] %>% as.symbol()
     dataset <- dataset %>%
       dplyr::filter(
         !is.na(!!group_flag)
       )
+    return(dataset)
+  } else{ # no grouping vars
+    dataset <- dataset
   }
-  dataset <- dataset %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate_at(
-      dplyr::vars(
-        grouping_vars
-      ),
-      list(~forcats::as_factor(.))
-    ) %>%
-    dplyr::group_by(
-      !!group_flag
-    )
   return(dataset)
 }
 
@@ -457,9 +471,8 @@ column_quos <- function(dataset, wt) {
     col_names <- setdiff(col_names, grouping_vars)
   }
   # Exclude weighting varaible from freqs in select
-  weight_name <- dplyr::enquo(wt) %>% as.character()
-  weight_name2 <- weight_name[2]
-  col_names <- setdiff(col_names, weight_name2)
+  weight_name <- rlang::enquo(wt) %>% rlang::as_label()
+  col_names <- setdiff(col_names, weight_name)
 
   col_syms <- col_names %>% dplyr::syms()
   col_quos <- purrr::map(col_syms, dplyr::quo)

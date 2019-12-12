@@ -65,11 +65,14 @@ test_that("nas - group", {
     g = c(1, 1, 2, 2, 3, NA, 2)
   ) %>% dplyr::group_by(g)
 
-  yes_nas <- freq(df, a)
-  no_nas <- freqs(df, a, nas_group = F)
+  yes_nas <- df %>% dplyr::group_by(g) %>% freqs(a)
+  no_nas <- df %>% dplyr::group_by(g) %>% freqs(a, nas_group = F)
+  group_factors <- df %>% dplyr::group_by(g) %>% freqs(a, factor_group = T)
 
   expect_equal(nrow(yes_nas), 7)
   expect_equal(nrow(no_nas), 6)
+  expect_equal(is.factor(group_factors$group_var), TRUE)
+  expect_equal(is.factor(no_nas$group_var), FALSE)
   expect_equal(names(yes_nas)[1], 'group_var')
 })
 
