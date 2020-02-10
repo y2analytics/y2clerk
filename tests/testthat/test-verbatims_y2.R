@@ -55,12 +55,12 @@ context("verbatims")
 
 ### Runs and creates a DF
 test_that("single string var, no errors", {
-  frequencies <- verbatims_fun(df_labelled, var1)
+  frequencies <- verbatims_y2(df_labelled, var1)
   expect_equal(class(frequencies), c("tbl_df", "tbl", "data.frame"))
 })
 
 test_that("creates a data frame", {
-  frequencies <- verbatims_fun(df_labelled, var1)
+  frequencies <- verbatims_y2(df_labelled, var1)
   expect_error(frequencies, NA)
 })
 
@@ -68,7 +68,7 @@ test_that("creates a data frame", {
 ### No labels
 test_that("variable with no label - give a warning", {
   expect_warning(
-    verbatims_fun(df_nolab, var1),
+    verbatims_y2(df_nolab, var1),
     "You are working with variables that have no labeling. You may want to consider adding a prompt before continuing"
     )
 })
@@ -76,7 +76,7 @@ test_that("variable with no label - give a warning", {
 
 ### Empty and NA strings
 test_that("empty strings ('')", {
-  frequencies <- verbatims_fun(df_empty_strings, var1)
+  frequencies <- verbatims_y2(df_empty_strings, var1)
   length_freqs <- dplyr::count(frequencies) %>% as.numeric()
 
   expect_error(frequencies, NA)
@@ -84,7 +84,7 @@ test_that("empty strings ('')", {
 })
 
 test_that("NA strings", {
-  frequencies <- verbatims_fun(df_na_strings, var1)
+  frequencies <- verbatims_y2(df_na_strings, var1)
   length_freqs <- dplyr::count(frequencies) %>% as.numeric()
 
   expect_error(frequencies, NA)
@@ -94,14 +94,14 @@ test_that("NA strings", {
 
 ### Duplicates and large data frame
 test_that("Duplicates not removed", {
-  frequencies <- verbatims_fun(df_duplicates, var1)
+  frequencies <- verbatims_y2(df_duplicates, var1)
   length_freqs <- dplyr::count(frequencies) %>% as.numeric()
 
   expect_equal(length_freqs, 12)
 })
 
 test_that("Large data frame", {
-  frequencies <- verbatims_fun(df_large, var1)
+  frequencies <- verbatims_y2(df_large, var1)
   length_freqs <- dplyr::count(frequencies) %>% as.numeric()
 
   expect_equal(length_freqs, 100000)
@@ -110,7 +110,7 @@ test_that("Large data frame", {
 
 ### Special symbols
 test_that("Large data frame", {
-  frequencies <- verbatims_fun(df_special, var1)
+  frequencies <- verbatims_y2(df_special, var1)
   length_freqs <- dplyr::count(frequencies) %>% as.numeric()
 
   expect_error(frequencies, NA)

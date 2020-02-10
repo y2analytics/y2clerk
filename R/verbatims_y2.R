@@ -1,4 +1,4 @@
-#### verbatims_fun ####
+#### verbatims_y2 ####
 ### Description
 #' Create a dataframe of open-ended questions formatted for internbot, used to create appendices
 #'
@@ -19,11 +19,11 @@
 #'   )
 #' )
 #'
-#' responses %>% verbatims_fun(var1)
+#' responses %>% verbatims_y2(var1)
 
 
 #### Public function ####
-verbatims_fun <- function(
+verbatims_y2 <- function(
   df,
   ...
 ){
@@ -32,7 +32,7 @@ verbatims_fun <- function(
     frequencies <- purrr::map_dfr(
       .x = freq_flags,
       .f = function(freq_flag) {
-        verbatims_fun_single(df, !!freq_flag)
+        verbatims_y2_single(df, !!freq_flag)
       }
     )
 
@@ -52,7 +52,7 @@ taking_names <- function(dataset = responses) {
                  label = labels)
 }
 
-verbatims_fun_single <- function(
+verbatims_y2_single <- function(
   df,
   freq_var
 ){
