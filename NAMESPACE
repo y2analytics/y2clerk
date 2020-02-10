@@ -1,3 +1,4 @@
 importFrom(dplyr,"%>%")
 export(freqs)
 export(freq)
+export(verbatims_fun)
