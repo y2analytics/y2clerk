@@ -1,4 +1,9 @@
 #### freqs ####
+
+library(testthat)
+library(dplyr)
+library(y2clerk)
+
 context("Tests on frequencies functions")
 
 
@@ -91,18 +96,6 @@ test_that("Digits", {
   expect_equal(dig1$result[1], .3)
   expect_equal(dig2$result[1], .33)
   expect_equal(dig3$result[1], .333)
-})
-
-
-
-###Prompt
-test_that("Prompt", {
-  df <- data.frame(
-    a = c('Yes', 'No', NA)
-  )
-  Hmisc::label(df$a) <- "Does this work?"
-  frequencies <- freqs(df, a, prompt = T)
-  expect_equal(frequencies$prompt[1], 'Does this work?')
 })
 
 

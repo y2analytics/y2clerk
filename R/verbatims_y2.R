@@ -8,7 +8,7 @@
 #' @keywords openend open end frequencies freqs internbot appendix
 #' @export
 #' @examples
-#' responses <- tibble(
+#' responses <- tibble::tibble(
 #'   var1 = c(
 #'     'I like to talk about dogs',
 #'     'Dogs are cool but cats are aight too',
@@ -19,20 +19,26 @@
 #'   )
 #' )
 #'
-#' responses %>% verbatims_y2(var1)
+#' verbatims_y2(responses, var1)
 
 
 #### Public function ####
 verbatims_y2 <- function(
-  df,
+  dataset,
   ...
 ){
   freq_flags <- dplyr::quos(...)
 
+  # If no variables are specified in the function call,
+  # assume the user wants to run a frequency on all columns.
+  if(!length(freq_flags)) {
+    freq_flags <- column_quos_verbatims(dataset)
+  }
+
     frequencies <- purrr::map_dfr(
       .x = freq_flags,
       .f = function(freq_flag) {
-        verbatims_y2_single(df, !!freq_flag)
+        verbatims_y2_single(dataset, !!freq_flag)
       }
     )
 
@@ -48,17 +54,29 @@ verbatims_y2 <- function(
 #### Private functions ####
 taking_names <- function(dataset = responses) {
   labels <- sapply(dataset, function(x) attr(x, "label"))
-  tibble::tibble(name = names(labels),
-                 label = labels)
+  tibble::tibble(
+    name = names(labels),
+    label = labels %>% as.character()
+    )
 }
 
+
+column_quos_verbatims <- function(dataset) {
+  col_names <- dataset %>% colnames()
+  col_syms <- col_names %>% dplyr::syms()
+  col_quos <- purrr::map(col_syms, dplyr::quo)
+  class(col_quos) <- append(class(col_quos),"quosures", after = 0)
+  return(col_quos)
+}
+
+
 verbatims_y2_single <- function(
-  df,
+  dataset,
   freq_var
 ){
   freq_flag <- dplyr::enquo(freq_var)
 
-  var_label_list <- taking_names(df) %>%
+  var_label_list <- taking_names(dataset) %>%
     dplyr::mutate(
       label = as.character(label)
     ) %>%
@@ -74,9 +92,9 @@ verbatims_y2_single <- function(
     ) %>%
     unlist()
 
-  labelled::var_label(df) <- var_label_list
+  labelled::var_label(dataset) <- var_label_list
 
-  freq_df <- df %>%
+  freq_df <- dataset %>%
     dplyr::select(
       !!freq_flag
     ) %>%
@@ -85,7 +103,7 @@ verbatims_y2_single <- function(
       label
     )
 
-  labels <- df %>%
+  labels <- dataset %>%
     dplyr::select(
       !!freq_flag
     ) %>%
@@ -117,3 +135,4 @@ verbatims_y2_single <- function(
     )
 
 }
+

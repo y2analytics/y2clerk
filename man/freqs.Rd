@@ -2,6 +2,7 @@
 % Please edit documentation in R/freqs.R
 \name{freqs}
 \alias{freqs}
+\alias{freq}
 \title{Run frequencies for multiple variables.}
 \usage{
 freqs(
@@ -11,7 +12,20 @@ freqs(
   pr = NULL,
   nas = TRUE,
   wt = NULL,
-  prompt = F,
+  prompt = FALSE,
+  digits = 2,
+  nas_group = TRUE,
+  factor_group = FALSE
+)
+
+freq(
+  dataset,
+  ...,
+  stat = "percent",
+  pr = NULL,
+  nas = TRUE,
+  wt = NULL,
+  prompt = FALSE,
   digits = 2,
   nas_group = TRUE,
   factor_group = FALSE
@@ -20,24 +34,24 @@ freqs(
 \arguments{
 \item{dataset}{A dataframe.}
 
-\item{...}{The unquoted names of a set of variables in the dataframe. If nothing
+\item{...}{The unquoted names of a set of variables in the dataset If nothing
 is specified, the function runs a frequency on every column in given dataset.}
 
 \item{stat}{Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').}
 
-\item{pr}{Double, for use when stat = 'quantile.' Input should be a real number x such that 0 ≤ x ≤ 100. Stands for percentile rank, which is a quantile relative to a 100-point scale.}
+\item{pr}{Double, for use when stat = 'quantile.' Input should be a real number x such that 0 ≤ x ≤ 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)}
 
-\item{nas}{Boolean, whether or not to include NAs in the tabulation (default: T).}
+\item{nas}{Boolean, whether or not to include NAs in the tabulation (default: TRUE).}
 
-\item{wt}{The unquoted name of a weighting variable in the dataframe (default: NULL).}
+\item{wt}{The unquoted name of a weighting variable in the dataset (default: NULL).}
 
-\item{prompt}{Boolean, whether or not to include the prompt in the dataframe (default: F).}
+\item{prompt}{Boolean, whether or not to include the prompt in the dataset (default: FALSE).}
 
 \item{digits}{Integer, number of significant digits for rounding (default: 2).}
 
-\item{nas_group}{Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: T).}
+\item{nas_group}{Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: TRUE).}
 
-\item{factor_group}{Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: F)}
+\item{factor_group}{Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)}
 }
 \value{
 A dataframe with the variable names, prompts, values, labels, counts,
@@ -55,9 +69,11 @@ df <- data.frame(
 
 freqs(df, a, b)
 freqs(df, a, b, wt = weights)
-freq(df, stat = 'mean', nas = F)
-freq(df, stat = 'mean', nas = F, wt = weights)
-freq(df \%>\% group_by(a), b, stat = 'mean', nas = F, wt = weights)
+freq(df, stat = 'mean', nas = FALSE)
+freq(df, stat = 'mean', nas = FALSE, wt = weights)
+\dontrun{
+df \%>\% group_by(a) \%>\% freqs(b, stat = 'mean', nas = FALSE, wt = weights)
+}
 
 # * note that pr = 60 will return an estimate
 # of the real number such that 60\% of values
@@ -65,8 +81,8 @@ freq(df \%>\% group_by(a), b, stat = 'mean', nas = F, wt = weights)
 
 # * note also that minimums and maximums are
 # unaffected by weighting
-freqs(df, a, stat = 'min', nas = F)
-freqs(df, a, stat = 'median', nas = F)
-freqs(df, a, stat = 'quantile', pr = 95, nas = F)
-freqs(df, a, stat = 'summary', nas = F, wt = weights)
+freqs(df, a, stat = 'min', nas = FALSE)
+freqs(df, a, stat = 'median', nas = FALSE)
+freqs(df, a, stat = 'quantile', pr = 95, nas = FALSE)
+freqs(df, a, stat = 'summary', nas = FALSE, wt = weights)
 }

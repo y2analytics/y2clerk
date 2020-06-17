@@ -5,7 +5,7 @@
 rm(list = ls())
 
 library(y2clerk)
-library(tidyverse)
+library(dplyr)
 library(labelled)
 library(testthat)
 
@@ -38,7 +38,7 @@ responses <- {
     w = rnorm(25, mean = 1, sd = 0.1)
 
   ) %>%
-  set_value_labels(
+  labelled::set_value_labels(
     q4 = c(`Less than a year` = 1,
            `1-2 years` = 2,
            `3-4 years` = 3,
@@ -56,7 +56,7 @@ responses <- {
     )
 
   ) %>%
-  set_variable_labels(
+    labelled::set_variable_labels(
     q1 = "% of males involved in agriculture",
     q2 = "Orange tree ID",
     q3 = "Preferred fruit",
@@ -64,8 +64,8 @@ responses <- {
     q5 = "Satisfaction",
     w = "Weights"
   ) %>%
-
-  as_tibble()}
+  dplyr::as_tibble()
+  }
 
 # tests -------------------------------------------------------------------
 
@@ -84,7 +84,7 @@ context("numeric variables")
 test_that("NAs not present, nas = T: n & result are correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      y2clerk::freqs(stat = "mean") %>%
+                      freqs(stat = "mean") %>%
                       select(result) %>%
                       pull(),
 
@@ -241,7 +241,7 @@ test_that("using prompt: variable label is correctly output", {
     responses %>%
       select(q1) %>%
       var_label() %>%
-      deframe()
+      tibble::deframe()
 
   )
 })

@@ -1,4 +1,7 @@
 #### Test data ####
+library(testthat)
+library(y2clerk)
+
 # Unlabelled
 df_nolab <- tibble::tibble(
   var1 = c(
@@ -20,10 +23,13 @@ df_empty_strings <- df_labelled %>%
   dplyr::add_row(
     var1 = c("", "")
   )
+labelled::var_label(df_empty_strings$var1) <- 'My prompt'
+
 df_na_strings <- df_labelled %>%
   dplyr::add_row(
     var1 = c(NA_character_, NA_character_)
   )
+labelled::var_label(df_na_strings$var1) <- 'My prompt'
 
 # Duplicates and large data frames
 df_duplicates <- bind_rows(
@@ -47,6 +53,12 @@ df_special <- tibble::tibble(
 )
 labelled::var_label(df_special$var1) <- 'My prompt'
 
+# Multiple vars
+df_multiple <- df_labelled %>%
+  dplyr::mutate(
+    var2 = var1,
+    var3 = var1
+  )
 
 
 #### Tests ####
@@ -116,3 +128,25 @@ test_that("Large data frame", {
   expect_error(frequencies, NA)
   expect_equal(length_freqs, 3)
 })
+
+
+### Select multiple vars
+test_that("multiple vars", {
+  frequencies <- df_multiple %>% verbatims_y2(var1, var2, var3)
+  length_freqs <- dplyr::count(frequencies) %>% as.numeric()
+
+  expect_error(frequencies, NA)
+  expect_equal(length_freqs, 18)
+})
+
+test_that("pipe vars", {
+  frequencies <- df_multiple %>%
+    dplyr::select(dplyr::starts_with('var')) %>%
+    verbatims_y2()
+  length_freqs <- dplyr::count(frequencies) %>% as.numeric()
+
+  expect_error(frequencies, NA)
+  expect_equal(length_freqs, 18)
+})
+
+

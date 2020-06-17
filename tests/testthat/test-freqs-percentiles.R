@@ -5,9 +5,11 @@
 # rm(list = ls())
 
 # library(y2clerk)
-library(tidyverse)
+library(dplyr)
 library(labelled)
 library(testthat)
+#devtools::install_github('y2analytics/y2clerk', force = T)
+library(y2clerk)
 
 set.seed(100)
 
@@ -85,7 +87,7 @@ test_that("bad input throws error", {
   expect_error(
     responses %>%
       select(q0) %>%
-      y2clerk::freqs(stat = "perc")
+      freqs(stat = "perc")
   )
 })
 
@@ -147,7 +149,7 @@ test_that("NAs present, nas = F: n & result are correct", {
                  select(result) %>%
                  pull(),
 
-               round(quantile(responses$q1, 0.95, na.rm = T), 2) %>% as.numeric()
+               round(quantile(responses$q1, 0.95, na.rm = T), 2)
   )
   expect_equivalent(responses %>%
                       select(q1) %>%
@@ -236,8 +238,7 @@ test_that("using weights: equivalent to wtd.quantile() output", {
                           q = 0.95,
                           weight = responses$w,
                           na.rm = T) %>%
-      round(2) %>%
-      as.numeric()
+      round(2)
   )
 })
 
@@ -256,7 +257,7 @@ test_that("using prompt: variable label is correctly output", {
     responses %>%
       select(q1) %>%
       var_label() %>%
-      deframe()
+      tibble::deframe()
 
   )
 })
@@ -277,8 +278,7 @@ test_that("using digits: output is precise to multiple decimal places", {
       select(w) %>%
       pull() %>%
       quantile(0.95, na.rm = T) %>%
-      round(digits = 6) %>%
-      as.numeric()
+      round(digits = 6)
   )
 })
 
@@ -291,7 +291,7 @@ test_that("output from 'pr = 0' is equivalent to base::min()", {
     responses %>%
       freqs(q0, stat = 'quantile', pr = 0) %>%
       select(result) %>%
-      pull(),
+      pull() %>% as.numeric(),
 
     min(responses$q0)
   )
@@ -302,7 +302,7 @@ test_that("output from 'pr = 0' is equivalent to base::min() when weights are pr
     responses %>%
       freqs(q0, stat = 'quantile', pr = 0, wt = w) %>%
       select(result) %>%
-      pull(),
+      pull() %>% as.numeric(),
 
     min(responses$q0)
   )
@@ -313,7 +313,7 @@ test_that("output from 'pr = 100' is equivalent to base::max()", {
     responses %>%
       freqs(q0, stat = 'quantile', pr = 100) %>%
       select(result) %>%
-      pull(),
+      pull() %>% as.numeric(),
 
     max(responses$q0)
   )
@@ -324,7 +324,7 @@ test_that("output from 'pr = 100' is equivalent to base::max() when weights are 
     responses %>%
       freqs(q0, stat = 'quantile', pr = 100, wt = w) %>%
       select(result) %>%
-      pull(),
+      pull() %>% as.numeric(),
 
     max(responses$q0)
   )

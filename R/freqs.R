@@ -3,18 +3,19 @@
 #' Run frequencies for multiple variables.
 #'
 #' @param dataset A dataframe.
-#' @param ... The unquoted names of a set of variables in the dataframe. If nothing
+#' @param ... The unquoted names of a set of variables in the dataset. If nothing
 #' is specified, the function runs a frequency on every column in given dataset.
 #' @param stat Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').
-#' @param pr Double, for use when stat = 'quantile.' Input should be a real number x such that 0 ≤ x ≤ 100. Stands for percentile rank, which is a quantile relative to a 100-point scale.
-#' @param nas Boolean, whether or not to include NAs in the tabulation (default: T).
-#' @param wt The unquoted name of a weighting variable in the dataframe (default: NULL).
-#' @param prompt Boolean, whether or not to include the prompt in the dataframe (default: F).
+#' @param pr Double, for use when stat = 'quantile.' Input should be a real number x such that 0 ≤ x ≤ 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)
+#' @param nas Boolean, whether or not to include NAs in the tabulation (default: TRUE).
+#' @param wt The unquoted name of a weighting variable in the dataset (default: NULL).
+#' @param prompt Boolean, whether or not to include the prompt in the dataset (default: FALSE).
 #' @param digits Integer, number of significant digits for rounding (default: 2).
-#' @param nas_group Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: T).
-#' @param factor_group Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: F)
+#' @param nas_group Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: TRUE).
+#' @param factor_group Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations.
+#' @importFrom dplyr "%>%"
 #' @examples
 #' df <- data.frame(
 #'   a = c(1, 2, 2, 3, 4, 2, NA),
@@ -24,9 +25,11 @@
 #'
 #' freqs(df, a, b)
 #' freqs(df, a, b, wt = weights)
-#' freq(df, stat = 'mean', nas = F)
-#' freq(df, stat = 'mean', nas = F, wt = weights)
-#' freq(df %>% group_by(a), b, stat = 'mean', nas = F, wt = weights)
+#' freq(df, stat = 'mean', nas = FALSE)
+#' freq(df, stat = 'mean', nas = FALSE, wt = weights)
+#' \dontrun{
+#' df %>% group_by(a) %>% freqs(b, stat = 'mean', nas = FALSE, wt = weights)
+#' }
 #'
 #' # * note that pr = 60 will return an estimate
 #' # of the real number such that 60% of values
@@ -34,20 +37,20 @@
 #'
 #' # * note also that minimums and maximums are
 #' # unaffected by weighting
-#' freqs(df, a, stat = 'min', nas = F)
-#' freqs(df, a, stat = 'median', nas = F)
-#' freqs(df, a, stat = 'quantile', pr = 95, nas = F)
-#' freqs(df, a, stat = 'summary', nas = F, wt = weights)
+#' freqs(df, a, stat = 'min', nas = FALSE)
+#' freqs(df, a, stat = 'median', nas = FALSE)
+#' freqs(df, a, stat = 'quantile', pr = 95, nas = FALSE)
+#' freqs(df, a, stat = 'summary', nas = FALSE, wt = weights)
 #' @export
 
-freqs <- freq <- function(
+freqs  <- function(
   dataset,
   ...,
   stat = 'percent',
   pr = NULL,
   nas = TRUE,
   wt = NULL,
-  prompt = F,
+  prompt = FALSE,
   digits = 2,
   nas_group = TRUE,
   factor_group = FALSE
@@ -56,13 +59,13 @@ freqs <- freq <- function(
 
   if(factor_group == TRUE){dataset <- group_factor(dataset)}
   if(nas_group == FALSE){dataset <- remove_group_nas(dataset)}
-  weight = dplyr::enquo(wt)
-  variables = dplyr::quos(...)
+  weight <- dplyr::enquo(wt)
+  variables <- dplyr::quos(...)
 
   # If no variables are specified in the function call,
   # assume the user wants to run a frequency on all columns.
   if(!length(variables)) {
-    variables <- column_quos(dataset, !!weight)
+    variables <- column_quos(dataset, wt = !!weight)
   }
 
   # suppressWarnings added for trivial bind rows warning
@@ -81,6 +84,9 @@ freqs <- freq <- function(
   # options(warn=0)
 }
 
+#' @rdname freqs
+#' @export
+freq <- freqs
 
 # Private functions -------------------------------------------------------
 
@@ -99,7 +105,7 @@ calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
     if(rlang::quo_is_null(wt)) {
       out_df <- dataset %>%
         # always filter nas because the function previously checked
-        # to ensure nas = F is set if necessary
+        # to ensure nas = FALSE is set if necessary
         dplyr::filter(!is.na(!!variable)) %>%
         dplyr::summarise(n = base::length(!!variable),
                          result = base::mean(!!variable)
@@ -128,14 +134,14 @@ calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
 
     if(stat %in% c('min', 'max')) {
       # mins and maxes are never weighted, per our decision
-      wt <- quo(NULL)
+      wt <- dplyr::quo(NULL)
     }
 
     # 1) wt = NULL
     if(rlang::quo_is_null(wt)) {
       out_df <- dataset %>%
         # always filter nas because the function previously checked
-        # to ensure nas = F is set if necessary
+        # to ensure nas = FALSE is set if necessary
         dplyr::filter(!is.na(!!variable)) %>%
         dplyr::summarise(n = base::length(!!variable),
                          result = stats::quantile(x = !!variable,
@@ -172,7 +178,7 @@ validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits
     if(pr < 1) rlang::inform('Remember that pr ranges between 0 and 100. pr = 0.5 returns the bottom half percentile, whereas pr = 50 returns the median.')
   }
 
-  # 1) if there are NAs in the data, you should use nas = F
+  # 1) if there are NAs in the data, you should use nas = FALSE
   if(nas) {
     count_nas <- dataset %>%
       dplyr::filter(is.na(!!variable)) %>%
@@ -259,7 +265,7 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
                     statistic == 'median' ~ 'median',
                     statistic == 'max' ~ 'max',
                     statistic == 'quantile' &
-                      !(pr %in% c(0,50,100)) ~ str_c('q', pr),
+                      !(pr %in% c(0,50,100)) ~ stringr::str_c('q', pr),
                     statistic == 'quantile' & pr == 0 ~ 'min',
                     statistic == 'quantile' & pr == 50 ~ 'median',
                     statistic == 'quantile' & pr == 100 ~ 'max',
@@ -292,7 +298,7 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
       labelled::var_label() %>%
       tibble::deframe()
 
-    # when prompt = T but there is no variable label, output ""
+    # when prompt = TRUE but there is no variable label, output ""
     if(is.null(prompt_text)) {
       prompt_text <- ""
     }
@@ -332,7 +338,7 @@ get_summary_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt
   # [for other cases, this reminder is also present in validate_inputs()]
   if(!is.null(pr)) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
 
-  out <- bind_rows(
+  out <- dplyr::bind_rows(
     get_output_for_cont_var(dataset, variable, stat = 'min', pr,            nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 25,  nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'median', pr,         nas, wt, prompt, digits),
@@ -340,7 +346,7 @@ get_summary_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt
     get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 75,  nas, wt, prompt, digits),
     get_output_for_cont_var(dataset, variable, stat = 'max', pr,            nas, wt, prompt, digits)
   ) %>%
-    mutate(stat = forcats::fct_relevel(stat,
+    dplyr::mutate(stat = forcats::fct_relevel(stat,
                                        c('min',
                                          'q25',
                                          'q25 - weighted',
@@ -438,7 +444,7 @@ group_rename <- function(dataset){
   return(dataset)
 }
 
-freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = F, digits = 2) {
+freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = FALSE, digits = 2) {
   variable <- dplyr::enquo(variable)
   wt <- dplyr::enquo(wt)
 
@@ -470,12 +476,13 @@ column_quos <- function(dataset, wt) {
     grouping_vars <- dplyr::group_vars(dataset)
     col_names <- setdiff(col_names, grouping_vars)
   }
-  # Exclude weighting varaible from freqs in select
+  # Exclude weighting variable from freqs in select
   weight_name <- rlang::enquo(wt) %>% rlang::as_label()
   col_names <- setdiff(col_names, weight_name)
 
   col_syms <- col_names %>% dplyr::syms()
   col_quos <- purrr::map(col_syms, dplyr::quo)
+  class(col_quos) <- append(class(col_quos),"quosures", after = 0)
   return(col_quos)
 }
 
@@ -559,7 +566,7 @@ unlabelled_ns <- function(dataset, variable, weight, prompt) {
 base_ns <- function(dataset, variable, weight) {
   dataset %>%
     # When wt is NULL, it runs unweighted counts
-    dplyr::count(!!variable, wt = !!weight, .drop = F) %>%
+    dplyr::count(!!variable, wt = !!weight, .drop = FALSE) %>%
     dplyr::rename(value = !!variable) %>%
     dplyr::mutate(
       variable = dplyr::quo_name(variable)
