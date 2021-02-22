@@ -17,26 +17,46 @@ responses <- {
   data.frame(
 
     # continuous numeric, no variable label, no NA
-    q0 = sample(x = datasets::swiss$Agriculture, size = 25, replace = T),
+    q0 = sample(
+      x = datasets::swiss$Agriculture,
+      size = 25,
+      replace = TRUE),
 
     # continuous numeric, variable label, incl. NA
-    q1 = sample(x = c(datasets::swiss$Agriculture, NA), size = 25, prob = c(rep(.8/47,47), 0.2), replace = T),
+    q1 = sample(
+      x = c(datasets::swiss$Agriculture, NA),
+      size = 25,
+      prob = c(rep(.8/47,47), 0.2),
+      replace = TRUE),
 
     # factor (numbers), no value labels
-    q2 = sample(x = datasets::Orange$Tree, size = 25, replace = T),
+    q2 = sample(
+      x = datasets::Orange$Tree,
+      size = 25,
+      replace = TRUE),
 
     # character, no value labels
-    q3 = sample(stringr::fruit, 25, prob = 1/(1:80 * sum(1/(1:80))), replace = T),
+    q3 = sample(
+      stringr::fruit,
+      25,
+      prob = 1/(1:80 * sum(1/(1:80))),
+      replace = TRUE),
 
     # numeric values, discrete numeric value labels
-    q4 = sample(1:8, 25, replace = T),
+    q4 = sample(
+      1:8,
+      25,
+      replace = TRUE),
 
     # character values, discrete character value labels
-    q5 = sample(letters[1:4], 25, prob = c(0.4,0.3,0.2,0.1), replace = T),
+    q5 = sample(
+      letters[1:4],
+      25,
+      prob = c(0.4,0.3,0.2,0.1),
+      replace = TRUE),
 
     # numeric weights
     w = rnorm(25, mean = 1, sd = 0.1)
-
   ) %>%
   labelled::set_value_labels(
     q4 = c(`Less than a year` = 1,
@@ -52,9 +72,7 @@ responses <- {
       `Somewhat happy` = "b",
       `Somewhat unhappy` = "c",
       `Very unhappy` = "d"
-
     )
-
   ) %>%
     labelled::set_variable_labels(
     q1 = "% of males involved in agriculture",
@@ -93,7 +111,7 @@ test_that("NAs not present, nas = T: n & result are correct", {
 
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs(stat = "mean", nas = T) %>%
+                      freqs(stat = "mean", nas = TRUE) %>%
                       select(n) %>%
                       pull(),
 
@@ -104,7 +122,7 @@ test_that("NAs not present, nas = T: n & result are correct", {
 test_that("NAs not present, nas = F: n & result are correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs(stat = "mean", nas = F) %>%
+                      freqs(stat = "mean", nas = FALSE) %>%
                       select(result) %>%
                       pull(),
 
@@ -112,7 +130,7 @@ test_that("NAs not present, nas = F: n & result are correct", {
   )
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs(stat = "mean", nas = F) %>%
+                      freqs(stat = "mean", nas = FALSE) %>%
                       select(n) %>%
                       pull(),
 
@@ -130,15 +148,15 @@ test_that("NAs present, nas = T: throws error", {
 test_that("NAs present, nas = F: n & result are correct", {
   expect_equal(responses %>%
                  select(q1) %>%
-                 freqs(stat = "mean", nas = F) %>%
+                 freqs(stat = "mean", nas = FALSE) %>%
                  select(result) %>%
                  pull(),
 
-               round(mean(responses$q1, na.rm = T), 2)
+               round(mean(responses$q1, na.rm = TRUE), 2)
   )
   expect_equivalent(responses %>%
                       select(q1) %>%
-                      freqs(stat = "mean", nas = F) %>%
+                      freqs(stat = "mean", nas = FALSE) %>%
                       select(n) %>%
                       pull(),
 
@@ -215,13 +233,13 @@ test_that("using weights: equivalent to weighted.mean() output", {
   expect_equal(
     responses %>%
       select(q1, w) %>%
-      freqs(stat = 'mean', nas = F, wt = w) %>%
+      freqs(stat = 'mean', nas = FALSE, wt = w) %>%
       select(result) %>%
       pull(),
 
     stats::weighted.mean(x = responses$q1,
                          w = responses$w,
-                         na.rm = T) %>%
+                         na.rm = TRUE) %>%
       round(2)
   )
 })
@@ -234,7 +252,7 @@ test_that("using prompt: variable label is correctly output", {
   expect_equal(
     responses %>%
       select(q1) %>%
-      freqs(stat = 'mean', nas = F, prompt = T) %>%
+      freqs(stat = 'mean', nas = FALSE, prompt = TRUE) %>%
       select(prompt) %>%
       pull(),
 
@@ -254,14 +272,14 @@ test_that("using digits: output is precise to multiple decimal places", {
   expect_equal(
     responses %>%
       select(w) %>%
-      freqs(stat = 'mean', digits = 6, nas = F) %>%
+      freqs(stat = 'mean', digits = 6, nas = FALSE) %>%
       select(result) %>%
       pull(),
 
     responses %>%
       select(w) %>%
       pull() %>%
-      mean(na.rm = T) %>%
+      mean(na.rm = TRUE) %>%
       round(digits = 6)
   )
 })
@@ -271,28 +289,20 @@ context("validation")
 test_that("stat other than 'quantile' gives message when pr value is provided", {
   expect_message(
     responses %>%
-      freqs(q1,
-            pr = 75,
-            stat = 'mean',
-            nas = F)
+      freqs(q1, pr = 75, stat = 'mean', nas = FALSE)
   )
 })
 
 test_that("stat argument only accepts percent, mean, quantile, or summary", {
   expect_error(
     responses %>%
-      freqs(q1,
-            stat = 'means',
-            pr = 75,
-            nas = F)
+      freqs(q1, stat = 'means', pr = 75, nas = FALSE)
   )
 })
 
 test_that("function stops when value labels exist", {
   expect_error(
     responses %>%
-      freqs(q4,
-            stat = 'mean',
-            nas = F)
+      freqs(q4, stat = 'mean', nas = FALSE)
   )
 })

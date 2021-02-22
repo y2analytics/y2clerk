@@ -52,7 +52,7 @@ verbatims_y2 <- function(
 
 
 #### Private functions ####
-taking_names <- function(dataset = responses) {
+taking_names <- function(dataset) {
   labels <- sapply(dataset, function(x) attr(x, "label"))
   tibble::tibble(
     name = names(labels),
@@ -75,20 +75,21 @@ verbatims_y2_single <- function(
   freq_var
 ){
   freq_flag <- dplyr::enquo(freq_var)
+  freq_var_char <- rlang::quo_name(freq_flag) #convert quoed var into a string
 
   var_label_list <- taking_names(dataset) %>%
     dplyr::mutate(
-      label = as.character(label)
+      label = as.character(.data$label)
     ) %>%
     dplyr::mutate(
       label = dplyr::case_when(
-        label == "NULL" ~ "No label",
-        label == "" ~ "No label",
-        TRUE ~ label
+        .data$label == "NULL" ~ "No label",
+        .data$label == "" ~ "No label",
+        TRUE ~ .data$label
       )
     ) %>%
     dplyr::select(
-      label
+      .data$label
     ) %>%
     unlist()
 
@@ -98,10 +99,11 @@ verbatims_y2_single <- function(
     dplyr::select(
       !!freq_flag
     ) %>%
-    tidyr::gather(
-      variable,
-      label
-    )
+    dplyr::mutate(variable = freq_var_char) %>%
+    dplyr::select(
+      .data$variable,
+      label = !!freq_flag
+      )
 
   labels <- dataset %>%
     dplyr::select(
@@ -114,24 +116,25 @@ verbatims_y2_single <- function(
           TRUE ~ labelled::var_label(.)
         )
       )
-    ) %>%
-    tidyr::gather(
-      variable,
-      prompt
+    )%>%
+    dplyr::mutate(variable = freq_var_char) %>%
+    dplyr::select(
+      .data$variable,
+      prompt = !!freq_flag
     ) %>%
     dplyr::distinct(
-      variable,
+      .data$variable,
       .keep_all = T
     )
 
   dplyr::left_join(freq_df, labels, by = c("variable")) %>%
     dplyr::select(
-      variable,
-      prompt,
-      label
+      .data$variable,
+      .data$prompt,
+      .data$label
     ) %>%
     dplyr::filter(
-      label != ""
+      .data$label != ""
     )
 
 }

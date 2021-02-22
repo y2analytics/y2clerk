@@ -19,26 +19,46 @@ responses <- {
   data.frame(
 
     # continuous numeric, no variable label, no NA
-    q0 = sample(x = datasets::swiss$Agriculture, size = 25, replace = T),
+    q0 = sample(
+      x = datasets::swiss$Agriculture,
+      size = 25,
+      replace = TRUE),
 
     # continuous numeric, variable label, incl. NA
-    q1 = sample(x = c(datasets::swiss$Agriculture, NA), size = 25, prob = c(rep(.8/47,47), 0.2), replace = T),
+    q1 = sample(
+      x = c(datasets::swiss$Agriculture, NA),
+      size = 25,
+      prob = c(rep(.8/47,47), 0.2),
+      replace = TRUE),
 
     # factor (numbers), no value labels
-    q2 = sample(x = datasets::Orange$Tree, size = 25, replace = T),
+    q2 = sample(
+      x = datasets::Orange$Tree,
+      size = 25,
+      replace = TRUE),
 
     # character, no value labels
-    q3 = sample(stringr::fruit, 25, prob = 1/(1:80 * sum(1/(1:80))), replace = T),
+    q3 = sample(
+      stringr::fruit,
+      25,
+      prob = 1/(1:80 * sum(1/(1:80))),
+      replace = TRUE),
 
     # numeric values, discrete value labels
-    q4 = sample(1:8, 25, replace = T),
+    q4 = sample(
+      1:8,
+      25,
+      replace = TRUE),
 
     # character values, discrete value labels
-    q5 = sample(letters[1:4], 25, prob = c(0.4,0.3,0.2,0.1), replace = T),
+    q5 = sample(
+      letters[1:4],
+      25,
+      prob = c(0.4,0.3,0.2,0.1),
+      replace = TRUE),
 
     # numeric weights
     w = rnorm(25, mean = 1, sd = 0.1)
-
   ) %>%
   set_value_labels(
     q4 = c(`Less than a year` = 1,
@@ -54,9 +74,7 @@ responses <- {
       `Somewhat happy` = "b",
       `Somewhat unhappy` = "c",
       `Very unhappy` = "d"
-
     )
-
   ) %>%
   set_variable_labels(
     q1 = "% of males involved in agriculture",
@@ -66,8 +84,8 @@ responses <- {
     q5 = "Satisfaction",
     w = "Weights"
   ) %>%
-
-  as_tibble()}
+  as_tibble()
+  }
 
 # tests -------------------------------------------------------------------
 
@@ -82,7 +100,6 @@ test_that("test data is correct", {
 #
 
 context("check input mistakes")
-
 test_that("bad input throws error", {
   expect_error(
     responses %>%
@@ -107,7 +124,7 @@ test_that("NAs not present, nas = T: n & result are correct", {
 
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs(stat = "mean", nas = T) %>%
+                      freqs(stat = "mean", nas = TRUE) %>%
                       select(n) %>%
                       pull(),
 
@@ -118,7 +135,7 @@ test_that("NAs not present, nas = T: n & result are correct", {
 test_that("NAs not present, nas = F: n & result are correct", {
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs(stat = "quantile", nas = F, pr = 50) %>%
+                      freqs(stat = "quantile", nas = FALSE, pr = 50) %>%
                       select(result) %>%
                       pull(),
 
@@ -126,7 +143,7 @@ test_that("NAs not present, nas = F: n & result are correct", {
   )
   expect_equivalent(responses %>%
                       select(q0) %>%
-                      freqs(stat = "quantile", nas = F, pr = 50) %>%
+                      freqs(stat = "quantile", nas = FALSE, pr = 50) %>%
                       select(n) %>%
                       pull(),
 
@@ -145,15 +162,15 @@ test_that("NAs present, nas = T: throws error", {
 test_that("NAs present, nas = F: n & result are correct", {
   expect_equal(responses %>%
                  select(q1) %>%
-                 freqs(stat = "quantile", nas = F, pr = 95) %>%
+                 freqs(stat = "quantile", nas = FALSE, pr = 95) %>%
                  select(result) %>%
                  pull(),
 
-               round(quantile(responses$q1, 0.95, na.rm = T), 2)
+               round(quantile(responses$q1, 0.95, na.rm = TRUE), 2)
   )
   expect_equivalent(responses %>%
                       select(q1) %>%
-                      freqs(stat = "quantile", nas = F, pr = 95) %>%
+                      freqs(stat = "quantile", nas = FALSE, pr = 95) %>%
                       select(n) %>%
                       pull(),
 
@@ -230,14 +247,14 @@ test_that("using weights: equivalent to wtd.quantile() output", {
   expect_equal(
     responses %>%
       select(q1, w) %>%
-      freqs(stat = 'quantile', nas = F, wt = w, pr = 95) %>%
+      freqs(stat = 'quantile', nas = FALSE, wt = w, pr = 95) %>%
       select(result) %>%
       pull(),
 
     reldist::wtd.quantile(x = responses$q1,
                           q = 0.95,
                           weight = responses$w,
-                          na.rm = T) %>%
+                          na.rm = TRUE) %>%
       round(2)
   )
 })
@@ -250,7 +267,7 @@ test_that("using prompt: variable label is correctly output", {
   expect_equal(
     responses %>%
       select(q1) %>%
-      freqs(stat = 'quantile', nas = F, prompt = T, pr = 0.95) %>%
+      freqs(stat = 'quantile', nas = FALSE, prompt = TRUE, pr = 0.95) %>%
       select(prompt) %>%
       pull(),
 
@@ -270,14 +287,14 @@ test_that("using digits: output is precise to multiple decimal places", {
   expect_equal(
     responses %>%
       select(w) %>%
-      freqs(stat = 'quantile', pr = 95, digits = 6, nas = F) %>%
+      freqs(stat = 'quantile', pr = 95, digits = 6, nas = FALSE) %>%
       select(result) %>%
       pull(),
 
     responses %>%
       select(w) %>%
       pull() %>%
-      quantile(0.95, na.rm = T) %>%
+      quantile(0.95, na.rm = TRUE) %>%
       round(digits = 6)
   )
 })
@@ -348,15 +365,14 @@ test_that("there are 6 lines of output (min, 1st quartile, median, mean, 3rd qua
 
   expect_equal(
     responses %>%
-      freqs(q1, stat = 'summary', nas = F) %>%
+      freqs(q1, stat = 'summary', nas = FALSE) %>%
       nrow(),
     6
   )
 
   expect_equal(
     responses %>%
-      freqs(q1, stat = 'summary',
-            nas = F, wt = w) %>%
+      freqs( q1, stat = 'summary', nas = FALSE, wt = w) %>%
       nrow(),
     6
   )
@@ -365,8 +381,7 @@ test_that("there are 6 lines of output (min, 1st quartile, median, mean, 3rd qua
 test_that("setting a pr value when stat = 'summary' does not affect output", {
   expect_equal(
     responses %>%
-      freqs(q0, stat = 'summary',
-            pr = 0),
+      freqs(q0, stat = 'summary', pr = 0),
     responses %>%
       freqs(q0, stat = 'summary')
   )
@@ -376,10 +391,7 @@ test_that("stat = 'summary' gives message when pr value is provided", {
   expect_message(
     responses %>%
       select(q0,q1,w) %>%
-      freqs(pr = 75,
-            stat = 'summary',
-            wt = w,
-            nas = F)
+      freqs(pr = 75, stat = 'summary', wt = w, nas = FALSE)
   )
 })
 

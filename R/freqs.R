@@ -1,12 +1,12 @@
 ##### Public functions #####
 
-#' Run frequencies for multiple variables.
+#' Run frequencies for multiple variables
 #'
 #' @param dataset A dataframe.
 #' @param ... The unquoted names of a set of variables in the dataset. If nothing
 #' is specified, the function runs a frequency on every column in given dataset.
 #' @param stat Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').
-#' @param pr Double, for use when stat = 'quantile.' Input should be a real number x such that 0 ≤ x ≤ 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)
+#' @param pr Double, for use when stat = 'quantile.' Input should be a real number x such that 0 <= x <= 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)
 #' @param nas Boolean, whether or not to include NAs in the tabulation (default: TRUE).
 #' @param wt The unquoted name of a weighting variable in the dataset (default: NULL).
 #' @param prompt Boolean, whether or not to include the prompt in the dataset (default: FALSE).
@@ -16,6 +16,7 @@
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations.
 #' @importFrom dplyr "%>%"
+#' @importFrom rlang .data
 #' @examples
 #' df <- data.frame(
 #'   a = c(1, 2, 2, 3, 4, 2, NA),
@@ -276,17 +277,17 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
                     !rlang::quo_is_null(wt) & !(stat %in% c('min', 'max')) ~ stringr::str_c(stat, ' - weighted'),
                     TRUE ~ stat
                   ),
-                  n = base::round(n,
+                  n = base::round(.data$n,
                                   digits),
-                  result = base::round(result,
+                  result = base::round(.data$result,
                                        digits)) %>%
     dplyr::select(tidyselect::one_of(grouping_vars),
-                  variable,
-                  value,
-                  label,
-                  n,
-                  stat,
-                  result) %>%
+                  .data$variable,
+                  .data$value,
+                  .data$label,
+                  .data$n,
+                  .data$stat,
+                  .data$result) %>%
     tibble::as_tibble()
 
   # fill out prompt column if specified
@@ -309,13 +310,13 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
         prompt = prompt_text
       ) %>%
       dplyr::select(tidyselect::one_of(grouping_vars),
-                    variable,
-                    prompt,
-                    value,
-                    label,
-                    n,
-                    stat,
-                    result)
+                    .data$variable,
+                    .data$prompt,
+                    .data$value,
+                    .data$label,
+                    .data$n,
+                    .data$stat,
+                    .data$result)
   }
 
   # if weights are used, remove weight column rows from output
@@ -498,19 +499,19 @@ ns <- function(dataset, variable, weight, prompt) {
   if(prompt) {
     counts %>%
       dplyr::select(
-        variable,
-        prompt,
-        value,
-        label,
-        n
+        .data$variable,
+        .data$prompt,
+        .data$value,
+        .data$label,
+        .data$n
       )
   } else {
     counts %>%
       dplyr::select(
-        variable,
-        value,
-        label,
-        n
+        .data$variable,
+        .data$value,
+        .data$label,
+        .data$n
       )
   }
 }
@@ -520,14 +521,14 @@ percents <- function(counts, include_nas, digits) {
   if(! include_nas) {
     counts <- counts %>%
       dplyr::filter(
-        !is.na(value)
+        !is.na(.data$value)
       )
   }
   # Calculate and round to integer percentages
   counts %>%
     dplyr::mutate(
       stat = 'percent',
-      result = (n / sum(n)) %>% round(digits)
+      result = (.data$n / sum(.data$n)) %>% round(digits)
     )
 }
 
@@ -537,13 +538,13 @@ labelled_ns <- function(dataset, variable, weight, prompt) {
   if(prompt) {
     counts <- counts %>%
       dplyr::mutate(
-        prompt = labelled::var_label(value)
+        prompt = labelled::var_label(.data$value)
       )
   }
   counts <- counts %>%
     dplyr::mutate(
-      label = labelled::to_factor(value) %>% as.character,
-      value = value %>% as.character
+      label = labelled::to_factor(.data$value) %>% as.character,
+      value = .data$value %>% as.character
     )
   return(counts)
 }
@@ -551,8 +552,8 @@ labelled_ns <- function(dataset, variable, weight, prompt) {
 unlabelled_ns <- function(dataset, variable, weight, prompt) {
   counts <- base_ns(dataset, variable, weight) %>%
     dplyr::mutate(
-      label = value %>% as.character,
-      value = value %>% as.character
+      label = .data$value %>% as.character,
+      value = .data$value %>% as.character
     )
   if(prompt) {
     counts <- counts %>%

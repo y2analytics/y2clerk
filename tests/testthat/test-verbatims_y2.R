@@ -1,5 +1,6 @@
 #### Test data ####
 library(testthat)
+library(dplyr)
 library(y2clerk)
 
 # Unlabelled

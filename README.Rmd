@@ -1,0 +1,70 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# y2clerk
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+
+## Overview
+y2clerk exists to quickly create formatted frequencies tables. It leverages the tidyverse, allowing the user to ` %>% ` in data frames, `select()` down to lists of variables, `group_by()` others, and include weights for the frequencies. There are two main functions in y2clerk:
+
+* `freqs()` - creates a frequency table including both ns and percentages for each level of a variable or list of variables. `freqs()` is flexible and can also be used for calculating means, medians, or other quartiles while including weighting variables. 
+* `verbatims_y2()` - creates a table with similar formatting to freqs. However, this function is used for string variables and creates a table with all responses given.
+* `cross_freqs()` - creates a frequency table similar to cross tabs. Each group_var given in the function acts as its own unique banner for every variable listed in the freqs. 
+Whereas *group_by %>% freqs* produces a set of frequencies grouped by a single variable, *cross_freqs* is designed to produce a set of frequencies grouped by multiple different grouping variables one after another and then combines these results into a single dataframe. 
+
+
+## Installation
+
+<!-- You can install the released version of y2clerk from [CRAN](https://CRAN.R-project.org) with: -->
+
+<!-- ``` r -->
+<!-- install.packages("y2clerk") -->
+<!-- ``` -->
+
+You can install the most updated package version from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("y2analytics/y2clerk")
+```
+
+
+## Examples
+
+Below you will find a few basic examples which show you how to quickly get a frequencies table with `freqs()`:
+
+```{r example}
+library(y2clerk)
+library(dplyr)
+df <- data.frame(
+  a = c(1, 2, 2, 3, 4, 2, NA),
+  b = c(1, 2, 2, 3, 4, 1, NA),
+  weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
+)
+
+freqs(df, a, b)
+df %>% freqs(a, b, wt = weights)
+freqs(df, stat = 'mean', nas = FALSE)
+freqs(df, stat = 'mean', nas = FALSE, wt = weights)
+df %>% group_by(a) %>% freqs(b, stat = 'mean', nas = FALSE, wt = weights)
+```
+
+
+## Help
+If you have issues using y2clerk, please post your issue on [GitHub](https://github.com/y2analytics/y2clerk/issues) along with a minimal reproducible example. We will do our best to address your issues and get them fixed for the next version of y2clerk. 
+
