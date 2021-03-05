@@ -20,6 +20,7 @@
 #' @param nas_group Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: TRUE).
 #' @param factor_group Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)
 #' @param wide Boolean, whether the dataframe should be one long dataframe (FALSE) or a wide and nested dataframe, nested on the group_vars (TRUE) (default: FALSE)
+#' @param exclude_groups Boolean, argument only applies if group_vars are also included as freqs vars - group_vars are included as freqs vars if using select() to run cross_freqs on all variables in the dataset. FALSE will INclude group_vars as freqs vars. TRUE will EXclude group_vars from also being freqs vars (default: FALSE)
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations, split out by subgroups (group_vars).
 #' @export
@@ -48,7 +49,7 @@ cross_freqs <-
     dataset,
     group_vars,
     ...,
-    stat = "percent",
+    stat = c("percent", "mean", "median", "min", "max", "quantile", "summary"),
     pr = NULL,
     nas = TRUE,
     wt = NULL,
@@ -56,12 +57,18 @@ cross_freqs <-
     digits = 2,
     nas_group = TRUE,
     factor_group = FALSE,
-    wide = FALSE
+    wide = FALSE,
+    exclude_groups = FALSE
   ) {
 
+    # custom error messages
+    stat <- rlang::arg_match(stat)
+    cross_error_messages(dataset, group_vars)
+
+    # start for loop: run freqs for each level in group_vars
     for (i in 1:length(group_vars)) {
       group_symbol <- rlang::sym(group_vars[i])
-      if(i == 1) {
+      if (i == 1) {
         results_raw <-
           dataset %>%
           dplyr::group_by({{ group_symbol }}) %>%
@@ -103,9 +110,13 @@ cross_freqs <-
               )
           )
       }
-    }
+    } # end of for loop
 
-    if(wide == FALSE){
+    # exclude_groups (cut group_vars from variable if TRUE)
+    results_raw <- exclude_groups_fun(results_raw, group_vars, exclude_groups)
+
+    # Run long or wide
+    if (wide == FALSE){
       output <-
         results_raw %>%
         dplyr::select(
@@ -116,10 +127,6 @@ cross_freqs <-
     } else {
       output_unnamed <-
         results_raw %>%
-        dplyr::select(
-          .data$group_var_name,
-          tidyselect::everything()
-          ) %>%
         pivot_nest() %>%
         dplyr::ungroup()
 
@@ -131,22 +138,58 @@ cross_freqs <-
             output_unnamed$group_var_name
             )
           )
-    }
 
-    output
+      # for wide freqs, filter down group_vars to be specific for each nested df
+      output <- wide_filter(output, group_vars)
+    }
   }
 
 
 
-
 # Private functions -------------------------------------------------------
+
+### cross_error_messages
+cross_error_messages <- function(dataset, group_vars) {
+  # Not found b/c not a string
+  tryCatch(
+    exists(group_vars),
+    error = function(err) {
+      msg <- conditionMessage(err)
+      if (grepl("object '.*' not found", msg)) {
+        stop('group_vars should be a character vector of variable names. Try formatting like c("var1", "var2") instead of c(var1, var2) or quos(var1, var2)')
+      }
+    }
+  )
+
+  # Not a vector
+  if (is.vector(group_vars) == FALSE) {
+    stop('group_vars should be a character vector of variable names. Try formatting like c("var1", "var2") instead of c(var1, var2) or quos(var1, var2)')
+  }
+}
+
+
+
+### exclude_groups
+exclude_groups_fun <- function(results_raw, group_vars, exclude_groups) {
+  if (exclude_groups == FALSE) {
+    results_raw <- results_raw
+  } else {
+    results_raw <- results_raw  %>%
+      dplyr::mutate(
+        filter_out = as.numeric(.data$variable %in% group_vars) # 1 if matching
+      ) %>%
+      dplyr::filter(.data$filter_out == 0) %>%
+      dplyr::select(-.data$filter_out)
+  }
+}
+
+
 
 ### pivot_nest
 pivot_nest <-
   function(
     dataset
   ) {
-
     dataset %>%
       dplyr::select(
         .data$group_var_name,
@@ -171,9 +214,35 @@ pivot_nest <-
         .data$group_var_name,
         .data$results
       )
-
   }
 
 
+
+### wide_filter
+wide_filter <- function(output, group_vars) {
+  output <- output %>%
+    # for each df, keep group_var_name level only if it matches the id column
+    dplyr::mutate(
+      results = purrr::map2(
+        .data$results,
+        group_vars,
+        ~dplyr::filter(.x, group_var_name == .y)
+      ),
+      # remove any result columns that are NAs (leftover from other group_vars)
+      results = purrr::map(
+        .data$results,
+        ~ .x %>% dplyr::select_if(~sum(!is.na(.x)) > 0)
+      ),
+      # put group_var_name as first column
+      results = purrr::map(
+        .data$results,
+        ~dplyr::select(
+          .x,
+          .data$group_var_name,
+          tidyselect::everything()
+        )
+      )
+    )
+}
 
 

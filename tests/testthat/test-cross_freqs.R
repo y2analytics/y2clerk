@@ -5,6 +5,7 @@ library(testthat)
 library(dplyr)
 library(y2clerk)
 library(forcats)
+library(stringr)
 
 ### Data
 mtcars
@@ -17,9 +18,7 @@ GROUP_VARS <-
   ) %>%
   names()
 
-# Create names vector
 GROUP_VARS1 <- 'am'
-
 GROUP_VARS2 <-
   mtcars %>%
   select(
@@ -101,9 +100,14 @@ test_that("wide = TRUE", {
     )
   frequencies
   grouping_vars <- unique(frequencies$group_var_name)
+  table1 <- frequencies[[2]][[1]]
+  table2 <- frequencies[[2]][[2]]
 
-  expect_equal(class(frequencies$results), "list")
-  expect_equal(grouping_vars, GROUP_VARS2)
+  expect_equal(class(frequencies$results), "list") # is nested
+  expect_equal(grouping_vars, GROUP_VARS2) # id columns contain all group_vars
+  expect_equal(str_detect(table1$group_var_name, 'vs') %>% sum(), 0) # no vs in group_var if id is am
+  expect_equal(str_detect(table2$group_var_name, 'am') %>% sum(), 0) # no am in group_var if id is vs
+
 })
 
 
@@ -136,4 +140,59 @@ test_that("Mixed class group vars", {
   grouping_vars <- unique(frequencies$group_var_name)
   expect_equal(class(frequencies$results), "list")
   expect_equal(grouping_vars, GROUP_VARS2)
+})
+
+
+
+### Error messages
+test_that("Error messages", {
+
+  expect_error(
+    frequencies <- mtcars %>%
+      cross_freqs(
+        group_vars = quos(am, vs),
+        vs
+      ),
+    'group_vars should be a character vector of variable names. Try formatting like c("var1", "var2") instead of c(var1, var2) or quos(var1, var2)',
+    fixed = TRUE
+  )
+
+  expect_error(
+    frequencies <- mtcars %>%
+      cross_freqs(
+        group_vars = am,
+        vs
+      ),
+    'group_vars should be a character vector of variable names. Try formatting like c("var1", "var2") instead of c(var1, var2) or quos(var1, var2)',
+    fixed = TRUE
+  )
+})
+
+
+### exclude_groups
+test_that("exclude_groups, select() method", {
+  # Long
+  frequencies <- mtcars %>%
+    select(carb, gear, am, vs) %>%
+    cross_freqs(
+      group_vars = GROUP_VARS2, #am & vs
+      exclude_groups = TRUE
+    )
+  frequencies
+  grouping_vars <- unique(frequencies$variable)
+  expect_equal(grouping_vars, c("carb", "gear"))
+
+  # Wide
+  frequencies <- mtcars %>%
+    select(carb, gear, am, vs) %>%
+    cross_freqs(
+      group_vars = GROUP_VARS2, #am & vs
+      wide = TRUE,
+      exclude_groups = TRUE
+    )
+  frequencies
+  grouping_vars_am <- unique(frequencies[[2]][[1]]$variable)
+  grouping_vars_vs <- unique(frequencies[[2]][[2]]$variable)
+  expect_equal(grouping_vars_am, c("carb", "gear"))
+  expect_equal(grouping_vars_vs, c("carb", "gear"))
 })

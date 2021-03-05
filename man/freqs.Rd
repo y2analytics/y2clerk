@@ -8,7 +8,7 @@
 freqs(
   dataset,
   ...,
-  stat = "percent",
+  stat = c("percent", "mean", "median", "min", "max", "quantile", "summary"),
   pr = NULL,
   nas = TRUE,
   wt = NULL,
@@ -21,7 +21,7 @@ freqs(
 freq(
   dataset,
   ...,
-  stat = "percent",
+  stat = c("percent", "mean", "median", "min", "max", "quantile", "summary"),
   pr = NULL,
   nas = TRUE,
   wt = NULL,

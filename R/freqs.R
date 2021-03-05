@@ -47,7 +47,7 @@
 freqs  <- function(
   dataset,
   ...,
-  stat = 'percent',
+  stat = c("percent", "mean", "median", "min", "max", "quantile", "summary"),
   pr = NULL,
   nas = TRUE,
   wt = NULL,
@@ -57,6 +57,7 @@ freqs  <- function(
   factor_group = FALSE
   ) {
   # options(warn=-1)
+  stat <- rlang::arg_match(stat)
 
   if(factor_group == TRUE){dataset <- group_factor(dataset)}
   if(nas_group == FALSE){dataset <- remove_group_nas(dataset)}

@@ -2,13 +2,13 @@
 % Please edit documentation in R/cross_freqs.R
 \name{cross_freqs}
 \alias{cross_freqs}
-\title{Run cross tabs in R}
+\title{Run crosstabs in R}
 \usage{
 cross_freqs(
   dataset,
   group_vars,
   ...,
-  stat = "percent",
+  stat = c("percent", "mean", "median", "min", "max", "quantile", "summary"),
   pr = NULL,
   nas = TRUE,
   wt = NULL,
@@ -16,7 +16,8 @@ cross_freqs(
   digits = 2,
   nas_group = TRUE,
   factor_group = FALSE,
-  wide = FALSE
+  wide = FALSE,
+  exclude_groups = FALSE
 )
 }
 \arguments{
@@ -24,7 +25,7 @@ cross_freqs(
 
 \item{group_vars}{Accepts a character vector of variable names.
 The variables by which you want to subset your freqeuncies.
-In a traditional cross tab, these would be the banner variables}
+In a traditional crosstab, these would be the banner variables.}
 
 \item{...}{The unquoted names of a set of variables in the dataset. If nothing
 is specified, the function runs a frequency on every column in given dataset.}
@@ -45,7 +46,9 @@ is specified, the function runs a frequency on every column in given dataset.}
 
 \item{factor_group}{Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)}
 
-\item{wide}{Boolean, whether the dataframe should be one long dataframe (FALSE) or multiple wide and nested dataframes, nested on the group_vars (TRUE) (default: FALSE)}
+\item{wide}{Boolean, whether the dataframe should be one long dataframe (FALSE) or a wide and nested dataframe, nested on the group_vars (TRUE) (default: FALSE)}
+
+\item{exclude_groups}{Boolean, argument only applies if group_vars are also included as freqs vars - group_vars are included as freqs vars if using select() to run cross_freqs on all variables in the dataset. FALSE will INclude group_vars as freqs vars. TRUE will EXclude group_vars from also being freqs vars (default: FALSE)}
 }
 \value{
 A dataframe with the variable names, prompts, values, labels, counts,
