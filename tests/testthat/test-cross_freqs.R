@@ -105,8 +105,7 @@ test_that("wide = TRUE", {
 
   expect_equal(class(frequencies$results), "list") # is nested
   expect_equal(grouping_vars, GROUP_VARS2) # id columns contain all group_vars
-  expect_equal(str_detect(table1$group_var_name, 'vs') %>% sum(), 0) # no vs in group_var if id is am
-  expect_equal(str_detect(table2$group_var_name, 'am') %>% sum(), 0) # no am in group_var if id is vs
+  expect_equal(length(table1$variable), 3) # only am or vs
 
 })
 

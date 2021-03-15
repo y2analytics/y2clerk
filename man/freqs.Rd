@@ -71,11 +71,11 @@ freqs(df, a, b)
 freqs(df, a, b, wt = weights)
 freq(df, stat = 'mean', nas = FALSE)
 freq(df, stat = 'mean', nas = FALSE, wt = weights)
-\dontrun{
-df \%>\% group_by(a) \%>\% freqs(b, stat = 'mean', nas = FALSE, wt = weights)
-}
+df \%>\%
+  dplyr::group_by(a) \%>\%
+  freqs(b, stat = 'mean', nas = FALSE, wt = weights)
 
-# * note that pr = 60 will return an estimate
+# Note that pr = 60 will return an estimate
 # of the real number such that 60\% of values
 # are lower than that number
 

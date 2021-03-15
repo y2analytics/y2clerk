@@ -15,7 +15,6 @@
 #' @param factor_group Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations.
-#' @importFrom dplyr "%>%"
 #' @importFrom rlang .data
 #' @examples
 #' df <- data.frame(
@@ -28,11 +27,11 @@
 #' freqs(df, a, b, wt = weights)
 #' freq(df, stat = 'mean', nas = FALSE)
 #' freq(df, stat = 'mean', nas = FALSE, wt = weights)
-#' \dontrun{
-#' df %>% group_by(a) %>% freqs(b, stat = 'mean', nas = FALSE, wt = weights)
-#' }
+#' df %>%
+#'   dplyr::group_by(a) %>%
+#'   freqs(b, stat = 'mean', nas = FALSE, wt = weights)
 #'
-#' # * note that pr = 60 will return an estimate
+#' # Note that pr = 60 will return an estimate
 #' # of the real number such that 60% of values
 #' # are lower than that number
 #'

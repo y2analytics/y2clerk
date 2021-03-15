@@ -1,3 +1,11 @@
+# y2clerk 0.4.2.1
+## New functions
+* `pivot_freqs` - for pivoting wide a grouped freqs. Makes it easier for quick comparisons
+
+## Bugs
+* `cross_freqs` - more succinct way of running function
+* all examples now running
+
 
 # y2clerk 0.4.1.0
 ## New functions

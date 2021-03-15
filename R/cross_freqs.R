@@ -25,7 +25,6 @@
 #' stats, and resulting calculations, split out by subgroups (group_vars).
 #' @export
 #' @examples
-#' \dontrun{
 #' GROUP_VARS <-
 #'   mtcars %>%
 #'   dplyr::select(
@@ -36,8 +35,7 @@
 #' }
 #' GROUP_VARS <- c("am", "vs")
 #'
-#' cross_freqs(
-#'   mtcars,
+#' mtcars %>% cross_freqs(
 #'   group_vars = GROUP_VARS,
 #'   gear,
 #'   carb
@@ -84,7 +82,7 @@ cross_freqs <-
             factor_group = factor_group
           ) %>%
           dplyr::mutate(
-            group_var = factor(.data$group_var),
+            group_var = forcats::as_factor(.data$group_var),
             group_var_name = group_vars[i]
           )
       } else {
@@ -105,7 +103,7 @@ cross_freqs <-
                 factor_group = factor_group
               ) %>%
               dplyr::mutate(
-                group_var = factor(.data$group_var),
+                group_var = forcats::as_factor(.data$group_var),
                 group_var_name = group_vars[i]
               )
           )
@@ -138,9 +136,6 @@ cross_freqs <-
             output_unnamed$group_var_name
             )
           )
-
-      # for wide freqs, filter down group_vars to be specific for each nested df
-      output <- wide_filter(output, group_vars)
     }
   }
 
@@ -205,7 +200,7 @@ pivot_nest <-
       dplyr::mutate(
         results = list(
           tidyr::pivot_wider(
-            dataset,
+            .data$data,
             values_from = .data$result,
             names_from = .data$group_var)
         )
@@ -215,34 +210,5 @@ pivot_nest <-
         .data$results
       )
   }
-
-
-
-### wide_filter
-wide_filter <- function(output, group_vars) {
-  output <- output %>%
-    # for each df, keep group_var_name level only if it matches the id column
-    dplyr::mutate(
-      results = purrr::map2(
-        .data$results,
-        group_vars,
-        ~dplyr::filter(.x, group_var_name == .y)
-      ),
-      # remove any result columns that are NAs (leftover from other group_vars)
-      results = purrr::map(
-        .data$results,
-        ~ .x %>% dplyr::select_if(~sum(!is.na(.x)) > 0)
-      ),
-      # put group_var_name as first column
-      results = purrr::map(
-        .data$results,
-        ~dplyr::select(
-          .x,
-          .data$group_var_name,
-          tidyselect::everything()
-        )
-      )
-    )
-}
 
 
