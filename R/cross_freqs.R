@@ -137,6 +137,7 @@ cross_freqs <-
             )
           )
     }
+    return(output)
   }
 
 

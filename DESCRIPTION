@@ -1,7 +1,7 @@
 Type: Package
 Package: y2clerk
 Title: Our Resident Tabulation Expert
-Version: 0.4.2.1
+Version: 0.4.2.2
 Authors@R: c(
     person('Scotty', 'Riding', email = 'scott@y2analytics.com', role = 'aut'), 
     person('Luke', 'Carter', email = 'luke@y2analytics.com', role = 'aut'), 
