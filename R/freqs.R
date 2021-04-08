@@ -13,6 +13,7 @@
 #' @param digits Integer, number of significant digits for rounding (default: 2).
 #' @param nas_group Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: TRUE).
 #' @param factor_group Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)
+#' @param unweighted_ns Boolean, whether the 'n' column in the freqs table should be UNweighted while results ARE weighted. This argument can only be used if a wt variable is used. If no weight variable is used, the 'n' column will always be unweighted (default: FALSE).
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations.
 #' @importFrom rlang .data
@@ -53,10 +54,127 @@ freqs  <- function(
   prompt = FALSE,
   digits = 2,
   nas_group = TRUE,
-  factor_group = FALSE
+  factor_group = FALSE,
+  unweighted_ns = FALSE
   ) {
-  # options(warn=-1)
+  # options(warn = -1)
   stat <- rlang::arg_match(stat)
+
+  # Create logical for if there are weights
+  weight_null <- dplyr::enquo(wt)
+  weight_exists <- !rlang::quo_is_null(weight_null)
+
+  if(unweighted_ns == TRUE & weight_exists == FALSE) {
+    stop("If you use unweighted_ns = TRUE, you must specify a wt variable")
+  } else if (unweighted_ns == TRUE & weight_exists == TRUE) {
+    frequencies  <- freqs_wuw(
+      dataset,
+      ...,
+      stat = stat,
+      pr = pr,
+      nas = nas,
+      wt = {{ wt }},
+      prompt = prompt,
+      digits = digits,
+      nas_group = nas_group,
+      factor_group = factor_group
+    )
+  } else {
+    frequencies <- freqs_original(
+      dataset,
+      ...,
+      stat = stat,
+      pr = pr,
+      nas = nas,
+      wt = {{ wt }},
+      prompt = prompt,
+      digits = digits,
+      nas_group = nas_group,
+      factor_group = factor_group
+    )
+  }
+  return(frequencies)
+}
+
+#' @rdname freqs
+#' @export
+freq <- freqs
+
+# Private functions -------------------------------------------------------
+# Freqs weighted results unweighted ns function
+freqs_wuw  <- function(
+  dataset,
+  ...,
+  stat,
+  pr,
+  nas,
+  wt,
+  prompt,
+  digits,
+  nas_group,
+  factor_group
+) {
+
+  # run weighted freqs
+  freqs_weighted <-
+    dataset %>%
+    freqs_original(
+      ...,
+      stat = stat,
+      pr = pr,
+      nas = nas,
+      wt = {{ wt }},
+      prompt = prompt,
+      digits = digits,
+      nas_group = nas_group,
+      factor_group = factor_group
+    ) %>%
+    dplyr::select(-.data$n)
+
+  # run unweighted freqs, but only keep n
+  freqs_unweighted <-
+    dataset %>%
+    dplyr::select(-{{ wt }}) %>%
+    freqs_original(
+      ...,
+      stat = stat,
+      pr = pr,
+      nas = nas,
+      wt = NULL,
+      prompt = prompt,
+      digits = digits,
+      nas_group = nas_group,
+      factor_group = factor_group
+    ) %>%
+    dplyr::select(.data$n)
+
+  # bind freqs together
+  frequencies <- dplyr::bind_cols(
+    freqs_weighted,
+    freqs_unweighted
+  ) %>%
+    dplyr::relocate(
+      .data$n,
+      .after = "label"
+    )
+  return(frequencies)
+}
+
+
+
+# Try including original freqs function as sub function
+freqs_original  <- function(
+  dataset,
+  ...,
+  stat = stat,
+  pr = pr,
+  nas = nas,
+  wt = wt,
+  prompt = prompt,
+  digits = digits,
+  nas_group = nas_group,
+  factor_group = factor_group
+) {
 
   if(factor_group == TRUE){dataset <- group_factor(dataset)}
   if(nas_group == FALSE){dataset <- remove_group_nas(dataset)}
@@ -85,11 +203,7 @@ freqs  <- function(
   # options(warn=0)
 }
 
-#' @rdname freqs
-#' @export
-freq <- freqs
 
-# Private functions -------------------------------------------------------
 
 calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
 
@@ -488,7 +602,8 @@ column_quos <- function(dataset, wt) {
 }
 
 ns <- function(dataset, variable, weight, prompt) {
-  counts <- if(class(dataset %>% dplyr::pull(!!variable)) %in% c('labelled','haven_labelled','haven_labelled_spss')) {
+  is_labelled <- sum(class(dataset %>% dplyr::pull(!!variable)) %in% c('labelled','haven_labelled','haven_labelled_spss'))
+  counts <- if(is_labelled >= 1) {
     # Metadata is better if the given variable has labels
     labelled_ns(dataset, variable, weight, prompt)
   } else {

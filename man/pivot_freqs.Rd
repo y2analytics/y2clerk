@@ -13,7 +13,7 @@ pivot_freqs(dataset)
 A wide tibble of frequencies with one row for each group
 }
 \description{
-Using a grouped frequencies table, pivot_freqs will create new columns for each label level in the frequencies
+Given a grouped frequencies table, pivot_freqs will create new columns for each label level in the frequencies
 }
 \examples{
   frequencies <- ToothGrowth \%>\%

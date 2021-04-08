@@ -15,7 +15,8 @@ freqs(
   prompt = FALSE,
   digits = 2,
   nas_group = TRUE,
-  factor_group = FALSE
+  factor_group = FALSE,
+  unweighted_ns = FALSE
 )
 
 freq(
@@ -28,7 +29,8 @@ freq(
   prompt = FALSE,
   digits = 2,
   nas_group = TRUE,
-  factor_group = FALSE
+  factor_group = FALSE,
+  unweighted_ns = FALSE
 )
 }
 \arguments{
@@ -52,6 +54,8 @@ is specified, the function runs a frequency on every column in given dataset.}
 \item{nas_group}{Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: TRUE).}
 
 \item{factor_group}{Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)}
+
+\item{unweighted_ns}{Boolean, whether the 'n' column in the freqs table should be UNweighted while results ARE weighted. This argument can only be used if a wt variable is used. If no weight variable is used, the 'n' column will always be unweighted (default: FALSE).}
 }
 \value{
 A dataframe with the variable names, prompts, values, labels, counts,

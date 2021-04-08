@@ -1,3 +1,7 @@
+# y2clerk 0.4.3
+## New function capabilities
+* `freqs()` has a new argument: `unweighted_ns`. Use this argument in combination with the `wt` argument to have weighted results but unweighted ns. This is particularly useful in toplines.
+
 # y2clerk 0.4.2.1
 ## New functions
 * `pivot_freqs` - for pivoting wide a grouped freqs. Makes it easier for quick comparisons
