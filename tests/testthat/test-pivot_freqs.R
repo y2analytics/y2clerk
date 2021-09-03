@@ -52,10 +52,25 @@ test_that("Each row is a group_var level", {
 })
 
 
+### columns_var - pivot other way
+test_that("Pivot on group_var", {
+  frequencies_pivoted <- ToothGrowth %>%
+    group_by(supp) %>%
+    freqs(dose) %>%
+    pivot_freqs(group_var)
+  frequencies_pivoted
+  nrows <- nrow(frequencies_pivoted)
+  names_cols <- names(frequencies_pivoted)
+
+  expect_equal(nrows, 3)
+  expect_equal(names_cols, c('label', 'OJ', 'VC'))
+})
+
+
+### Errors
 test_that("pivot_freqs error testing", {
   expect_error(
     frequencies <- ToothGrowth %>%
-      group_by(supp) %>%
       freqs(len, stat = 'mean') %>%
       pivot_freqs(),
     'Your frequencies label column is blank. Please provide labels on which to pivot',
@@ -63,3 +78,12 @@ test_that("pivot_freqs error testing", {
   )
 })
 
+test_that("pivot_freqs error testing", {
+  expect_error(
+    frequencies <- ToothGrowth %>%
+      freqs(supp) %>%
+      pivot_freqs(),
+    'Your frequencies does not contain a group_var. It must have a group_var to pivot correctly',
+    fixed = TRUE
+  )
+})

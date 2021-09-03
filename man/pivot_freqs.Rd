@@ -4,13 +4,16 @@
 \alias{pivot_freqs}
 \title{Widen a frequencies table}
 \usage{
-pivot_freqs(dataset)
+pivot_freqs(dataset, columns_var = label)
 }
 \arguments{
 \item{dataset}{A grouped frequencies table as produced by y2clerk::freqs()}
+
+\item{columns_var}{DEFAULT = label; If label, the frequencies will be pivoted so a new column will be created for each unique level of label.
+Can also be set to group_var to pivot the other way and create new columns for each unique level of group_var}
 }
 \value{
-A wide tibble of frequencies with one row for each group
+A wide tibble of frequencies with one row for each group (by default)
 }
 \description{
 Given a grouped frequencies table, pivot_freqs will create new columns for each label level in the frequencies

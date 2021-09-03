@@ -1,6 +1,12 @@
+# y2clerk 0.4.4
+## New function argument
+* `pivot_freqs` - *columns_var*: DEFAULT = label; Used to pivot so only "label" could be the new columns in the wide df. Now you can set group_var to be the new columns, instead of rows. 
+
+
 # y2clerk 0.4.3
 ## New function capabilities
 * `freqs()` has a new argument: `unweighted_ns`. Use this argument in combination with the `wt` argument to have weighted results but unweighted ns. This is particularly useful in toplines.
+
 
 # y2clerk 0.4.2.1
 ## New functions

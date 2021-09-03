@@ -77,7 +77,7 @@ freq(df, stat = 'mean', nas = FALSE)
 freq(df, stat = 'mean', nas = FALSE, wt = weights)
 df \%>\%
   dplyr::group_by(a) \%>\%
-  freqs(b, stat = 'mean', nas = FALSE, wt = weights)
+  freqs(b, nas = FALSE, wt = weights)
 
 # Note that pr = 60 will return an estimate
 # of the real number such that 60\% of values
