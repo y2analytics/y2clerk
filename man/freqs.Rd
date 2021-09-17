@@ -9,7 +9,7 @@ freqs(
   dataset,
   ...,
   stat = c("percent", "mean", "median", "min", "max", "quantile", "summary"),
-  pr = NULL,
+  percentile = NULL,
   nas = TRUE,
   wt = NULL,
   prompt = FALSE,
@@ -23,7 +23,7 @@ freq(
   dataset,
   ...,
   stat = c("percent", "mean", "median", "min", "max", "quantile", "summary"),
-  pr = NULL,
+  percentile = NULL,
   nas = TRUE,
   wt = NULL,
   prompt = FALSE,
@@ -41,7 +41,7 @@ is specified, the function runs a frequency on every column in given dataset.}
 
 \item{stat}{Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').}
 
-\item{pr}{Double, for use when stat = 'quantile.' Input should be a real number x such that 0 <= x <= 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)}
+\item{percentile}{Double, for use when stat = 'quantile.' Input should be a real number x such that 0 <= x <= 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)}
 
 \item{nas}{Boolean, whether or not to include NAs in the tabulation (default: TRUE).}
 
@@ -79,7 +79,7 @@ df \%>\%
   dplyr::group_by(a) \%>\%
   freqs(b, nas = FALSE, wt = weights)
 
-# Note that pr = 60 will return an estimate
+# Note that percentile = 60 will return an estimate
 # of the real number such that 60\% of values
 # are lower than that number
 
@@ -87,6 +87,6 @@ df \%>\%
 # unaffected by weighting
 freqs(df, a, stat = 'min', nas = FALSE)
 freqs(df, a, stat = 'median', nas = FALSE)
-freqs(df, a, stat = 'quantile', pr = 95, nas = FALSE)
+freqs(df, a, stat = 'quantile', percentile = 95, nas = FALSE)
 freqs(df, a, stat = 'summary', nas = FALSE, wt = weights)
 }

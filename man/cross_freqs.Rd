@@ -9,7 +9,7 @@ cross_freqs(
   group_vars,
   ...,
   stat = c("percent", "mean", "median", "min", "max", "quantile", "summary"),
-  pr = NULL,
+  percentile = NULL,
   nas = TRUE,
   wt = NULL,
   prompt = FALSE,
@@ -32,7 +32,7 @@ is specified, the function runs a frequency on every column in given dataset.}
 
 \item{stat}{Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').}
 
-\item{pr}{Double, for use when stat = 'quantile.' Input should be a real number x such that 0 <= x <= 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)}
+\item{percentile}{Double, for use when stat = 'quantile.' Input should be a real number x such that 0 <= x <= 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)}
 
 \item{nas}{Boolean, whether or not to include NAs in the tabulation (default: TRUE).}
 

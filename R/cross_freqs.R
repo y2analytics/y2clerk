@@ -12,7 +12,7 @@
 #' @param ... The unquoted names of a set of variables in the dataset. If nothing
 #' is specified, the function runs a frequency on every column in given dataset.
 #' @param stat Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').
-#' @param pr Double, for use when stat = 'quantile.' Input should be a real number x such that 0 <= x <= 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)
+#' @param percentile Double, for use when stat = 'quantile.' Input should be a real number x such that 0 <= x <= 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)
 #' @param nas Boolean, whether or not to include NAs in the tabulation (default: TRUE).
 #' @param wt The unquoted name of a weighting variable in the dataset (default: NULL).
 #' @param prompt Boolean, whether or not to include the prompt in the dataset (default: FALSE).
@@ -48,7 +48,7 @@ cross_freqs <-
     group_vars,
     ...,
     stat = c("percent", "mean", "median", "min", "max", "quantile", "summary"),
-    pr = NULL,
+    percentile = NULL,
     nas = TRUE,
     wt = NULL,
     prompt = FALSE,
@@ -73,7 +73,7 @@ cross_freqs <-
           freqs(
             ...,
             stat = stat,
-            pr = pr,
+            percentile = percentile,
             nas = nas,
             wt = {{ wt }},
             prompt = prompt,
@@ -94,7 +94,7 @@ cross_freqs <-
               freqs(
                 ...,
                 stat = stat,
-                pr = pr,
+                percentile = percentile,
                 nas = nas,
                 wt = {{wt}},
                 prompt = prompt,

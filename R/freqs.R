@@ -6,7 +6,7 @@
 #' @param ... The unquoted names of a set of variables in the dataset. If nothing
 #' is specified, the function runs a frequency on every column in given dataset.
 #' @param stat Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').
-#' @param pr Double, for use when stat = 'quantile.' Input should be a real number x such that 0 <= x <= 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)
+#' @param percentile Double, for use when stat = 'quantile.' Input should be a real number x such that 0 <= x <= 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)
 #' @param nas Boolean, whether or not to include NAs in the tabulation (default: TRUE).
 #' @param wt The unquoted name of a weighting variable in the dataset (default: NULL).
 #' @param prompt Boolean, whether or not to include the prompt in the dataset (default: FALSE).
@@ -32,7 +32,7 @@
 #'   dplyr::group_by(a) %>%
 #'   freqs(b, nas = FALSE, wt = weights)
 #'
-#' # Note that pr = 60 will return an estimate
+#' # Note that percentile = 60 will return an estimate
 #' # of the real number such that 60% of values
 #' # are lower than that number
 #'
@@ -40,7 +40,7 @@
 #' # unaffected by weighting
 #' freqs(df, a, stat = 'min', nas = FALSE)
 #' freqs(df, a, stat = 'median', nas = FALSE)
-#' freqs(df, a, stat = 'quantile', pr = 95, nas = FALSE)
+#' freqs(df, a, stat = 'quantile', percentile = 95, nas = FALSE)
 #' freqs(df, a, stat = 'summary', nas = FALSE, wt = weights)
 #' @export
 
@@ -48,7 +48,7 @@ freqs  <- function(
   dataset,
   ...,
   stat = c("percent", "mean", "median", "min", "max", "quantile", "summary"),
-  pr = NULL,
+  percentile = NULL,
   nas = TRUE,
   wt = NULL,
   prompt = FALSE,
@@ -71,7 +71,7 @@ freqs  <- function(
       dataset,
       ...,
       stat = stat,
-      pr = pr,
+      percentile = percentile,
       nas = nas,
       wt = {{ wt }},
       prompt = prompt,
@@ -84,7 +84,7 @@ freqs  <- function(
       dataset,
       ...,
       stat = stat,
-      pr = pr,
+      percentile = percentile,
       nas = nas,
       wt = {{ wt }},
       prompt = prompt,
@@ -106,7 +106,7 @@ freqs_wuw  <- function(
   dataset,
   ...,
   stat,
-  pr,
+  percentile,
   nas,
   wt,
   prompt,
@@ -121,7 +121,7 @@ freqs_wuw  <- function(
     freqs_original(
       ...,
       stat = stat,
-      pr = pr,
+      percentile = percentile,
       nas = nas,
       wt = {{ wt }},
       prompt = prompt,
@@ -138,7 +138,7 @@ freqs_wuw  <- function(
     freqs_original(
       ...,
       stat = stat,
-      pr = pr,
+      percentile = percentile,
       nas = nas,
       wt = NULL,
       prompt = prompt,
@@ -167,7 +167,7 @@ freqs_original  <- function(
   dataset,
   ...,
   stat = stat,
-  pr = pr,
+  percentile = percentile,
   nas = nas,
   wt = wt,
   prompt = prompt,
@@ -193,7 +193,7 @@ freqs_original  <- function(
     frequencies <- purrr::map_dfr(
       .x = variables,
       .f = function(variable) {
-        freq_var(dataset, !!variable, stat, pr, nas, !!weight, prompt, digits)
+        freq_var(dataset, !!variable, stat, percentile, nas, !!weight, prompt, digits)
       }
     )
   )
@@ -205,7 +205,7 @@ freqs_original  <- function(
 
 
 
-calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
+calculate_result_for_cont_var <- function(dataset, variable, stat, percentile, wt) {
 
   # first: (if wt = NULL) change class so logical test can be performed in all cases:
   if(base::is.null(wt)) {
@@ -240,11 +240,11 @@ calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
   if(stat %in% c('quantile', 'median', 'min', 'max')) {
 
     if(stat == 'median'){
-      pr <- 50
+      percentile <- 50
     } else if(stat == 'min') {
-      pr <- 0
+      percentile <- 0
     } else if(stat == 'max') {
-      pr <- 100
+      percentile <- 100
     }
 
     if(stat %in% c('min', 'max')) {
@@ -260,7 +260,7 @@ calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
         dplyr::filter(!is.na(!!variable)) %>%
         dplyr::summarise(n = base::length(!!variable),
                          result = stats::quantile(x = !!variable,
-                                                  probs = pr / 100)
+                                                  probs = percentile / 100)
         )
     }
     # 2) wt exists in dataset
@@ -269,7 +269,7 @@ calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
         dplyr::filter(!is.na(!!variable)) %>%
         dplyr::summarise(n = base::length(!!variable),
                          result = reldist::wtd.quantile(!!variable,
-                                                        q = pr / 100,
+                                                        q = percentile / 100,
                                                         weight = !!wt)
         )
     }
@@ -277,20 +277,20 @@ calculate_result_for_cont_var <- function(dataset, variable, stat, pr, wt) {
   return(out_df)
 }
 
-validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
+validate_inputs <- function(dataset, variable, stat, percentile, nas, wt, prompt, digits) {
 
   # "failing fast"
 
   # 0) validate percentile rank
-  if(stat == 'quantile' & is.null(pr)) stop("No input given for pr (percentile rank)")
+  if(stat == 'quantile' & is.null(percentile)) stop("No input given for percentile (percentile rank)")
 
 
-  if(stat == 'quantile' & !is.null(pr)) {
-    if(pr < 0 | pr > 100) stop('Percentile rank should be between 0 and 100, inclusive')
+  if(stat == 'quantile' & !is.null(percentile)) {
+    if(percentile < 0 | percentile > 100) stop('Percentile rank should be between 0 and 100, inclusive')
   }
 
-  if(stat == 'quantile' & !is.null(pr)) {
-    if(pr < 1) rlang::inform('Remember that pr ranges between 0 and 100. pr = 0.5 returns the bottom half percentile, whereas pr = 50 returns the median.')
+  if(stat == 'quantile' & !is.null(percentile)) {
+    if(percentile < 1) rlang::inform('Remember that percentile ranges between 0 and 100. percentile = 0.5 returns the bottom half percentile, whereas percentile = 50 returns the median.')
   }
 
   # 1) if there are NAs in the data, you should use nas = FALSE
@@ -317,25 +317,26 @@ validate_inputs <- function(dataset, variable, stat, pr, nas, wt, prompt, digits
 
   # 3) stop if value labels exist
   check_labels <- dataset %>%
+    dplyr::ungroup() %>%
     dplyr::select(!!variable) %>%
     labelled::val_labels() %>%
     tibble::deframe() %>%
     base::is.null()
   if(! check_labels) stop("Value labels exist; consider converting values to labels or using stat = 'percent'")
 
-  # 4) give reminder if pr input given when stat is not set to 'quantile'
+  # 4) give reminder if percentile input given when stat is not set to 'quantile'
   if(!(stat %in% c('quantile', 'summary'))) {
-    if(!is.null(pr)) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
+    if(!is.null(percentile)) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
   }
 }
 
-get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
+get_output_for_cont_var <- function(dataset, variable, stat, percentile, nas, wt, prompt, digits) {
 
   # validation & checks
   validate_inputs(dataset,
                   variable,
                   stat,
-                  pr,
+                  percentile,
                   nas,
                   wt,
                   prompt,
@@ -345,7 +346,7 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
   out_df <- calculate_result_for_cont_var(dataset,
                                           variable,
                                           stat,
-                                          pr,
+                                          percentile,
                                           wt)
 
   # get group column names to add later (if they exist/as necessary)
@@ -365,8 +366,8 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
   # on the other hand, either of those would presumably be breaking changes
 
   # for convenience:
-  if(is.null(pr)) {
-    pr <- -99
+  if(is.null(percentile)) {
+    percentile <- -99
   }
 
   out_df <- out_df %>%
@@ -380,10 +381,10 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
                     statistic == 'median' ~ 'median',
                     statistic == 'max' ~ 'max',
                     statistic == 'quantile' &
-                      !(pr %in% c(0,50,100)) ~ stringr::str_c('q', pr),
-                    statistic == 'quantile' & pr == 0 ~ 'min',
-                    statistic == 'quantile' & pr == 50 ~ 'median',
-                    statistic == 'quantile' & pr == 100 ~ 'max',
+                      !(percentile %in% c(0,50,100)) ~ stringr::str_c('q', percentile),
+                    statistic == 'quantile' & percentile == 0 ~ 'min',
+                    statistic == 'quantile' & percentile == 50 ~ 'median',
+                    statistic == 'quantile' & percentile == 100 ~ 'max',
                     TRUE ~ 'error'
                   ),
                   # add 'weighted' string to existing value in stat column as relevant
@@ -440,26 +441,26 @@ get_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt
   }
 
   # for convenience:
-  if(pr == -99) {
-    pr <- NULL
+  if(percentile == -99) {
+    percentile <- NULL
   }
 
   return(out_df)
 }
 
-get_summary_output_for_cont_var <- function(dataset, variable, stat, pr, nas, wt, prompt, digits) {
+get_summary_output_for_cont_var <- function(dataset, variable, stat, percentile, nas, wt, prompt, digits) {
 
-  # add redundant reminder because  subsequent code overrides user inputs for stat & pr
+  # add redundant reminder because  subsequent code overrides user inputs for stat & percentile
   # [for other cases, this reminder is also present in validate_inputs()]
-  if(!is.null(pr)) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
+  if(!is.null(percentile)) rlang::inform("Remember that the percentile rank argument impacts output only when stat = 'quantile'")
 
   out <- dplyr::bind_rows(
-    get_output_for_cont_var(dataset, variable, stat = 'min', pr,            nas, wt, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 25,  nas, wt, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'median', pr,         nas, wt, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'mean', pr,           nas, wt, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'quantile', pr = 75,  nas, wt, prompt, digits),
-    get_output_for_cont_var(dataset, variable, stat = 'max', pr,            nas, wt, prompt, digits)
+    get_output_for_cont_var(dataset, variable, stat = 'min', percentile,            nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'quantile', percentile = 25,  nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'median', percentile,         nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'mean', percentile,           nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'quantile', percentile = 75,  nas, wt, prompt, digits),
+    get_output_for_cont_var(dataset, variable, stat = 'max', percentile,            nas, wt, prompt, digits)
   ) %>%
     dplyr::mutate(stat = forcats::fct_relevel(stat,
                                        c('min',
@@ -559,7 +560,7 @@ group_rename <- function(dataset){
   return(dataset)
 }
 
-freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, wt = NULL, prompt = FALSE, digits = 2) {
+freq_var <- function(dataset, variable, stat = 'percent', percentile = 50, nas = TRUE, wt = NULL, prompt = FALSE, digits = 2) {
   variable <- dplyr::enquo(variable)
   wt <- dplyr::enquo(wt)
 
@@ -574,11 +575,11 @@ freq_var <- function(dataset, variable, stat = 'percent', pr = 50, nas = TRUE, w
   }
 
   else if(stat %in% c('mean', 'quantile', 'min', 'median', 'max')) {
-    freq_result <- get_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
+    freq_result <- get_output_for_cont_var(dataset, variable, stat, percentile, nas, wt, prompt, digits)
   }
 
   else if(stat == 'summary') {
-    freq_result <- get_summary_output_for_cont_var(dataset, variable, stat, pr, nas, wt, prompt, digits)
+    freq_result <- get_summary_output_for_cont_var(dataset, variable, stat, percentile, nas, wt, prompt, digits)
   }
 
   return(freq_result)

@@ -1,3 +1,10 @@
+# y2clerk 0.5.0
+## Breaking changes
+* `freqs` & `cross_freqs`: argument *pr* changed to *percentile*. Change was done to better align with tidyverse practice that no arguments are the beginnings of another argument (existing argument "prompt" matched to "pr", which we now want to avoid by changing "pr" to "percentile")
+## Bug fixes
+* `freqs` bug fixed so now grouped freqs with stat = 'mean' runs properly 
+
+
 # y2clerk 0.4.4
 ## New function argument
 * `pivot_freqs` - *columns_var*: DEFAULT = label; Used to pivot so only "label" could be the new columns in the wide df. Now you can set group_var to be the new columns, instead of rows. 

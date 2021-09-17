@@ -448,17 +448,17 @@ test_that("using digits: output is precise to multiple decimal places", {
 
 context("validation")
 
-test_that("stat other than 'quantile' gives message when pr value is provided", {
+test_that("stat other than 'quantile' gives message when percentile value is provided", {
   expect_message(
     responses %>%
-      freqs(q1, pr = 75, stat = 'mean', nas = FALSE)
+      freqs(q1, percentile = 75, stat = 'mean', nas = FALSE)
   )
 })
 
 test_that("stat argument only accepts percent, mean, quantile, or summary", {
   expect_error(
     responses %>%
-      freqs(q1, stat = 'means', pr = 75, nas = FALSE)
+      freqs(q1, stat = 'means', percentile = 75, nas = FALSE)
   )
 })
 
@@ -492,7 +492,7 @@ test_that("freqs_wuw, ns and results are equal", {
     wt = carb,
     # Defaults auto input by function
     stat = 'percent',
-    pr = NULL,
+    percentile = NULL,
     nas = TRUE,
     prompt = FALSE,
     digits = 2,
@@ -518,7 +518,7 @@ test_that("freqs_wuw, test on responses", {
     wt = w,
     # Defaults auto input by function
     stat = 'percent',
-    pr = NULL,
+    percentile = NULL,
     nas = TRUE,
     prompt = FALSE,
     digits = 2,
