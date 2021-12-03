@@ -1,3 +1,8 @@
+# y2clerk 0.5.1
+## Bug fixes
+* `pivot_freqs` bug fixed where pivot_freqs was making columns into lists instead of numerics
+
+
 # y2clerk 0.5.0
 ## Breaking changes
 * `freqs` & `cross_freqs`: argument *pr* changed to *percentile*. Change was done to better align with tidyverse practice that no arguments are the beginnings of another argument (existing argument "prompt" matched to "pr", which we now want to avoid by changing "pr" to "percentile")

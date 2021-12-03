@@ -29,12 +29,14 @@ pivot_freqs <-
       dplyr::select(
         .data$group_var,
         .data$label,
-        .data$result
+        .data$result,
+        .data$variable
         ) %>%
       tidyr::pivot_wider(
         names_from = {{ columns_var }},
         values_from = .data$result
-        )
+        ) %>%
+      dplyr::select(-.data$variable)
   }
 
 
