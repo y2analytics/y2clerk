@@ -1,3 +1,8 @@
+# y2clerk 0.5.2
+## Bug fixes
+* `pivot_freqs` The last bug fix was a temporary solution for the list columns, but this one should be more legit (using values_fill argument from pivot_wider)
+
+
 # y2clerk 0.5.1
 ## Bug fixes
 * `pivot_freqs` bug fixed where pivot_freqs was making columns into lists instead of numerics
