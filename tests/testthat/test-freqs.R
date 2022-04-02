@@ -487,7 +487,7 @@ test_that("unweighted_ns = TRUE, but no wt variable", {
 test_that("freqs_wuw, ns and results are equal", {
   freqs_normal <- mtcars %>% freqs(gear)
   freqs_normal_weighted <- mtcars %>% freqs(gear, wt = carb)
-  freqs_wuw_table <- mtcars %>% freqs_wuw(
+  freqs_wuw_table <- mtcars %>% y2clerk:::freqs_wuw(
     gear,
     wt = carb,
     # Defaults auto input by function
@@ -513,7 +513,7 @@ test_that("freqs_wuw, ns and results are equal", {
 test_that("freqs_wuw, test on responses", {
   freqs_normal <- responses %>% freqs(q4)
   freqs_normal_weighted <- responses %>% freqs(q4, wt = w)
-  freqs_wuw_table <- responses %>% freqs_wuw(
+  freqs_wuw_table <- responses %>% y2clerk:::freqs_wuw(
     q4,
     wt = w,
     # Defaults auto input by function
