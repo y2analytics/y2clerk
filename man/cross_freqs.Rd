@@ -57,3 +57,21 @@ stats, and resulting calculations, split out by subgroups (group_vars).
 \description{
 Create a frequencies table with multiple distinct grouping variables/banners
 }
+\examples{
+GROUP_VARS <-
+  mtcars \%>\%
+  dplyr::select(
+    am,
+    vs
+  ) \%>\%
+  names()
+
+GROUP_VARS <- c("am", "vs")
+
+mtcars \%>\% cross_freqs(
+  group_vars = GROUP_VARS,
+  gear,
+  carb
+)
+
+}

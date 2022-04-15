@@ -1,3 +1,9 @@
+# y2clerk 0.5.4
+## New functions
+* `multi_freqs` Finally the new freqs function everyone has been waiting for. Run a frequencies table on a multiple answer question. Under the hood, the function looks for any respondents who answered *none* of the multiple selects for that series of questions with the same stem and filters them out before running freqs. Essentially, `multi_freqs` automates all that by-hand filtering that had to be done manually on any multiple answer questions. Conveniently allows you to input only one question in a multiple answer block. For example, the user only has to give it m_race_1, instead of m_race_1, m_race_2, m_race_3, etc..
+* `append_ns` - Uses the output from the y2clerk freqs() function and adds (N = ...) to the end of each label, based off the column "n". Useful for charts that require ns for all levels
+
+
 # y2clerk 0.5.2
 ## Bug fixes
 * `pivot_freqs` The last bug fix was a temporary solution for the list columns, but this one should be more legit (using values_fill argument from pivot_wider)

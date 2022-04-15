@@ -32,7 +32,7 @@
 #'     vs
 #'   ) %>%
 #'   names()
-#' }
+#'
 #' GROUP_VARS <- c("am", "vs")
 #'
 #' mtcars %>% cross_freqs(
