@@ -1,3 +1,12 @@
+# y2clerk 0.6.0
+# Breaking changes
+* `freqs` - When freqs was run on a factor variable in the past, the "value" column would pull the character labels even when the factor had underlying numbers. This version of y2clerk updates freqs to be more consistent with other types of haven labelled variables and pulls the underlying numbers of factor variables for use in the value column. 
+# New arguments
+* `freqs` - show_missing_levels: whether to keep response levels with no data (default: TRUE). For example, set to TRUE if you know no one answered "very dissatisfied" on a scale, but you still want that empty level of the scale present in the output of freqs.
+# New function
+* `to_haven_y2` - Convert a factor variable or a character variable to a haven labelled variable
+
+
 # y2clerk 0.5.4
 ## New functions
 * `multi_freqs` Finally the new freqs function everyone has been waiting for. Run a frequencies table on a multiple answer question. Under the hood, the function looks for any respondents who answered *none* of the multiple selects for that series of questions with the same stem and filters them out before running freqs. Essentially, `multi_freqs` automates all that by-hand filtering that had to be done manually on any multiple answer questions. Conveniently allows you to input only one question in a multiple answer block. For example, the user only has to give it m_race_1, instead of m_race_1, m_race_2, m_race_3, etc..

@@ -16,7 +16,8 @@ freqs(
   digits = 2,
   nas_group = TRUE,
   factor_group = FALSE,
-  unweighted_ns = FALSE
+  unweighted_ns = FALSE,
+  show_missing_levels = TRUE
 )
 
 freq(
@@ -30,7 +31,8 @@ freq(
   digits = 2,
   nas_group = TRUE,
   factor_group = FALSE,
-  unweighted_ns = FALSE
+  unweighted_ns = FALSE,
+  show_missing_levels = TRUE
 )
 }
 \arguments{
@@ -56,6 +58,8 @@ is specified, the function runs a frequency on every column in given dataset.}
 \item{factor_group}{Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)}
 
 \item{unweighted_ns}{Boolean, whether the 'n' column in the freqs table should be UNweighted while results ARE weighted. This argument can only be used if a wt variable is used. If no weight variable is used, the 'n' column will always be unweighted (default: FALSE).}
+
+\item{show_missing_levels}{Boolean, whether to keep response levels with no data (default: TRUE)}
 }
 \value{
 A dataframe with the variable names, prompts, values, labels, counts,

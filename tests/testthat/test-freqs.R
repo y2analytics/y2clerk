@@ -497,12 +497,14 @@ test_that("freqs_wuw, ns and results are equal", {
     prompt = FALSE,
     digits = 2,
     nas_group = TRUE,
-    factor_group = FALSE
+    factor_group = FALSE,
+    show_missing_levels = FALSE
     )
   freqs_wuw_infreqs <- mtcars %>% freqs(
     gear,
     wt = carb,
-    unweighted_ns = TRUE
+    unweighted_ns = TRUE,
+    show_missing_levels = FALSE
     )
 
   expect_equal(freqs_normal_weighted$result, freqs_wuw_infreqs$result)
@@ -523,12 +525,14 @@ test_that("freqs_wuw, test on responses", {
     prompt = FALSE,
     digits = 2,
     nas_group = TRUE,
-    factor_group = FALSE
+    factor_group = FALSE,
+    show_missing_levels = FALSE
   )
   freqs_wuw_infreqs <- responses %>% freqs(
     q4,
     wt = w,
-    unweighted_ns = TRUE
+    unweighted_ns = TRUE,
+    show_missing_levels = FALSE
   )
 
   expect_equal(freqs_normal_weighted$result, freqs_wuw_infreqs$result)
