@@ -1,3 +1,9 @@
+# y2clerk 0.6.1
+# Bug fixes
+* `freqs` - 'prompt = TRUE' now properly working with the new 'show_missing_levels' argument
+* `verbatims_y2` - internal update to work more in-line with the y2municipal topline() function
+
+
 # y2clerk 0.6.0
 # Breaking changes
 * `freqs` - When freqs was run on a factor variable in the past, the "value" column would pull the character labels even when the factor had underlying numbers. This version of y2clerk updates freqs to be more consistent with other types of haven labelled variables and pulls the underlying numbers of factor variables for use in the value column. 

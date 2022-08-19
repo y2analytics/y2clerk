@@ -135,6 +135,11 @@ verbatims_y2_single <- function(
     ) %>%
     dplyr::filter(
       .data$label != ""
+    ) %>%
+    dplyr::mutate(
+      variable = as.character(.data$variable),
+      prompt = as.character(.data$prompt),
+      label = as.character(.data$label)
     )
 
 }

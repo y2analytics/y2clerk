@@ -670,10 +670,10 @@ labelled_ns <- function(dataset, variable, weight, prompt, show_missing_levels) 
   # Extract the metadata from the labelled class
   counts <- base_ns(dataset, variable, weight)
   if (prompt) {
-    counts <- counts %>%
-      dplyr::mutate(
-        prompt = labelled::var_label(.data$value)
-      )
+    prompt_text <- counts %>%
+      dplyr::select(.data$value) %>%
+      labelled::var_label() %>%
+      as.character()
   }
   counts <- counts %>%
     dplyr::mutate(
@@ -700,6 +700,10 @@ labelled_ns <- function(dataset, variable, weight, prompt, show_missing_levels) 
       dplyr::mutate(
         n = ifelse(is.na(.data$n), 0, .data$n)
       )
+  }
+
+  if(prompt == TRUE) {
+    counts$prompt <- prompt_text
   }
 
   return(counts)

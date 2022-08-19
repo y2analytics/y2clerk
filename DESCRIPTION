@@ -1,7 +1,7 @@
 Type: Package
 Package: y2clerk
 Title: Our Resident Tabulation Expert
-Version: 0.6.0
+Version: 0.6.1
 Authors@R: c(
     person('Scotty', 'Riding', email = 'scott@y2analytics.com', role = 'aut'), 
     person('Luke', 'Carter', email = 'luke@y2analytics.com', role = 'aut'), 
@@ -28,10 +28,11 @@ Imports:
     reldist,
     rlang,
     stringr,
-    testthat,
     tibble,
     tidyr,
     tidyselect
+Suggests:
+    testthat
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2
