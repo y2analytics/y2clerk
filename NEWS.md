@@ -1,3 +1,7 @@
+# y2clerk 0.6.2
+# Bug fixes
+* `freqs` - Bug fix for grouped frequencies with prompt = TRUE
+
 # y2clerk 0.6.1
 # Bug fixes
 * `freqs` - 'prompt = TRUE' now properly working with the new 'show_missing_levels' argument

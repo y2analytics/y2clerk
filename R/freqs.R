@@ -671,6 +671,7 @@ labelled_ns <- function(dataset, variable, weight, prompt, show_missing_levels) 
   counts <- base_ns(dataset, variable, weight)
   if (prompt) {
     prompt_text <- counts %>%
+      dplyr::ungroup() %>%
       dplyr::select(.data$value) %>%
       labelled::var_label() %>%
       as.character()
