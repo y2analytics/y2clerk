@@ -131,7 +131,7 @@ multi_freqs <- function(
     data <- dataset %>%
       # dataset selects all columns that start with the string or the ith element in the string list
       dplyr::select(
-        dplyr::starts_with(i),
+        dplyr::starts_with(stringr::str_c(i, '_')),
         # "_TEXT" question is always removed
         -dplyr::ends_with('_TEXT'),
         # weight is selected if specified

@@ -1,19 +1,24 @@
+# y2clerk 0.6.3
+## Bug fixes
+* `multi_freqs` - Resolved bug for multi-select questions with 10+ options.
+
+
 # y2clerk 0.6.2
-# Bug fixes
+## Bug fixes
 * `freqs` - Bug fix for grouped frequencies with prompt = TRUE
 
 # y2clerk 0.6.1
-# Bug fixes
+## Bug fixes
 * `freqs` - 'prompt = TRUE' now properly working with the new 'show_missing_levels' argument
 * `verbatims_y2` - internal update to work more in-line with the y2municipal topline() function
 
 
 # y2clerk 0.6.0
-# Breaking changes
+## Breaking changes
 * `freqs` - When freqs was run on a factor variable in the past, the "value" column would pull the character labels even when the factor had underlying numbers. This version of y2clerk updates freqs to be more consistent with other types of haven labelled variables and pulls the underlying numbers of factor variables for use in the value column. 
-# New arguments
+## New arguments
 * `freqs` - show_missing_levels: whether to keep response levels with no data (default: TRUE). For example, set to TRUE if you know no one answered "very dissatisfied" on a scale, but you still want that empty level of the scale present in the output of freqs.
-# New function
+## New function
 * `to_haven_y2` - Convert a factor variable or a character variable to a haven labelled variable
 
 
