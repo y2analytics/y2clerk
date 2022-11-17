@@ -2,7 +2,7 @@
 
 #' Tastefully combine "label" and "n" columns
 #'
-#' Uses the output from the y2clerk freqs() function and adds (n = ...) to the end of each label, based off the column "n". Useful for charts that require ns for all levels
+#' Uses the output from the y2clerk freqs() function and adds (n = ...) to the end of each label, based off the column "n". Useful for charts that require ns for all levels. this is a random comment
 #'
 #' @param dataset A dataframe
 #' @param append_to (default: label). The variable to which you wish to add (n = ...)
