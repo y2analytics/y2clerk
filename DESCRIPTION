@@ -1,7 +1,7 @@
 Type: Package
 Package: y2clerk
 Title: Our Resident Tabulation Expert
-Version: 0.6.3
+Version: 0.6.4
 Authors@R: c(
     person('Scotty', 'Riding', email = 'scott@y2analytics.com', role = 'aut'), 
     person('Luke', 'Carter', email = 'luke@y2analytics.com', role = 'aut'), 
@@ -12,6 +12,7 @@ Authors@R: c(
     person('Tatiana', 'Gilchrist', email = 'tatiana@y2analytics.com', role = 'aut'),
     person('Pearce', 'Solomon', email = 'pearce@y2analytics.com', role = 'aut'),
     person('Canyen', 'Heimuli', email = 'canyen@y2analytics.com', role = 'aut'),
+    person('Megan', 'Gilchrist', email = 'megan@y2analytics.com', role = 'aut'),
     person('Y2 Analytics', role = c('cph', 'fnd')))
 Description: Frequencies functions to speed up our workflow, freeing up time to wile away before the grave.
 License: file LICENSE
