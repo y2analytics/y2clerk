@@ -118,7 +118,7 @@ cross_freqs <-
       output <-
         results_raw %>%
         dplyr::select(
-          .data$group_var_name,
+          'group_var_name',
           tidyselect::everything()
           ) %>%
         dplyr::ungroup()
@@ -175,7 +175,7 @@ exclude_groups_fun <- function(results_raw, group_vars, exclude_groups) {
         filter_out = as.numeric(.data$variable %in% group_vars) # 1 if matching
       ) %>%
       dplyr::filter(.data$filter_out == 0) %>%
-      dplyr::select(-.data$filter_out)
+      dplyr::select(-'filter_out')
   }
 }
 
@@ -188,11 +188,11 @@ pivot_nest <-
   ) {
     dataset %>%
       dplyr::select(
-        .data$group_var_name,
-        .data$group_var,
-        .data$variable,
-        .data$label,
-        .data$result
+        'group_var_name',
+        'group_var',
+        'variable',
+        'label',
+        'result'
       )  %>%
       dplyr::ungroup() %>%
       dplyr::nest_by(
@@ -202,13 +202,13 @@ pivot_nest <-
         results = list(
           tidyr::pivot_wider(
             .data$data,
-            values_from = .data$result,
-            names_from = .data$group_var)
+            values_from = 'result',
+            names_from = 'group_var')
         )
       ) %>%
       dplyr::select(
-        .data$group_var_name,
-        .data$results
+        'group_var_name',
+        'results'
       )
   }
 

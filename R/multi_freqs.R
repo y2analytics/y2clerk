@@ -96,7 +96,7 @@ multi_freqs <- function(
     pattern <- dataset %>%
       dplyr::ungroup() %>%
       dplyr::select(-{{ wt }},
-                    -.data[[dplyr::group_vars(dataset)]]) %>%
+                    -tidyselect::all_of(dplyr::group_vars(dataset))) %>%
       names() %>%
       stringr::str_remove(
         '_[0-9]+$'

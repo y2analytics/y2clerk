@@ -1,3 +1,10 @@
+# y2clerk 0.6.4
+## New functions
+* `stat_test_y2` - Akin to crosstabs, run significance testing on a grouped frequencies
+## Maintenance 
+* Updating depreciation of .data$ in tidyselect functions
+
+
 # y2clerk 0.6.3
 ## Bug fixes
 * `multi_freqs` - Resolved bug for multi-select questions with 10+ options.

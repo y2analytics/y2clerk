@@ -27,13 +27,13 @@ pivot_freqs <-
 
     dataset %>%
       dplyr::select(
-        .data$group_var,
-        .data$label,
-        .data$result
+        'group_var',
+        'label',
+        'result'
       ) %>%
       tidyr::pivot_wider(
         names_from = {{ columns_var }},
-        values_from = .data$result,
+        values_from = 'result',
         values_fill = 0
       )
   }

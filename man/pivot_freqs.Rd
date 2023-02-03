@@ -19,8 +19,8 @@ A wide tibble of frequencies with one row for each group (by default)
 Given a grouped frequencies table, pivot_freqs will create new columns for each label level in the frequencies
 }
 \examples{
-  frequencies <- ToothGrowth \%>\%
-    dplyr::group_by(supp) \%>\%
-      y2clerk::freqs(dose) \%>\%
+  frequencies <- forcats::gss_cat \%>\%
+    dplyr::group_by(year) \%>\%
+      y2clerk::freqs(marital) \%>\%
       pivot_freqs()
 }

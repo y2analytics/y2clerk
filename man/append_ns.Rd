@@ -11,7 +11,7 @@ append_ns(dataset, append_to = label, by_group_var = FALSE, newline = FALSE)
 
 \item{append_to}{(default: label). The variable to which you wish to add (n = ...)}
 
-\item{by_group_var}{(default: FALSE). If FALSE, takes ns by row. If TRUE, takes group ns by group_var levels. Set to TRUE if making a stacked bar chart.}
+\item{by_group_var}{(default: FALSE). If FALSE, takes ns by row. If TRUE, takes group ns by group_var levels. Set to TRUE if making a stacked bar chart}
 
 \item{newline}{(default: FALSE). If FALSE, (n = ...) comes after a space " ". If TRUE, it comes after a hard return}
 }

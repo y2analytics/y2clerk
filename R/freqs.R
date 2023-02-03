@@ -135,7 +135,7 @@ freqs_wuw  <- function(
       factor_group = factor_group,
       show_missing_levels = show_missing_levels
     ) %>%
-    dplyr::select(-.data$n)
+    dplyr::select(-'n')
 
   # run unweighted freqs, but only keep n
   freqs_unweighted <-
@@ -153,7 +153,7 @@ freqs_wuw  <- function(
       factor_group = factor_group,
       show_missing_levels = show_missing_levels
     ) %>%
-    dplyr::select(.data$n)
+    dplyr::select('n')
 
   # bind freqs together
   frequencies <- dplyr::bind_cols(
@@ -161,7 +161,7 @@ freqs_wuw  <- function(
     freqs_unweighted
   ) %>%
     dplyr::relocate(
-      .data$n,
+      'n',
       .after = "label"
     )
   return(frequencies)
@@ -358,7 +358,7 @@ get_output_for_cont_var <- function(dataset, variable, stat, percentile, nas, wt
                                           wt)
 
   # get group column names to add later (if they exist/as necessary)
-  grouping_vars <- c("")
+  grouping_vars <- c(NULL)
   if (dplyr::is.grouped_df(dataset)) {
     grouping_vars <- dplyr::group_vars(dataset)
   }
@@ -404,13 +404,19 @@ get_output_for_cont_var <- function(dataset, variable, stat, percentile, nas, wt
                                   digits),
                   result = base::round(.data$result,
                                        digits)) %>%
-    dplyr::select(tidyselect::one_of(grouping_vars),
-                  .data$variable,
-                  .data$value,
-                  .data$label,
-                  .data$n,
-                  .data$stat,
-                  .data$result) %>%
+    dplyr::select(
+      tidyselect::all_of(
+        c(
+          grouping_vars,
+          'variable',
+          'value',
+          'label',
+          'n',
+          'stat',
+          'result'
+        )
+      )
+    ) %>%
     tibble::as_tibble()
 
   # fill out prompt column if specified
@@ -432,14 +438,20 @@ get_output_for_cont_var <- function(dataset, variable, stat, percentile, nas, wt
       dplyr::mutate(
         prompt = prompt_text
       ) %>%
-      dplyr::select(tidyselect::one_of(grouping_vars),
-                    .data$variable,
-                    .data$prompt,
-                    .data$value,
-                    .data$label,
-                    .data$n,
-                    .data$stat,
-                    .data$result)
+      dplyr::select(
+        tidyselect::all_of(
+          c(
+            grouping_vars,
+            'variable',
+            'prompt',
+            'value',
+            'label',
+            'n',
+            'stat',
+            'result'
+          )
+        )
+      )
   }
 
   # if weights are used, remove weight column rows from output
@@ -496,7 +508,7 @@ group_factor <- function(dataset){
       dplyr::ungroup() %>%
       dplyr::mutate_at(
         dplyr::vars(
-          grouping_vars
+          tidyselect::all_of(grouping_vars)
         ),
         list(~forcats::as_factor(.))
       ) %>%
@@ -511,7 +523,7 @@ group_factor <- function(dataset){
         dplyr::ungroup() %>%
         dplyr::mutate_at(
           dplyr::vars(
-            grouping_vars
+            tidyselect::all_of(grouping_vars)
           ),
           list(~forcats::as_factor(.))
         ) %>%
@@ -633,19 +645,19 @@ ns <- function(dataset, variable, weight, prompt, show_missing_levels) {
   if (prompt) {
     counts %>%
       dplyr::select(
-        .data$variable,
-        .data$prompt,
-        .data$value,
-        .data$label,
-        .data$n
+        'variable',
+        'prompt',
+        'value',
+        'label',
+        'n'
       )
   } else {
     counts %>%
       dplyr::select(
-        .data$variable,
-        .data$value,
-        .data$label,
-        .data$n
+        'variable',
+        'value',
+        'label',
+        'n'
       )
   }
 }
@@ -672,7 +684,7 @@ labelled_ns <- function(dataset, variable, weight, prompt, show_missing_levels) 
   if (prompt) {
     prompt_text <- counts %>%
       dplyr::ungroup() %>%
-      dplyr::select(.data$value) %>%
+      dplyr::select('value') %>%
       labelled::var_label() %>%
       as.character()
   }

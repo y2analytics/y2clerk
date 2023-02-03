@@ -2,11 +2,11 @@
 
 #' Tastefully combine "label" and "n" columns
 #'
-#' Uses the output from the y2clerk freqs() function and adds (n = ...) to the end of each label, based off the column "n". Useful for charts that require ns for all levels. this is a random comment
+#' Uses the output from the y2clerk freqs() function and adds (n = ...) to the end of each label, based off the column "n". Useful for charts that require ns for all levels
 #'
 #' @param dataset A dataframe
 #' @param append_to (default: label). The variable to which you wish to add (n = ...)
-#' @param by_group_var (default: FALSE). If FALSE, takes ns by row. If TRUE, takes group ns by group_var levels. Set to TRUE if making a stacked bar chart.
+#' @param by_group_var (default: FALSE). If FALSE, takes ns by row. If TRUE, takes group ns by group_var levels. Set to TRUE if making a stacked bar chart
 #' @param newline (default: FALSE). If FALSE, (n = ...) comes after a space " ". If TRUE, it comes after a hard return
 #' @importFrom data.table :=
 #' @examples
@@ -67,7 +67,7 @@ append_ns <-
             ')'
           )
         ) %>%
-        dplyr::select(-.data$n_group)
+        dplyr::select(-'n_group')
     }
   }
 

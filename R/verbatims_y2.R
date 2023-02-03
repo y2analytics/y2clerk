@@ -89,7 +89,7 @@ verbatims_y2_single <- function(
       )
     ) %>%
     dplyr::select(
-      .data$label
+      'label'
     ) %>%
     unlist()
 
@@ -101,7 +101,7 @@ verbatims_y2_single <- function(
     ) %>%
     dplyr::mutate(variable = freq_var_char) %>%
     dplyr::select(
-      .data$variable,
+      'variable',
       label = !!freq_flag
       )
 
@@ -119,7 +119,7 @@ verbatims_y2_single <- function(
     )%>%
     dplyr::mutate(variable = freq_var_char) %>%
     dplyr::select(
-      .data$variable,
+      'variable',
       prompt = !!freq_flag
     ) %>%
     dplyr::distinct(
@@ -129,9 +129,9 @@ verbatims_y2_single <- function(
 
   dplyr::left_join(freq_df, labels, by = c("variable")) %>%
     dplyr::select(
-      .data$variable,
-      .data$prompt,
-      .data$label
+      'variable',
+      'prompt',
+      'label'
     ) %>%
     dplyr::filter(
       .data$label != ""
