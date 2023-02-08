@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: ''
+title: "[Untitled FEATURE REQUEST]"
 labels: ''
 assignees: ''
 
@@ -18,3 +18,10 @@ A clear and concise description of any alternative solutions or features you've 
 
 **Additional context**
 Add any other context or screenshots about the feature request here.
+
+**Priority**
+A subjective description of the importance that the development team should place on exploring this feature:
+
+ - Low
+ - Medium
+ - High
