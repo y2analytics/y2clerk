@@ -14,6 +14,7 @@
 #' @param nas_group Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: TRUE).
 #' @param factor_group Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)
 #' @param unweighted_ns Boolean, whether the 'n' column in the freqs table should be UNweighted while results ARE weighted. This argument can only be used if a wt variable is used. If no weight variable is used, the 'n' column will always be unweighted (default: FALSE).
+#' @param show_missing_levels Boolean, whether to keep response levels with no data (default: TRUE)
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations.
 #' @examples
@@ -56,8 +57,9 @@ multi_freqs <- function(
   digits = 2,
   nas_group = TRUE,
   factor_group = FALSE,
-  unweighted_ns = FALSE
-){
+  unweighted_ns = FALSE,
+  show_missing_levels = TRUE
+) {
 
   # Creates an empty list to be populated with frequencies data frames
   datalist <- list()
@@ -119,7 +121,7 @@ multi_freqs <- function(
       )
 
     # Throw warning if stem is character variable
-    if (is.character(type_check[, 1])){
+    if (is.character(type_check[, 1])) {
       warning('Text variable stem detected -- please ensure this is intentional')
     }
 
@@ -162,8 +164,9 @@ multi_freqs <- function(
         digits = digits,
         nas_group = nas_group,
         factor_group = factor_group,
-        unweighted_ns = unweighted_ns
-      )
+        unweighted_ns = unweighted_ns,
+        show_missing_levels = show_missing_levels
+        )
 
     if (remove_nas == TRUE) {
 
