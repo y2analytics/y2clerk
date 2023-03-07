@@ -201,7 +201,18 @@ freqs_original  <- function(
     frequencies <- purrr::map_dfr(
       .x = variables,
       .f = function(variable) {
-        freq_var(dataset, !!variable, stat, percentile, nas, !!weight, prompt, digits, show_missing_levels)
+        freq_var(
+          dataset,
+          !!variable,
+          stat,
+          percentile,
+          nas,
+          !!weight,
+          prompt,
+          digits,
+          show_missing_levels,
+          nas_group
+          )
       }
     )
   )
@@ -589,7 +600,8 @@ freq_var <- function(
     wt = NULL,
     prompt = FALSE,
     digits = 2,
-    show_missing_levels = show_missing_levels
+    show_missing_levels = show_missing_levels,
+    nas_group
     ) {
   variable <- dplyr::enquo(variable)
   wt <- dplyr::enquo(wt)
@@ -599,7 +611,7 @@ freq_var <- function(
                    'summary','min','max','median'))) stop('"stat" argument must receive a value from c("percent", "mean", "quantile", "summary", "min", "median", "max")')
 
   if (stat == 'percent') {
-    base <- ns(dataset, variable, wt, prompt, show_missing_levels)
+    base <- ns(dataset, variable, wt, prompt, show_missing_levels, nas_group)
     freq_result <- base %>%
       percents(nas, digits = digits)
   }
@@ -632,11 +644,11 @@ column_quos <- function(dataset, wt) {
   return(col_quos)
 }
 
-ns <- function(dataset, variable, weight, prompt, show_missing_levels) {
+ns <- function(dataset, variable, weight, prompt, show_missing_levels, nas_group) {
   is_labelled <- sum(class(dataset %>% dplyr::pull(!!variable)) %in% c('labelled','haven_labelled','haven_labelled_spss'))
   counts <- if (is_labelled >= 1) {
     # Metadata is better if the given variable has labels
-    labelled_ns(dataset, variable, weight, prompt, show_missing_levels)
+    labelled_ns(dataset, variable, weight, prompt, show_missing_levels, nas_group)
   } else {
     # Otherwise, use some sensible defaults
     unlabelled_ns(dataset, variable, weight, prompt)
@@ -678,7 +690,7 @@ percents <- function(counts, include_nas, digits) {
     )
 }
 
-labelled_ns <- function(dataset, variable, weight, prompt, show_missing_levels) {
+labelled_ns <- function(dataset, variable, weight, prompt, show_missing_levels, nas_group) {
   # Extract the metadata from the labelled class
   counts <- base_ns(dataset, variable, weight)
   if (prompt) {
@@ -705,14 +717,41 @@ labelled_ns <- function(dataset, variable, weight, prompt, show_missing_levels) 
       variable = rlang::quo_name(variable)
     )
 
+    if (dplyr::is.grouped_df(dataset)) {
+      grouping_vars <- dplyr::group_vars(dataset)
+      group_levels <- list()
+      for (i in grouping_vars) {
+        group_levels[[i]] <- dataset %>%
+          dplyr::select(tidyselect::all_of(i)) %>%
+          dplyr::distinct()
+      }
+      all_group_levels <- dplyr::bind_rows(group_levels)
+      all_levels_tibble <- dplyr::cross_join(all_group_levels, all_levels_tibble)
+      counts <- counts %>%
+        dplyr::full_join(
+          all_levels_tibble,
+          by = c(grouping_vars, 'label', 'value', 'variable')
+        ) %>%
+        dplyr::mutate(
+          n = ifelse(is.na(.data$n), 0, .data$n)
+        )
+      if (nas_group == FALSE) {
+        counts <- counts %>%
+          dplyr::filter_at(
+            .vars = 1,
+            ~!is.na(.)
+          )
+      }
+    } else { # If not grouped
     counts <- counts %>%
       dplyr::full_join(
         all_levels_tibble,
         by = c('label', 'value', 'variable')
-        ) %>%
+      ) %>%
       dplyr::mutate(
         n = ifelse(is.na(.data$n), 0, .data$n)
       )
+    }
   }
 
   if(prompt == TRUE) {

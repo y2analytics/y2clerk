@@ -4,52 +4,59 @@ library(dplyr)
 library(labelled)
 library(testthat)
 
-set.seed(100)
 
 # test data ---------------------------------------------------------------
 
+set.seed(100)
 responses <- {
   data.frame(
-
     # continuous numeric, no variable label, no NA
     q0 = sample(
       x = datasets::swiss$Agriculture,
       size = 25,
       replace = TRUE),
-
     # continuous numeric, variable label, incl. NA
     q1 = sample(
       x = c(datasets::swiss$Agriculture, NA),
       size = 25,
       prob = c(rep(.8/47,47), 0.2),
       replace = TRUE),
-
     # factor (numbers), no value labels
     q2 = sample(
       x = datasets::Orange$Tree,
       size = 25,
       replace = TRUE),
-
     # character, no value labels
     q3 = sample(
       stringr::fruit,
       25,
       prob = 1/(1:80 * sum(1/(1:80))),
       replace = TRUE),
-
     # numeric values, discrete numeric value labels
     q4 = sample(
       1:8,
       25,
       replace = TRUE),
-
     # character values, discrete character value labels
     q5 = sample(
       letters[1:4],
       25,
       prob = c(0.4,0.3,0.2,0.1),
       replace = TRUE),
-
+    # character, no value labels
+    gender_labelled = c(
+      rep(1, 12,),
+      rep(2, 12),
+      rep(3, 0),
+      rep(NA_real_, 1)
+    ),
+    # groups
+    group_var1 = sample(
+      c('group 1', 'group 2', NA_character_),
+      25,
+      prob = c(.8, .15, .05),
+      replace = TRUE
+    ),
     # numeric weights
     w = rnorm(25, mean = 1, sd = 0.1)
   ) %>%
@@ -67,6 +74,11 @@ responses <- {
         `Somewhat happy` = "b",
         `Somewhat unhappy` = "c",
         `Very unhappy` = "d"
+      ),
+      gender_labelled = c(
+        'male' = 1,
+        'female' = 2,
+        'other' = 3
       )
     ) %>%
     labelled::set_variable_labels(
@@ -75,7 +87,8 @@ responses <- {
       q3 = "Preferred fruit",
       q4 = "Duration",
       q5 = "Satisfaction",
-      w = "Weights"
+      w = "Weights",
+      gender_labelled = 'gender'
     ) %>%
     dplyr::as_tibble()
 }
@@ -147,7 +160,9 @@ test_that("nas - label", {
 test_that("nas - group", {
   df <- data.frame(
     a = c(1, 2, 2, 3, 4, 2, NA),
-    g = c(1, 1, 2, 2, 3, NA, 2)
+    a2 = c(1, 2, 2, 3, 4, 2, 5),
+    g = c(1, 1, 2, 2, 3, NA, 2),
+    g2 = c(1, 1, 2, 2, 3, 3, NA)
   ) %>% dplyr::group_by(g)
 
   yes_nas <- df %>%
@@ -156,6 +171,9 @@ test_that("nas - group", {
   no_nas <- df %>%
     dplyr::group_by(g) %>%
     freqs(a, nas_group = FALSE)
+  no_nas2 <- df %>%
+    dplyr::group_by(g2) %>%
+    freqs(a2, nas_group = FALSE)
   group_factors <- df %>%
     dplyr::group_by(g) %>%
     freqs(a, factor_group = TRUE)
@@ -253,7 +271,7 @@ context("check test data")
 
 test_that("test data is correct", {
   expect_type(responses, "list")
-  expect_equal(ncol(responses), 7)
+  expect_equal(ncol(responses), 9)
   expect_equal(nrow(responses), 25)
 })
 
@@ -537,5 +555,80 @@ test_that("freqs_wuw, test on responses", {
 
   expect_equal(freqs_normal_weighted$result, freqs_wuw_infreqs$result)
   expect_equal(freqs_normal$n, freqs_wuw_infreqs$n)
+})
+
+
+
+# Test on show missing levels ---------------------------------------------
+test_that("multi_freqs - show_missing_levels argument", {
+  test_no_missing_levels <- responses %>%
+    freqs(
+      gender_labelled,
+      show_missing_levels = FALSE
+    )
+  test_yes_missing_levels <- responses %>%
+    freqs(
+      gender_labelled,
+      show_missing_levels = TRUE
+    )
+  test_yes_missing_levels_no_nas <- responses %>%
+    freqs(
+      gender_labelled,
+      nas = FALSE,
+      show_missing_levels = TRUE
+    )
+  sum_no_missing <-
+    stringr::str_detect(test_no_missing_levels$label, 'other') %>%
+    sum(na.rm = TRUE)
+  sum_yes_missing <-
+    stringr::str_detect(test_yes_missing_levels$label, 'other') %>%
+    sum(na.rm = TRUE)
+  sum_yes_missing_nas <-
+    stringr::str_detect(test_yes_missing_levels_no_nas$label, 'other') %>%
+    sum()
+
+  expect_equal(sum_no_missing, 0)
+  expect_equal(sum_yes_missing, 1)
+  expect_equal(sum_yes_missing_nas, 1)
+})
+
+
+test_that("freqs - show_missing_levels argument", {
+  # Missing level shows up in NA group, but not other groups
+  no_missing <- responses %>%
+    dplyr::group_by(group_var1) %>%
+    freqs(
+      gender_labelled,
+      nas = FALSE,
+      show_missing_levels = FALSE
+    )
+  yes_missing <- responses %>%
+    dplyr::group_by(group_var1) %>%
+    freqs(
+      gender_labelled,
+      nas = FALSE,
+      show_missing_levels = TRUE
+    )
+  yes_missing_no_nas_group <- responses %>%
+    dplyr::group_by(group_var1) %>%
+    freqs(
+      gender_labelled,
+      nas = FALSE,
+      show_missing_levels = TRUE,
+      nas_group = FALSE
+    )
+  sum_no_missing <-
+    stringr::str_detect(no_missing$label, 'other') %>%
+    sum()
+  sum_yes_missing <-
+    stringr::str_detect(yes_missing$label, 'other') %>%
+    sum()
+  sum_yes_missing_no_nas_group <-
+    stringr::str_detect(yes_missing_no_nas_group$label, 'other') %>%
+    sum()
+
+  expect_equal(sum_no_missing, 0)
+  expect_equal(sum_yes_missing, 3)
+  expect_equal(sum_yes_missing_no_nas_group, 2)
 })
 

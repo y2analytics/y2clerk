@@ -1,3 +1,10 @@
+# y2clerk 0.6.6
+## New features
+* `multi_freqs` - New argument *show_missing_levels* Boolean, whether to keep response levels with no data (default: TRUE). This argument functions the same way it does with freqs()
+## Bug fixes
+* `freqs` did not always capture all missing levels with the argument *show_missing_levels* when the data was grouped. This has been fixed, and the hotfix also applies to the new argument in *multi_freqs*
+
+
 # y2clerk 0.6.4
 ## New functions
 * `stat_test_y2` - Akin to crosstabs, run significance testing on a grouped frequencies
