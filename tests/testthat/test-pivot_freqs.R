@@ -1,25 +1,8 @@
-# setup -------------------------------------------------------------------
-
-### Packages
-library(testthat)
-library(dplyr)
-library(y2clerk)
-library(forcats)
-library(stringr)
-
-### Data
-gss_cat
-names(gss_cat)
-
-# Tests -------------------------------------------------------------------
-### Context
-context("Tests on pivot_freqs")
-
 
 ### Column names
 test_that("Column names", {
-  frequencies_base <- gss_cat %>%
-    group_by(year) %>%
+  frequencies_base <- forcats::gss_cat %>%
+    dplyr::group_by(year) %>%
     freqs(marital)
   frequencies_base
 
@@ -41,8 +24,8 @@ test_that("Column names", {
 
 
 test_that("Column names with two group vars", {
-  frequencies_pivoted <- gss_cat %>%
-    group_by(year, marital) %>%
+  frequencies_pivoted <- forcats::gss_cat %>%
+    dplyr::group_by(year, marital) %>%
     freqs(race) %>%
     pivot_freqs()
   frequencies_pivoted
@@ -63,8 +46,8 @@ test_that("Column names with two group vars", {
 
 ### Group_var levels
 test_that("Each row is a group_var level", {
-  frequencies_pivoted <- gss_cat %>%
-    group_by(year) %>%
+  frequencies_pivoted <- forcats::gss_cat %>%
+    dplyr::group_by(year) %>%
     freqs(marital) %>%
     pivot_freqs()
   frequencies_pivoted
@@ -85,8 +68,8 @@ test_that("Each row is a group_var level", {
 
 ### columns_var - pivot other way
 test_that("Pivot on group_var", {
-  frequencies_pivoted <- gss_cat %>%
-    group_by(year) %>%
+  frequencies_pivoted <- forcats::gss_cat %>%
+    dplyr::group_by(year) %>%
     freqs(marital) %>%
     pivot_freqs(group_var)
   frequencies_pivoted
@@ -102,7 +85,7 @@ test_that("Pivot on group_var", {
 ### Errors
 test_that("pivot_freqs error testing - blank label column", {
   expect_error(
-    frequencies <- gss_cat %>%
+    frequencies <- forcats::gss_cat %>%
       freqs(age, stat = 'mean', nas = FALSE) %>%
       pivot_freqs(),
     'Your frequencies label column is blank. Please provide labels on which to pivot.',
@@ -112,7 +95,7 @@ test_that("pivot_freqs error testing - blank label column", {
 
 test_that("pivot_freqs error testing - missing group_var", {
   expect_error(
-    frequencies <- gss_cat %>%
+    frequencies <- forcats::gss_cat %>%
       freqs(marital) %>%
       pivot_freqs(),
     'Your frequencies does not contain a group_var. It must have a group_var to pivot correctly.',
@@ -122,7 +105,7 @@ test_that("pivot_freqs error testing - missing group_var", {
 
 test_that("pivot_freqs error testing - missing label or result column", {
   expect_error(
-    frequencies <- gss_cat %>%
+    frequencies <- forcats::gss_cat %>%
       pivot_freqs(),
     'Input data must contain a "label" column and a "result" column. Ensure you are passing the output from a freqs() call.',
     fixed = TRUE

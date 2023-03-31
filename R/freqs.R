@@ -195,9 +195,6 @@ freqs_original  <- function(
     variables <- column_quos(dataset, wt = !!weight)
   }
 
-  # suppressWarnings added for trivial bind rows warning
-  # i used messages instead of warnings to still communicate my own conditional output
-  suppressWarnings(
     frequencies <- purrr::map_dfr(
       .x = variables,
       .f = function(variable) {
@@ -215,11 +212,9 @@ freqs_original  <- function(
           )
       }
     )
-  )
   frequencies <- group_rename(frequencies)
 
   return(frequencies)
-  # options(warn=0)
 }
 
 
@@ -406,11 +401,6 @@ get_output_for_cont_var <- function(dataset, variable, stat, percentile, nas, wt
                     statistic == 'quantile' & percentile == 100 ~ 'max',
                     TRUE ~ 'error'
                   ),
-                  # add 'weighted' string to existing value in stat column as relevant
-                  stat = dplyr::case_when(
-                    !rlang::quo_is_null(wt) & !(stat %in% c('min', 'max')) ~ stringr::str_c(stat, ' - weighted'),
-                    TRUE ~ stat
-                  ),
                   n = base::round(.data$n,
                                   digits),
                   result = base::round(.data$result,
@@ -496,13 +486,9 @@ get_summary_output_for_cont_var <- function(dataset, variable, stat, percentile,
     dplyr::mutate(stat = forcats::fct_relevel(stat,
                                        c('min',
                                          'q25',
-                                         'q25 - weighted',
                                          'median',
-                                         'median - weighted',
                                          'mean',
-                                         'mean - weighted',
                                          'q75',
-                                         'q75 - weighted',
                                          'max')
     )
     )

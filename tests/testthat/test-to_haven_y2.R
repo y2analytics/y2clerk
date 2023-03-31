@@ -1,14 +1,7 @@
-# setup -------------------------------------------------------------------
-library(y2clerk)
-library(dplyr)
-library(forcats)
-library(labelled)
-library(testthat)
 
+# Data --------------------------------------------------------------------
 
-# test data ---------------------------------------------------------------
 set.seed(100)
-
 responses <- {
   data.frame(
 
@@ -56,7 +49,7 @@ responses <- {
       stringr::fruit,
       25,
       prob = 1/(1:80 * sum(1/(1:80))),
-      replace = TRUE) %>% as_factor(),
+      replace = TRUE) %>% forcats::as_factor(),
 
     # numeric weights
     w = rnorm(25, mean = 1, sd = 0.1)
@@ -89,18 +82,13 @@ responses <- {
     dplyr::as_tibble()
 }
 
-glimpse(responses)
 
 # Tests -------------------------------------------------------------
-
-
-context("to_haven_y2")
-
 
 test_that("to_haven_y2 error on haven_labelled vars", {
   expect_error(
     responses %>%
-      mutate(
+      dplyr::mutate(
       q4_haven = to_haven_y2(q4),
     'q4 is already a haven_labelled variable',
     fixed = TRUE
@@ -112,7 +100,7 @@ test_that("to_haven_y2 error on haven_labelled vars", {
 test_that("to_haven_y2 error on numeric vars", {
   expect_error(
     responses %>%
-      mutate(
+      dplyr::mutate(
         q0_haven = to_haven_y2(q0),
         'to_haven_y2 cannot be used on numeric variable: q0',
         fixed = TRUE
@@ -127,19 +115,19 @@ test_that("to_haven_y2 error on numeric vars", {
 # 3) Is the ordering consistent after conversion to haven_labelled?
 test_that("to_haven_y2: character vars", {
   # Original
-  responses %>% pull(q3)
+  responses %>% dplyr::pull(q3)
   responses_haven <- responses %>%
-    mutate(q3_haven = to_haven_y2(q3))
+    dplyr::mutate(q3_haven = to_haven_y2(q3))
   q3_factor <- responses_haven %>%
-    slice(1:3) %>%
-    pull(q3_haven) %>%
-    as_factor() %>%
+    dplyr::slice(1:3) %>%
+    dplyr::pull(q3_haven) %>%
+    forcats::as_factor() %>%
     as.character()
   q3_num <- responses_haven %>%
-    slice(1:3) %>%
-    pull(q3_haven) %>%
+    dplyr::slice(1:3) %>%
+    dplyr::pull(q3_haven) %>%
     as.numeric()
-  responses_haven %>% select(q3, q3_haven)
+  responses_haven %>% dplyr::select(q3, q3_haven)
 
   expect_equal(class(responses_haven$q3_haven)[1], "haven_labelled")
   expect_equal(q3_num, c(1, 1, 2))
@@ -149,19 +137,19 @@ test_that("to_haven_y2: character vars", {
 
 test_that("to_haven_y2: factor vars", {
   # Original
-  responses %>% pull(q6)
+  responses %>% dplyr::pull(q6)
   responses_haven <- responses %>%
-    mutate(q6_haven = to_haven_y2(q6))
+    dplyr::mutate(q6_haven = to_haven_y2(q6))
   q6_factor <- responses_haven %>%
-    slice(1:4) %>%
-    pull(q6_haven) %>%
-    as_factor() %>%
+    dplyr::slice(1:4) %>%
+    dplyr::pull(q6_haven) %>%
+    forcats::as_factor() %>%
     as.character()
   q6_num <- responses_haven %>%
-    slice(1:4) %>%
-    pull(q6_haven) %>%
+    dplyr::slice(1:4) %>%
+    dplyr::pull(q6_haven) %>%
     as.numeric()
-  responses_haven %>% select(q6, q6_haven)
+  responses_haven %>% dplyr::select(q6, q6_haven)
 
   expect_equal(class(responses_haven$q6_haven)[1], "haven_labelled")
   expect_equal(q6_num, c(1, 2, 3, 2))

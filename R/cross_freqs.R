@@ -21,6 +21,7 @@
 #' @param factor_group Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)
 #' @param wide Boolean, whether the dataframe should be one long dataframe (FALSE) or a wide and nested dataframe, nested on the group_vars (TRUE) (default: FALSE)
 #' @param exclude_groups Boolean, argument only applies if group_vars are also included as freqs vars - group_vars are included as freqs vars if using select() to run cross_freqs on all variables in the dataset. FALSE will INclude group_vars as freqs vars. TRUE will EXclude group_vars from also being freqs vars (default: FALSE)
+#' @param include_overall Boolean, whether to include the overall frequency levels for variables (default = FALSE)
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations, split out by subgroups (group_vars).
 #' @export
@@ -56,12 +57,18 @@ cross_freqs <-
     nas_group = TRUE,
     factor_group = FALSE,
     wide = FALSE,
-    exclude_groups = FALSE
+    exclude_groups = FALSE,
+    include_overall = FALSE
   ) {
 
     # custom error messages
     stat <- rlang::arg_match(stat)
     cross_error_messages(dataset, group_vars)
+
+    if(include_overall == TRUE) {
+      dataset$Overall <- '1'
+      group_vars <- c('Overall', group_vars)
+    }
 
     # start for loop: run freqs for each level in group_vars
     for (i in 1:length(group_vars)) {

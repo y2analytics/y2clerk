@@ -17,7 +17,8 @@ cross_freqs(
   nas_group = TRUE,
   factor_group = FALSE,
   wide = FALSE,
-  exclude_groups = FALSE
+  exclude_groups = FALSE,
+  include_overall = FALSE
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ is specified, the function runs a frequency on every column in given dataset.}
 \item{wide}{Boolean, whether the dataframe should be one long dataframe (FALSE) or a wide and nested dataframe, nested on the group_vars (TRUE) (default: FALSE)}
 
 \item{exclude_groups}{Boolean, argument only applies if group_vars are also included as freqs vars - group_vars are included as freqs vars if using select() to run cross_freqs on all variables in the dataset. FALSE will INclude group_vars as freqs vars. TRUE will EXclude group_vars from also being freqs vars (default: FALSE)}
+
+\item{include_overall}{Boolean, whether to include the overall frequency levels for variables (default = FALSE)}
 }
 \value{
 A dataframe with the variable names, prompts, values, labels, counts,

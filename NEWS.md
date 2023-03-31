@@ -1,3 +1,10 @@
+# y2clerk 0.6.7
+## New features
+* `cross_freqs` - New argument *include_overall* Boolean, whether to include the overall frequency levels for variables (default = FALSE)
+## Maintenance 
+* Fixed underlying suppressed warnings in freqs() function
+
+
 # y2clerk 0.6.6
 ## New features
 * `multi_freqs` - New argument *show_missing_levels* Boolean, whether to keep response levels with no data (default: TRUE). This argument functions the same way it does with freqs()
