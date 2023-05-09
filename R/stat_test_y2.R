@@ -88,7 +88,7 @@ sig_test_y2 <- function(
 ) {
 
   ## Error for labelled double group_var
-  if(haven::is.labelled(frequencies$group_var) == TRUE) {
+  if (haven::is.labelled(frequencies$group_var) == TRUE) {
 
     stop(
       stringr::str_c(
@@ -121,18 +121,9 @@ sig_test_y2 <- function(
     as.character()
 
   # Define value levels from frequencies object
-  if (is.factor(dataset[[var_name]]) == TRUE ||
-      is.character(dataset[[var_name]]) == TRUE) {
+  if (haven::is.labelled(dataset[[var_name]])) {
 
-    # (fix for factor or character vars in freqs)
-    value_levels <- frequencies %>%
-      dplyr::ungroup() %>%
-      dplyr::count(.data$label) %>%
-      dplyr::pull(.data$label)
-
-  } else if (is.na(as.numeric(frequencies$value)[1]) == FALSE) {
-
-    # (fix for character type number values in freqs)
+    # Use value col for haven labelled vars
     value_levels <- frequencies %>%
       dplyr::ungroup() %>%
       dplyr::count(.data$value) %>%
@@ -141,10 +132,11 @@ sig_test_y2 <- function(
 
   } else {
 
+    # Label col works for everything else
     value_levels <- frequencies %>%
       dplyr::ungroup() %>%
-      dplyr::count(.data$value) %>%
-      dplyr::pull(.data$value)
+      dplyr::count(.data$label) %>%
+      dplyr::pull(.data$label)
 
   }
 
@@ -164,22 +156,40 @@ sig_test_y2 <- function(
   for (i in value_levels) {
 
     # Process updates
-    message(
-      stringr::str_c(
-        'Adding grouped pairwise significance tests for response "',
-        frequencies %>%
-          dplyr::ungroup() %>%
-          dplyr::filter(
-            .data$value == i |
-              .data$label == i
-          ) %>%
-          dplyr::distinct(.data$label) %>%
-          dplyr::pull(.data$label),
-        '" for group_var "',
-        deparse(substitute(banner_var)),
-        '"'
+
+    if (haven::is.labelled(dataset[[var_name]])) {
+
+      haven_val_label <- frequencies %>%
+        dplyr::ungroup() %>%
+        dplyr::filter(
+          .data$value == i
+        ) %>%
+        dplyr::distinct(.data$label) %>%
+        dplyr::pull(.data$label)
+
+      message(
+        stringr::str_c(
+          'Adding grouped pairwise significance tests for response "',
+          haven_val_label,
+          '" for group_var "',
+          deparse(substitute(banner_var)),
+          '"'
+        )
       )
-    )
+
+    } else {
+
+      message(
+        stringr::str_c(
+          'Adding grouped pairwise significance tests for response "',
+          i,
+          '" for group_var "',
+          deparse(substitute(banner_var)),
+          '"'
+        )
+      )
+
+    }
 
     # All group_level pairwise combinations
     for (j in group_levels) {
@@ -190,19 +200,43 @@ sig_test_y2 <- function(
 
           # Proportions check
 
-          Px <- frequencies %>%
-            dplyr::filter(
-              .data$group_var == j,
-              .data$value == i
-            ) %>%
-            dplyr::pull(.data$result)
+          if (haven::is.labelled(dataset[[var_name]])) {
 
-          Py <- frequencies %>%
-            dplyr::filter(
-              .data$group_var == k,
-              .data$value == i
-            ) %>%
-            dplyr::pull(.data$result)
+            # For haven labelled vars, reference value
+
+            Px <- frequencies %>%
+              dplyr::filter(
+                .data$group_var == j,
+                .data$value == i
+              ) %>%
+              dplyr::pull(.data$result)
+
+            Py <- frequencies %>%
+              dplyr::filter(
+                .data$group_var == k,
+                .data$value == i
+              ) %>%
+              dplyr::pull(.data$result)
+
+          } else {
+
+            # Reference label for all else
+
+            Px <- frequencies %>%
+              dplyr::filter(
+                .data$group_var == j,
+                .data$label == i
+              ) %>%
+              dplyr::pull(.data$result)
+
+            Py <- frequencies %>%
+              dplyr::filter(
+                .data$group_var == k,
+                .data$label == i
+              ) %>%
+              dplyr::pull(.data$result)
+
+          }
 
           # In cases where no one in group answered
 
@@ -218,7 +252,7 @@ sig_test_y2 <- function(
 
           }
 
-          # Only for cases where Px is greater than Py
+          # Only where Px is greater than Py
 
           if (Px > Py) {
 
@@ -245,13 +279,13 @@ sig_test_y2 <- function(
                   !is.na(.data$test_var),
                   .data$group == j |
                     .data$group == k
-                ) %>%
-                dplyr::mutate(id = dplyr::row_number())
+                )
 
               # Create survey design object
 
               surv_object <- survey::svydesign(
-                id =~ id,
+                id =~ 1,
+                weights = NULL,
                 data = test_data
               )
 
@@ -281,13 +315,12 @@ sig_test_y2 <- function(
                   !is.na(.data$test_var),
                   .data$group == j |
                     .data$group == k
-                ) %>%
-                dplyr::mutate(id = dplyr::row_number())
+                )
 
               # Create survey design object
 
               surv_object <- survey::svydesign(
-                id =~ id,
+                id =~ 1,
                 weights =~ weight,
                 data = test_data
               )
@@ -339,16 +372,17 @@ sig_test_y2 <- function(
 
         }
 
-        if (is.factor(dataset[[var_name]]) == TRUE ||
-            is.character(dataset[[var_name]]) == TRUE) {
 
-          ## Merge
+        ## Merge
+        if (haven::is.labelled(dataset[[var_name]])) {
+
+          # Onto value for haven labelled vars
           tested_freqs <- tested_freqs %>%
             dplyr::mutate(
               sig = ifelse(
                 # For the group_var and value just tested against,
                 .data$group_var == j &
-                  .data$label == i,
+                  .data$value == i,
                 # Add the appropriate legend code to the sig column
                 stringr::str_c(.data$sig, code_result),
                 # Keep it the same for all else
@@ -358,13 +392,13 @@ sig_test_y2 <- function(
 
         } else {
 
-          ## Merge
+          # Onto label for all else
           tested_freqs <- tested_freqs %>%
             dplyr::mutate(
               sig = ifelse(
                 # For the group_var and value just tested against,
                 .data$group_var == j &
-                  .data$value == i,
+                  .data$label == i,
                 # Add the appropriate legend code to the sig column
                 stringr::str_c(.data$sig, code_result),
                 # Keep it the same for all else
@@ -380,16 +414,24 @@ sig_test_y2 <- function(
   }
 
   ## Final appending group level references
+
+  sig_codes_refs <- sig_codes %>%
+    dplyr::mutate(
+      group_levels = unlist(
+        lapply(
+          group_levels, paste0('as.', class(tested_freqs$group_var))
+        )
+      ),
+      reference = stringr::str_c(
+        '[',
+        toupper(.data$reference),
+        ']'
+      )
+    )
+
   tested_freqs <- tested_freqs %>%
     dplyr::left_join(
-      sig_codes %>%
-        dplyr::mutate(
-          reference = stringr::str_c(
-            '[',
-            toupper(.data$reference),
-            ']'
-          )
-        ),
+      sig_codes_refs,
       by = c('group_var' = 'group_levels')) %>%
     dplyr::mutate(
       group_var = stringr::str_c(
@@ -404,7 +446,8 @@ sig_test_y2 <- function(
           group_levels,
           ' [',
           toupper(sig_codes$reference),
-          ']')
+          ']'
+        )
       )
     ) %>%
     dplyr::select(-'reference')
