@@ -129,7 +129,7 @@ sig_test_y2 <- function(
       dplyr::count(.data$value) %>%
       dplyr::pull(.data$value) %>%
       as.numeric()
-ethrtjykt
+
   } else {
 
     # Label col works for everything else
