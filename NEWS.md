@@ -1,3 +1,8 @@
+# y2clerk 0.6.9
+## New features
+* `verbatims_y2` now has an additional column of output: base_ns.
+
+
 # y2clerk 0.6.7
 ## New features
 * `cross_freqs` - New argument *include_overall* Boolean, whether to include the overall frequency levels for variables (default = FALSE)

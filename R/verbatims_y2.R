@@ -2,7 +2,7 @@
 ### Description
 #' Create a dataframe of open-ended questions formatted for internbot, used to create appendices
 #'
-#' Formats open-ended questions with the proper columns for internbot: variable, prompt, label
+#' Formats open-ended questions with the proper columns for internbot: variable, prompt, label, base_ns
 #' @param dataset no default. Usually piped in from your main dataset
 #' @param ... The names of the openended variables from your dataset you want to include in your new dataframe
 #' @keywords openend open end frequencies freqs internbot appendix
@@ -26,12 +26,12 @@
 verbatims_y2 <- function(
   dataset,
   ...
-){
+) {
   freq_flags <- dplyr::quos(...)
 
   # If no variables are specified in the function call,
   # assume the user wants to run a frequency on all columns.
-  if(!length(freq_flags)) {
+  if (!length(freq_flags)) {
     freq_flags <- column_quos_verbatims(dataset)
   }
 
@@ -42,7 +42,7 @@ verbatims_y2 <- function(
       }
     )
 
-  if("No label" %in% frequencies$prompt == TRUE){
+  if ("No label" %in% frequencies$prompt == TRUE) {
     warning("You are working with variables that have no labeling. You may want to consider adding a prompt before continuing")
   }
 
@@ -73,7 +73,7 @@ column_quos_verbatims <- function(dataset) {
 verbatims_y2_single <- function(
   dataset,
   freq_var
-){
+) {
   freq_flag <- dplyr::enquo(freq_var)
   freq_var_char <- rlang::quo_name(freq_flag) #convert quoed var into a string
 
@@ -116,7 +116,7 @@ verbatims_y2_single <- function(
           TRUE ~ labelled::var_label(.)
         )
       )
-    )%>%
+    ) %>%
     dplyr::mutate(variable = freq_var_char) %>%
     dplyr::select(
       'variable',
@@ -134,13 +134,15 @@ verbatims_y2_single <- function(
       'label'
     ) %>%
     dplyr::filter(
-      .data$label != ""
+      .data$label != "",
+      .data$label != "NA"
     ) %>%
     dplyr::mutate(
       variable = as.character(.data$variable),
       prompt = as.character(.data$prompt),
       label = as.character(.data$label)
-    )
+    ) %>%
+    dplyr::add_count(name = 'base_ns')
 
 }
 
