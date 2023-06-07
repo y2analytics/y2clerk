@@ -207,4 +207,49 @@ test_that("pipe vars", {
   expect_equal(length_freqs, 18)
 })
 
+test_that("base_ns", {
+  df_labelled <- tibble::tibble(
+    var1 = c(
+      'I like to talk about dogs',
+      'Dogs are cool but cats are aight too',
+      'NA',
+      "My dog's collars are always too tight",
+      '',
+      'Cats collars are typically cooler than dogs'
+    )
+  )
+  labelled::var_label(df_labelled$var1) <- 'My prompt'
+  ns <- df_labelled %>%
+    verbatims_y2(var1)
 
+  expect_equal(names(ns)[4], 'base_ns')
+  expect_equal(
+    ns %>% dplyr::pull(base_ns),
+    c(4, 4, 4, 4)
+    )
+})
+
+
+test_that("empty variables", {
+  df_labelled <- tibble::tibble(
+    var1 = c('','',''),
+    var2 = c(
+      'I like to talk about dogs',
+      'Dogs are cool but cats are aight too',
+      "My dog's collars are always too tight"
+    ),
+    var3 = c('NA','NA','NA')
+  )
+  labelled::var_label(df_labelled$var1) <- 'My prompt'
+  labelled::var_label(df_labelled$var2) <- 'My prompt 2'
+  labelled::var_label(df_labelled$var3) <- 'My prompt 3'
+
+  expect_error(
+    verbatims_y2(df_labelled),
+    regexp = NA
+    )
+  expect_equal(
+    verbatims_y2(df_labelled) %>% dplyr::pull(variable),
+    c('var2', 'var2', 'var2')
+  )
+})

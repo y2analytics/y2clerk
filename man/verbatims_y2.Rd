@@ -12,7 +12,7 @@ verbatims_y2(dataset, ...)
 \item{...}{The names of the openended variables from your dataset you want to include in your new dataframe}
 }
 \description{
-Formats open-ended questions with the proper columns for internbot: variable, prompt, label
+Formats open-ended questions with the proper columns for internbot: variable, prompt, label, base_ns
 }
 \examples{
 responses <- tibble::tibble(
