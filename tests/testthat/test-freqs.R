@@ -39,7 +39,7 @@ responses <- {
       replace = TRUE),
     # character, no value labels
     gender_labelled = c(
-      rep(1, 12,),
+      rep(1, 12),
       rep(2, 12),
       rep(3, 0),
       rep(NA_real_, 1)
@@ -595,6 +595,53 @@ test_that("freqs - show_missing_levels argument", {
   expect_equal(sum_yes_missing, 3)
   expect_equal(sum_yes_missing_no_nas_group, 2)
 })
+
+test_that("freqs - show_missing_levels ordered", {
+  missing_tibble <- tibble::tibble(
+    weekdays = c(
+      rep(1, 10),
+      rep(2, 0),
+      rep(3, 10),
+      rep(4, 0),
+      rep(5, 10)
+    ),
+    pokemon = c(
+      rep(1, 12),
+      rep(2, 5),
+      rep(3, 13)
+    )
+  ) %>%
+    labelled::set_value_labels(
+      weekdays = c(
+        'Monday' = 1,
+        'Tuesday' = 2,
+        'Wednesday' = 3,
+        'Thursday' = 4,
+        'Friday' = 5
+      ),
+      pokemon = c(
+        'Bulbasaur' = 1,
+        'Charmander' = 2,
+        'Squirtle' = 3
+      )
+    )
+
+  missing_freqs <- missing_tibble %>% freqs(weekdays)
+  missing_freqs_grouped <- missing_tibble %>%
+    dplyr::group_by(pokemon) %>%
+    freqs(weekdays, factor_group = TRUE)
+
+  expect_equal(missing_freqs %>% dplyr::pull(n), c(10, 0, 10, 0, 10))
+  expect_equal(
+    missing_freqs %>% dplyr::pull(label),
+    c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+    )
+  expect_equal(
+    missing_freqs_grouped %>% dplyr::pull(label) %>% unique(),
+    c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+  )
+})
+
 
 
 # Percentile tests --------------------------------------------------------
