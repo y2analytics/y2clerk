@@ -1,3 +1,8 @@
+# y2clerk 0.6.10
+## Bug fixes
+* `freqs` - When show_missing_levels = TRUE, now has freqs table ordered by value, slotting in the missing levels where they *should* have gone if not missing, instead of at the end of the table.
+
+
 # y2clerk 0.6.9
 ## New features
 * `verbatims_y2` now has an additional column of output: base_ns.

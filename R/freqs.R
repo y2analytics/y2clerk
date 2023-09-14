@@ -738,6 +738,7 @@ labelled_ns <- function(dataset, variable, weight, prompt, show_missing_levels, 
         n = ifelse(is.na(.data$n), 0, .data$n)
       )
     }
+    counts <- counts %>% dplyr::arrange(.data$value)
   }
 
   if(prompt == TRUE) {
