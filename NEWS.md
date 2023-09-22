@@ -1,3 +1,7 @@
+# y2clerk 0.6.11
+## New features
+* `sig_test_y2` can now take a grouped freqs() object with multiple variables; function iterates through pairwise group-level testing in each variable and displays results together.
+
 # y2clerk 0.6.10
 ## Bug fixes
 * `freqs` - When show_missing_levels = TRUE, now has freqs table ordered by value, slotting in the missing levels where they *should* have gone if not missing, instead of at the end of the table.
