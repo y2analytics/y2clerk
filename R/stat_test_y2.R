@@ -4,9 +4,9 @@
 #'
 #' Akin to crosstabs, run significance testing on a grouped frequencies
 #'
-#' @param frequencies A frequencies table created using the freqs() function in y2clerk
-#' @param dataset (default: 'responses') The original data frame that the frequencies table came from
-#' @param banner_var This will be the banner variables for cross tabs. Same as the grouping variable from the freqs() function.
+#' @param frequencies A grouped frequencies table created using the freqs() function in y2clerk
+#' @param dataset The original data frame that the frequencies table came from
+#' @param banner_var This will be the banner variables for cross tabs. Must be the same as the grouping variable from the freqs() function.
 #' @param wt The weight variable used in the frequencies function, if applicable
 #' @param layout (default: 'tall') 'tall' formats the output to look like a basic grouped freqs table. 'wide' formats the output to look like the result from Q-formatted cross tabs
 #' @return A table that matches the output of cross tabs, showing significance differences between different groups for any input variables
@@ -86,10 +86,10 @@ sig_test_y2 <- function(
     wt = NULL,
     layout = c('tall', 'wide')
 ) {
-
+  
   ## Error for labelled double group_var
   if (haven::is.labelled(frequencies$group_var) == TRUE) {
-
+    
     stop(
       stringr::str_c(
         'Banner variable "',
@@ -97,324 +97,335 @@ sig_test_y2 <- function(
         '" is a labelled double; please set "factor_group" equal to TRUE in freqs() for this variable'
       )
     )
-
+    
   }
-
+  
   ## Create logical for if there are weights
   weight_null <- dplyr::enquo(wt)
   weight_exists <- !rlang::quo_is_null(weight_null)
-
+  
   ## Test matching arguments
   layout <- rlang::arg_match(layout)
-
+  
   ## Getting iterables
   # Define variable name for responses reference
-  var_name <- frequencies %>%
+  var_names <- frequencies %>%
     dplyr::ungroup() %>%
     dplyr::distinct(.data$variable) %>%
     dplyr::pull()
-
+  
   # Define group_var levels from frequencies object
   group_levels <- frequencies %>%
     dplyr::count(.data$group_var) %>%
     dplyr::pull(.data$group_var) %>%
     as.character()
-
-  # Define value levels from frequencies object
-  if (haven::is.labelled(dataset[[var_name]])) {
-
-    # Use value col for haven labelled vars
-    value_levels <- frequencies %>%
-      dplyr::ungroup() %>%
-      dplyr::count(.data$value) %>%
-      dplyr::pull(.data$value) %>%
-      as.numeric()
-
-  } else {
-
-    # Label col works for everything else
-    value_levels <- frequencies %>%
-      dplyr::ungroup() %>%
-      dplyr::count(.data$label) %>%
-      dplyr::pull(.data$label)
-
-  }
-
+  
   # Letter references
   sig_codes <- data.frame(
     group_levels = group_levels,
     reference = letters[1:length(group_levels)]
   )
-
+  
   # New column for test results
   tested_freqs <- frequencies %>%
     dplyr::mutate(sig = '')
-
-  ## Populate
-
-  # Iterate through each value level (comparing ACROSS groups WITHIN values)
-  for (i in value_levels) {
-
-    # Process updates
-
+  
+  for (var_name in var_names){
+    
+    # Define value levels from frequencies object
     if (haven::is.labelled(dataset[[var_name]])) {
-
-      haven_val_label <- frequencies %>%
+      
+      # Use value col for haven labelled vars
+      value_levels <- frequencies %>%
         dplyr::ungroup() %>%
-        dplyr::filter(
-          .data$value == i
-        ) %>%
-        dplyr::distinct(.data$label) %>%
-        dplyr::pull(.data$label)
-
-      message(
-        stringr::str_c(
-          'Adding grouped pairwise significance tests for response "',
-          haven_val_label,
-          '" for group_var "',
-          deparse(substitute(banner_var)),
-          '"'
-        )
-      )
-
+        dplyr::count(.data$value) %>%
+        dplyr::pull(.data$value) %>%
+        as.numeric()
+      
     } else {
-
-      message(
-        stringr::str_c(
-          'Adding grouped pairwise significance tests for response "',
-          i,
-          '" for group_var "',
-          deparse(substitute(banner_var)),
-          '"'
+      
+      # Label col works for everything else
+      value_levels <- frequencies %>%
+        dplyr::ungroup() %>%
+        dplyr::count(.data$label) %>%
+        dplyr::pull(.data$label)
+      
+    }
+    
+    ## Populate
+    
+    # Iterate through each value level (comparing ACROSS groups WITHIN values)
+    for (i in value_levels) {
+      
+      # Process updates
+      
+      if (haven::is.labelled(dataset[[var_name]])) {
+        
+        haven_val_label <- frequencies %>%
+          dplyr::ungroup() %>%
+          dplyr::filter(
+            .data$variable == var_name,
+            .data$value == i
+          ) %>%
+          dplyr::distinct(.data$label) %>%
+          dplyr::pull(.data$label)
+        
+        message(
+          stringr::str_c(
+            'Adding grouped pairwise significance tests for response "',
+            haven_val_label,
+            '" for group_var "',
+            deparse(substitute(banner_var)),
+            '"'
+          )
         )
-      )
-
-    }
-
-    # All group_level pairwise combinations
-    for (j in group_levels) {
-      for (k in group_levels) {
-
-        # Only runs test for pairings of un-alike groups
-        if (j != k) {
-
-          # Proportions check
-
-          if (haven::is.labelled(dataset[[var_name]])) {
-
-            # For haven labelled vars, reference value
-
-            Px <- frequencies %>%
-              dplyr::filter(
-                .data$group_var == j,
-                .data$value == i
-              ) %>%
-              dplyr::pull(.data$result)
-
-            Py <- frequencies %>%
-              dplyr::filter(
-                .data$group_var == k,
-                .data$value == i
-              ) %>%
-              dplyr::pull(.data$result)
-
-          } else {
-
-            # Reference label for all else
-
-            Px <- frequencies %>%
-              dplyr::filter(
-                .data$group_var == j,
-                .data$label == i
-              ) %>%
-              dplyr::pull(.data$result)
-
-            Py <- frequencies %>%
-              dplyr::filter(
-                .data$group_var == k,
-                .data$label == i
-              ) %>%
-              dplyr::pull(.data$result)
-
-          }
-
-          # In cases where no one in group answered
-
-          if (rlang::is_empty(Px)) {
-
-            Px <- 0
-
-          }
-
-          if (rlang::is_empty(Py)) {
-
-            Py <- 0
-
-          }
-
-          # Only where Px is greater than Py
-
-          if (Px > Py) {
-
-            # Unweighted
-
-            if (weight_exists == FALSE) {
-
-              # Set up testing data
-
-              test_data <- dataset %>%
-                dplyr::select(
-                  test_var = tidyselect::all_of(var_name),
-                  group = {{ banner_var }}
-                ) %>%
-                dplyr::mutate(
-                  group = as.character(haven::as_factor(.data$group)),
-                  test_var = dplyr::case_when(
-                    test_var == i ~ 1,
-                    is.na(test_var) ~ NA_real_,
-                    TRUE ~ 0
-                  )
-                ) %>%
-                dplyr::filter(
-                  !is.na(.data$test_var),
-                  .data$group == j |
-                    .data$group == k
-                )
-
-              # Create survey design object
-
-              surv_object <- survey::svydesign(
-                id =~ 1,
-                weights = NULL,
-                data = test_data
-              )
-
-            }
-
-            # Weighted
-
-            if (weight_exists == TRUE) {
-
-              # Set up testing data
-
-              test_data <- dataset %>%
-                dplyr::select(
-                  test_var = tidyselect::all_of(var_name),
-                  group = {{ banner_var }},
-                  weight = {{ wt }}
-                ) %>%
-                dplyr::mutate(
-                  group = as.character(haven::as_factor(.data$group)),
-                  test_var = dplyr::case_when(
-                    test_var == i ~ 1,
-                    is.na(test_var) ~ NA_real_,
-                    TRUE ~ 0
-                  )
-                ) %>%
-                dplyr::filter(
-                  !is.na(.data$test_var),
-                  .data$group == j |
-                    .data$group == k
-                )
-
-              # Create survey design object
-
-              surv_object <- survey::svydesign(
-                id =~ 1,
-                weights =~ weight,
-                data = test_data
-              )
-
-            }
-
-            # Get test results
-
-            p_value <- survey::svychisq(
-              ~test_var + group,
-              surv_object
-            ) %>%
-              purrr::pluck('p.value')
-
-            # Get legend code
-
-            group_letter <- sig_codes %>%
-              dplyr::filter(group_levels == k) %>%
-              dplyr::pull(.data$reference)
-
-            # FDR correction (default; used in Q crosstabs)
-
-            p_value <- stats::p.adjust(
-              p_value,
-              method = 'fdr',
-              n = choose(length(group_levels), 2)
-            )
-
-            code_result <- dplyr::case_when(
-              # < 0.05 is lower-case code; < 0.001 is upper-case
-              dplyr::between(p_value, 0.001, 0.05) ~ group_letter,
-              p_value < 0.001 ~ toupper(group_letter),
-              TRUE ~ ''
-            )
-
-            # Skip for any Px < Py
-
-          } else {
-
-            code_result = ''
-
-          }
-
-          # Skip if j == k
-
-        } else {
-
-          code_result = ''
-
-        }
-
-
-        ## Merge
-        if (haven::is.labelled(dataset[[var_name]])) {
-
-          # Onto value for haven labelled vars
-          tested_freqs <- tested_freqs %>%
-            dplyr::mutate(
-              sig = ifelse(
-                # For the group_var and value just tested against,
-                .data$group_var == j &
-                  .data$value == i,
-                # Add the appropriate legend code to the sig column
-                stringr::str_c(.data$sig, code_result),
-                # Keep it the same for all else
-                .data$sig
-              )
-            )
-
-        } else {
-
-          # Onto label for all else
-          tested_freqs <- tested_freqs %>%
-            dplyr::mutate(
-              sig = ifelse(
-                # For the group_var and value just tested against,
-                .data$group_var == j &
-                  .data$label == i,
-                # Add the appropriate legend code to the sig column
-                stringr::str_c(.data$sig, code_result),
-                # Keep it the same for all else
-                .data$sig
-              )
-            )
-
-        }
-
+        
+      } else {
+        
+        message(
+          stringr::str_c(
+            'Adding grouped pairwise significance tests for response "',
+            i,
+            '" for group_var "',
+            deparse(substitute(banner_var)),
+            '"'
+          )
+        )
+        
       }
+      
+      # All group_level pairwise combinations
+      for (j in group_levels) {
+        for (k in group_levels) {
+          
+          # Only runs test for pairings of dissimilar groups
+          if (j != k) {
+            
+            # Proportions check
+            
+            if (haven::is.labelled(dataset[[var_name]])) {
+              
+              # For haven labelled vars, reference value
+              
+              Px <- frequencies %>%
+                dplyr::filter(
+                  .data$variable == var_name,
+                  .data$group_var == j,
+                  .data$value == i
+                ) %>%
+                dplyr::pull(.data$result)
+              
+              Py <- frequencies %>%
+                dplyr::filter(
+                  .data$variable == var_name,
+                  .data$group_var == k,
+                  .data$value == i
+                ) %>%
+                dplyr::pull(.data$result)
+              
+            } else {
+              
+              # Reference label for all else
+              
+              Px <- frequencies %>%
+                dplyr::filter(
+                  .data$variable == var_name,
+                  .data$group_var == j,
+                  .data$label == i
+                ) %>%
+                dplyr::pull(.data$result)
+              
+              Py <- frequencies %>%
+                dplyr::filter(
+                  .data$variable == var_name,
+                  .data$group_var == k,
+                  .data$label == i
+                ) %>%
+                dplyr::pull(.data$result)
+              
+            }
+            
+            # In cases where no one in group answered
+            
+            if (rlang::is_empty(Px)) {
+              
+              Px <- 0
+              
+            }
+            
+            if (rlang::is_empty(Py)) {
+              
+              Py <- 0
+              
+            }
+            
+            # Only where Px is greater than Py
+            
+            if (Px > Py) {
+              
+              # Unweighted
+              
+              if (weight_exists == FALSE) {
+                
+                # Set up testing data
+                
+                test_data <- dataset %>%
+                  dplyr::select(
+                    test_var = tidyselect::all_of(var_name),
+                    group = {{ banner_var }}
+                  ) %>%
+                  dplyr::mutate(
+                    group = as.character(haven::as_factor(.data$group)),
+                    test_var = dplyr::case_when(
+                      test_var == i ~ 1,
+                      is.na(test_var) ~ NA_real_,
+                      TRUE ~ 0
+                    )
+                  ) %>%
+                  dplyr::filter(
+                    !is.na(.data$test_var),
+                    .data$group == j |
+                      .data$group == k
+                  )
+                
+                # Create survey design object
+                
+                surv_object <- survey::svydesign(
+                  id =~ 1,
+                  weights = NULL,
+                  data = test_data
+                )
+                
+              }
+              
+              # Weighted
+              
+              if (weight_exists == TRUE) {
+                
+                # Set up testing data
+                
+                test_data <- dataset %>%
+                  dplyr::select(
+                    test_var = tidyselect::all_of(var_name),
+                    group = {{ banner_var }},
+                    weight = {{ wt }}
+                  ) %>%
+                  dplyr::mutate(
+                    group = as.character(haven::as_factor(.data$group)),
+                    test_var = dplyr::case_when(
+                      test_var == i ~ 1,
+                      is.na(test_var) ~ NA_real_,
+                      TRUE ~ 0
+                    )
+                  ) %>%
+                  dplyr::filter(
+                    !is.na(.data$test_var),
+                    .data$group == j |
+                      .data$group == k
+                  )
+                
+                # Create survey design object
+                
+                surv_object <- survey::svydesign(
+                  id =~ 1,
+                  weights =~ weight,
+                  data = test_data
+                )
+                
+              }
+              
+              # Get test results
+              
+              p_value <- survey::svychisq(
+                ~test_var + group,
+                surv_object
+              ) %>%
+                purrr::pluck('p.value')
+              
+              # Get legend code
+              
+              group_letter <- sig_codes %>%
+                dplyr::filter(group_levels == k) %>%
+                dplyr::pull(.data$reference)
+              
+              # FDR correction (default; used in Q crosstabs)
+              
+              p_value <- stats::p.adjust(
+                p_value,
+                method = 'fdr',
+                n = choose(length(group_levels), 2)
+              )
+              
+              code_result <- dplyr::case_when(
+                # < 0.05 is lower-case code; < 0.001 is upper-case
+                dplyr::between(p_value, 0.001, 0.05) ~ group_letter,
+                p_value < 0.001 ~ toupper(group_letter),
+                TRUE ~ ''
+              )
+              
+              # Skip for any Px < Py
+              
+            } else {
+              
+              code_result = ''
+              
+            }
+            
+            # Skip if j == k
+            
+          } else {
+            
+            code_result = ''
+            
+          }
+          
+          
+          ## Merge
+          if (haven::is.labelled(dataset[[var_name]])) {
+            
+            # Onto value for haven labelled vars
+            tested_freqs <- tested_freqs %>%
+              dplyr::mutate(
+                sig = ifelse(
+                  # For the group_var, varbiable, and value just tested against,
+                  .data$group_var == j &
+                    .data$variable == var_name &
+                    .data$value == i,
+                  # Add the appropriate legend code to the sig column
+                  stringr::str_c(.data$sig, code_result),
+                  # Keep it the same for all else
+                  .data$sig
+                )
+              )
+            
+          } else {
+            
+            # Onto label for all else
+            tested_freqs <- tested_freqs %>%
+              dplyr::mutate(
+                sig = ifelse(
+                  # For the group_var, varbiable, and value just tested against,
+                  .data$group_var == j &
+                    .data$variable == var_name &
+                    .data$label == i,
+                  # Add the appropriate legend code to the sig column
+                  stringr::str_c(.data$sig, code_result),
+                  # Keep it the same for all else
+                  .data$sig
+                )
+              )
+            
+          }
+          
+        }
+      }
+      
     }
-
+    
   }
-
+  
   ## Final appending group level references
-
+  
   sig_codes_refs <- sig_codes %>%
     dplyr::mutate(
       group_levels = unlist(
@@ -428,7 +439,7 @@ sig_test_y2 <- function(
         ']'
       )
     )
-
+  
   tested_freqs <- tested_freqs %>%
     dplyr::left_join(
       sig_codes_refs,
@@ -451,28 +462,32 @@ sig_test_y2 <- function(
       )
     ) %>%
     dplyr::select(-'reference')
-
+  
   ## Layout options
   # Normal Freqs Layout (tall)
-
+  
   if (layout == 'tall') {
-
+    
     return(tested_freqs)
-
+    
   }
-
+  
   # Crosstab Layout (wide)
-
+  
   if (layout == 'wide') {
-
+    
     # Get wide percentages
     xtab_results <- tested_freqs %>%
       tidyr::pivot_wider(
-        .data$label,
+        id_cols = c(
+          'variable', 
+          'label'
+        ),
         names_from = 'group_var',
         values_from = 'result'
       ) %>%
       dplyr::select(
+        'variable',
         'label',
         stringr::str_c(
           group_levels,
@@ -482,15 +497,19 @@ sig_test_y2 <- function(
         )
       ) %>%
       dplyr::mutate_all(~replace(., is.na(.), 0))
-
+    
     # Get wide sig codes
     xtab_codes <- tested_freqs %>%
       tidyr::pivot_wider(
-        .data$label,
+        id_cols = c(
+          'variable', 
+          'label'
+        ),        
         names_from = 'group_var',
         values_from = 'sig'
       ) %>%
       dplyr::select(
+        'variable',
         'label',
         stringr::str_c(
           group_levels,
@@ -499,22 +518,33 @@ sig_test_y2 <- function(
           ']'
         )
       ) %>%
-      dplyr::mutate_all(~replace(., is.na(.), ''))
-
+      dplyr::mutate(
+        dplyr::across(
+          .cols = everything(),
+          .fns = ~replace(
+            ., 
+            is.na(.), 
+            ''
+          )
+        )
+      )
+    
     # Combine
-
+    
     xtab <- data.frame()
-
+    
     for (i in 1:nrow(xtab_results)) {
-
-      xtab <- rbind(xtab,
-                    xtab_results[i, ],
-                    xtab_codes[i, ])
-
+      
+      xtab <- rbind(
+        xtab,
+        xtab_results[i, ],
+        xtab_codes[i, ]
+      )
+      
     }
-
+    
     return(xtab)
-
+    
   }
-
+  
 }
