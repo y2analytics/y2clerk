@@ -520,7 +520,7 @@ sig_test_y2 <- function(
       ) %>%
       dplyr::mutate(
         dplyr::across(
-          .cols = everything(),
+          .cols = dplyr::everything(),
           .fns = ~replace(
             ., 
             is.na(.), 
