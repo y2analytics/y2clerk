@@ -1,3 +1,7 @@
+# y2clerk 0.6.12
+## Maintenance 
+* Updated the documentation of the sig_test_y2() function with the test code legend
+
 # y2clerk 0.6.11
 ## New features
 * `sig_test_y2` can now take a grouped freqs() object with multiple variables; function iterates through pairwise group-level testing in each variable and displays results together.
