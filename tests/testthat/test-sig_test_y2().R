@@ -32,41 +32,6 @@ test_df <- data.frame(
     )
   )
 
-# Sandbox ----------------------------------------------------------------
-
-mod_df <- test_df %>% 
-  dplyr::mutate(
-    V2 = c(
-      rep('Agree', 100),
-      rep('Neither', 100),
-      rep('Disagree', 100),
-      rep('Agree', 280),
-      rep('Neither', 10),
-      rep('Disagree', 10),
-      rep('Agree', 60),
-      rep('Neither', 60),
-      rep('Disagree', 180)
-    )
-  ) %>% 
-  dplyr::mutate(
-    V2 = forcats::fct_relevel(
-      V2,
-      'Agree',
-      'Neither',
-      'Disagree'
-    )
-  )
-
-frequencies <- mod_df %>% 
-  dplyr::group_by(group) %>% 
-  freqs(V1,
-        V2) %>% 
-  sig_test_y2(
-    mod_df,
-    group,
-    layout = 'wide'
-  )
-
 # Overall ----------------------------------------------------------------
 
 test_that('`sig` Column Created', {
