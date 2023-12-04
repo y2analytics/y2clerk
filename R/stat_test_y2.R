@@ -86,7 +86,25 @@ sig_test_y2 <- function(
     wt = NULL,
     layout = c('tall', 'wide')
 ) {
+
+  ## Error for missing dataset argument
+  if (is.null(dataset)) {
+    
+    stop(
+      'argument "dataset" is missing, with no default'
+    )
+    
+  }
   
+  ## Error for missing banner_var argument
+  if (is.null(banner_var)) {
+    
+    stop(
+      'argument "banner_var" is missing, with no default'
+    )
+    
+  }
+    
   ## Error for labelled double group_var
   if (haven::is.labelled(frequencies$group_var) == TRUE) {
     
