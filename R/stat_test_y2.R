@@ -88,7 +88,7 @@ sig_test_y2 <- function(
 ) {
 
   ## Error for missing dataset argument
-  if (is.null(dataset)) {
+  if (missing(dataset)) {
     
     stop(
       'argument "dataset" is missing, with no default'
@@ -97,7 +97,7 @@ sig_test_y2 <- function(
   }
   
   ## Error for missing banner_var argument
-  if (is.null(banner_var)) {
+  if (missing(banner_var)) {
     
     stop(
       'argument "banner_var" is missing, with no default'
