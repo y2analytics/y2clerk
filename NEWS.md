@@ -1,5 +1,6 @@
 # y2clerk 0.6.12
 ## Maintenance 
+* Added more user-friendly error messages to sig_test_y2()
 * Updated the documentation of the sig_test_y2() function with the test code legend
 
 # y2clerk 0.6.11
