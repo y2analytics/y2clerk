@@ -39,11 +39,6 @@ test_that('`sig` Column Created', {
   frequencies <- test_df %>% 
     dplyr::group_by(group) %>% 
     freqs(V1) %>% 
-    orderlabel::order_label(
-      inherent_order_label = TRUE,
-      inherent_order_group = TRUE,
-      group_var = group_var
-    ) %>% 
     sig_test_y2(
       test_df,
       group
@@ -60,7 +55,6 @@ test_that('`sig` Column Created', {
     'n',
     'stat',
     'result',
-    'percent_label',
     'sig'
   )
   
@@ -69,16 +63,11 @@ test_that('`sig` Column Created', {
 })
 
 
-test_that('Sig Tests Results Correctly Ordered (inherent_order_group = TRUE)', {
+test_that('Sig Tests Results Correctly Ordered', {
   
   frequencies <- test_df %>% 
     dplyr::group_by(group) %>% 
     freqs(V1) %>% 
-    orderlabel::order_label(
-      inherent_order_label = TRUE,
-      inherent_order_group = TRUE,
-      group_var = group_var
-    ) %>% 
     sig_test_y2(
       test_df,
       group
@@ -89,13 +78,13 @@ test_that('Sig Tests Results Correctly Ordered (inherent_order_group = TRUE)', {
   
   sig_expected <- c(
     'C',
+    'B',
+    'B',
     'AC',
     '',
-    'B',
+    '',
     '',
     'B',
-    'B',
-    '',
     'B'
   )
   
@@ -167,50 +156,11 @@ test_that('Sig Test works on a grouped freqs object of multiple variables', {
 })
 
 
-test_that('Sig Tests Results Correctly Ordered (inherent_order_group = FALSE)', {
+test_that('Group References Appended Correctly', {
   
   frequencies <- test_df %>% 
     dplyr::group_by(group) %>% 
     freqs(V1) %>% 
-    orderlabel::order_label(
-      inherent_order_label = TRUE,
-      group_var = group_var
-    ) %>% 
-    sig_test_y2(
-      test_df,
-      group
-    )
-  
-  sig_actual <- frequencies %>% 
-    dplyr::pull(sig)
-  
-  sig_expected <- c(
-    'BC',
-    'C',
-    '',
-    '',
-    'A',
-    'A',
-    '',
-    'A',
-    'A'
-  )
-  
-  expect_equal(sig_actual, sig_expected)
-  
-})
-
-
-test_that('Group References Appended Correctly (inherent_group_order = TRUE)', {
-  
-  frequencies <- test_df %>% 
-    dplyr::group_by(group) %>% 
-    freqs(V1) %>% 
-    orderlabel::order_label(
-      inherent_order_label = TRUE,
-      inherent_order_group = TRUE,
-      group_var = group_var
-    ) %>% 
     sig_test_y2(
       test_df,
       group
@@ -224,36 +174,6 @@ test_that('Group References Appended Correctly (inherent_group_order = TRUE)', {
   groups_expected <- c(
     'Group 1 [A]',
     'Group 2 [B]',
-    'Group 3 [C]'
-  )
-  
-  expect_equal(groups_actual, groups_expected)
-  
-})
-
-
-test_that('Group References Appended Correctly (inherent_group_order = FALSE)', {
-  
-  frequencies <- test_df %>% 
-    dplyr::group_by(group) %>% 
-    freqs(V1) %>% 
-    orderlabel::order_label(
-      inherent_order_label = TRUE,
-      group_var = group_var
-    ) %>% 
-    sig_test_y2(
-      test_df,
-      group
-    )
-  
-  groups_actual <- frequencies %>% 
-    dplyr::count(group_var) %>% 
-    dplyr::pull(group_var) %>% 
-    as.character()
-  
-  groups_expected <- c(
-    'Group 2 [A]',
-    'Group 1 [B]',
     'Group 3 [C]'
   )
   
@@ -278,12 +198,6 @@ test_that('Works on Numeric freqs var', {
     frequencies <- mod_df %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
-      orderlabel::order_label(
-        inherent_order_label = TRUE,
-        rev_label = TRUE,
-        inherent_order_group = TRUE,
-        group_var = group_var
-      ) %>% 
       sig_test_y2(
         mod_df,
         group
@@ -306,12 +220,6 @@ test_that('Works on Character freqs var', {
     frequencies <- mod_df %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
-      orderlabel::order_label(
-        inherent_order_label = TRUE,
-        rev_label = TRUE,
-        inherent_order_group = TRUE,
-        group_var = group_var
-      ) %>% 
       sig_test_y2(
         mod_df,
         group
@@ -329,12 +237,6 @@ test_that('Works on Factor freqs var', {
     frequencies <- test_df %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
-      orderlabel::order_label(
-        inherent_order_label = TRUE,
-        rev_label = TRUE,
-        inherent_order_group = TRUE,
-        group_var = group_var
-      ) %>% 
       sig_test_y2(
         test_df,
         group
@@ -369,12 +271,6 @@ test_that('Works on labelled freqs var', {
     frequencies <- test_df %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
-      orderlabel::order_label(
-        inherent_order_label = TRUE,
-        label_last = 'Disagree',
-        inherent_order_group = TRUE,
-        group_var = group_var
-      ) %>% 
       sig_test_y2(
         mod_df,
         group
@@ -401,11 +297,6 @@ test_that('Works on numeric group_var', {
     frequencies <- mod_df %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
-      orderlabel::order_label(
-        inherent_order_label = TRUE,
-        label_last = 'Disagree',
-        group_var = group_var
-      ) %>% 
       sig_test_y2(
         mod_df,
         group
@@ -423,12 +314,6 @@ test_that('Works on character group_var', {
     frequencies <- test_df %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
-      orderlabel::order_label(
-        inherent_order_label = TRUE,
-        label_last = 'Disagree',
-        inherent_order_group = TRUE,
-        group_var = group_var
-      ) %>% 
       sig_test_y2(
         test_df,
         group
@@ -451,11 +336,6 @@ test_that('Works on factor group_var', {
     frequencies <- mod_df %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
-      orderlabel::order_label(
-        inherent_order_label = TRUE,
-        inherent_order_group = TRUE,
-        group_var = group_var
-      ) %>% 
       sig_test_y2(
         test_df,
         group
