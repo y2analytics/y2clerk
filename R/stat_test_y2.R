@@ -10,7 +10,7 @@
 #' @param wt The weight variable used in the frequencies function, if applicable
 #' @param layout (default: 'tall') 'tall' formats the output to look like a basic grouped freqs table. 'wide' formats the output to look like the result from Q-formatted cross tabs
 #' @return A table that matches the output of cross tabs, showing significance differences between different groups for any input variables
-#' stats, cross tabs
+#' stats, cross tabs. Column comparison symbols: a, b, c... (p <= 0.05), A, B, C... (p <= 0.001); No symbol: not significant at at least (p <= 0.05)
 #' @examples
 #'
 #' # Example Data
@@ -86,7 +86,25 @@ sig_test_y2 <- function(
     wt = NULL,
     layout = c('tall', 'wide')
 ) {
+
+  ## Error for missing dataset argument
+  if (missing(dataset)) {
+    
+    stop(
+      'argument "dataset" is missing, with no default'
+    )
+    
+  }
   
+  ## Error for missing banner_var argument
+  if (missing(banner_var)) {
+    
+    stop(
+      'argument "banner_var" is missing, with no default'
+    )
+    
+  }
+    
   ## Error for labelled double group_var
   if (haven::is.labelled(frequencies$group_var) == TRUE) {
     
