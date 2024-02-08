@@ -1,3 +1,7 @@
+# y2clerk 0.6.13
+## Maintenance 
+* Fixed a bug in multi_freqs() in which variable names being part of other variables' names were causing calculation errors
+
 # y2clerk 0.6.12
 ## Maintenance 
 * Added more user-friendly error messages to sig_test_y2()
