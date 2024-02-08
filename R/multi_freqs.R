@@ -97,8 +97,10 @@ multi_freqs <- function(
     
     pattern <- dataset %>%
       dplyr::ungroup() %>%
-      dplyr::select(-{{ wt }},
-                    -tidyselect::all_of(dplyr::group_vars(dataset))) %>%
+      dplyr::select(
+          -{{ wt }},
+          -tidyselect::all_of(dplyr::group_vars(dataset))
+      ) %>%
       names() %>%
       stringr::str_remove(
         '_[0-9]+$'
@@ -117,7 +119,7 @@ multi_freqs <- function(
     type_check <- dataset %>%
       dplyr::ungroup() %>%
       dplyr::select(
-        dplyr::matches(str_c(i, '_[0-9]+$'))
+        dplyr::matches(stringr::str_c(i, '_[0-9]'))
       )
     
     # Throw warning if stem is character variable
