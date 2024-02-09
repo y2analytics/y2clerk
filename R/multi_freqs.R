@@ -49,18 +49,18 @@
 #' @export
 
 multi_freqs <- function(
-    dataset,
-    ... ,
-    remove_nas = TRUE,
-    wt = NULL,
-    prompt = FALSE,
-    digits = 2,
-    nas_group = TRUE,
-    factor_group = FALSE,
-    unweighted_ns = FALSE,
-    show_missing_levels = TRUE
+  dataset,
+  ... ,
+  remove_nas = TRUE,
+  wt = NULL,
+  prompt = FALSE,
+  digits = 2,
+  nas_group = TRUE,
+  factor_group = FALSE,
+  unweighted_ns = FALSE,
+  show_missing_levels = TRUE
 ) {
-  
+
   # Creates an empty list to be populated with frequencies data frames
   datalist <- list()
   
@@ -75,7 +75,7 @@ multi_freqs <- function(
       '_[0-9]+_TEXT$'
     ) %>%
     unique()
-  
+
   # If no variables are specified, assume user wants to run function on entire dataset
   if (length(pattern) == 0 & dplyr::is_grouped_df(dataset) == FALSE) {
     
@@ -89,9 +89,9 @@ multi_freqs <- function(
         '_[0-9]+_TEXT$'
       ) %>%
       unique()
-    
+
   }
-  
+
   # Same as above for grouped, length == 0 dataset
   if (length(pattern) == 0 & dplyr::is_grouped_df(dataset) == TRUE) {
     
@@ -109,29 +109,29 @@ multi_freqs <- function(
         '_[0-9]+_TEXT$'
       ) %>%
       unique()
-    
+
   }
-  
+
   # Creating a filtered frequencies dataframe for each stem
   for (i in pattern) {
-    
+
     # Warning Section
     type_check <- dataset %>%
       dplyr::ungroup() %>%
       dplyr::select(
         dplyr::matches(stringr::str_c(i, '_[0-9]'))
       )
-    
+
     # Throw warning if stem is character variable
     if (is.character(type_check[, 1])) {
       warning('Text variable stem detected -- please ensure this is intentional')
     }
-    
+
     # Throw warning if stem is single select variable
     if (nrow(freqs(type_check %>% dplyr::select(1), nas = FALSE)) > 1){
       warning('Single select variable stem detected -- please ensure this is intentional')
     }
-    
+
     data <- dataset %>%
       # dataset selects all columns that start with the string or the ith element in the string list
       dplyr::select(
@@ -169,16 +169,16 @@ multi_freqs <- function(
         unweighted_ns = unweighted_ns,
         show_missing_levels = show_missing_levels
       )
-    
+
     if (remove_nas == TRUE) {
       
       data <- data %>%
         dplyr::filter(
           !is.na(.data$value)
         )
-      
-    }
     
+    }
+
     # Adds stem freqs to datalist
     datalist[[i]] <- data
     
@@ -189,13 +189,13 @@ multi_freqs <- function(
         '" successfully freq\'d'
       )
     )
-    
+
   }
-  
+
   # Combine
   frequencies <- dplyr::bind_rows(datalist)
-  
+
   # Returns full data frame
   return(frequencies)
-  
+
 }
