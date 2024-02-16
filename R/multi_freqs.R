@@ -63,7 +63,7 @@ multi_freqs <- function(
 
   # Creates an empty list to be populated with frequencies data frames
   datalist <- list()
-
+  
   pattern <- dataset %>%
     dplyr::ungroup() %>%
     dplyr::select(...) %>%
@@ -78,7 +78,7 @@ multi_freqs <- function(
 
   # If no variables are specified, assume user wants to run function on entire dataset
   if (length(pattern) == 0 & dplyr::is_grouped_df(dataset) == FALSE) {
-
+    
     pattern <- dataset %>%
       dplyr::select(-{{ wt }}) %>%
       names() %>%
@@ -94,11 +94,13 @@ multi_freqs <- function(
 
   # Same as above for grouped, length == 0 dataset
   if (length(pattern) == 0 & dplyr::is_grouped_df(dataset) == TRUE) {
-
+    
     pattern <- dataset %>%
       dplyr::ungroup() %>%
-      dplyr::select(-{{ wt }},
-                    -tidyselect::all_of(dplyr::group_vars(dataset))) %>%
+      dplyr::select(
+          -{{ wt }},
+          -tidyselect::all_of(dplyr::group_vars(dataset))
+      ) %>%
       names() %>%
       stringr::str_remove(
         '_[0-9]+$'
@@ -117,7 +119,7 @@ multi_freqs <- function(
     type_check <- dataset %>%
       dplyr::ungroup() %>%
       dplyr::select(
-        dplyr::starts_with(i)
+        dplyr::matches(stringr::str_c(i, '_[0-9]'))
       )
 
     # Throw warning if stem is character variable
@@ -133,7 +135,7 @@ multi_freqs <- function(
     data <- dataset %>%
       # dataset selects all columns that start with the string or the ith element in the string list
       dplyr::select(
-        dplyr::starts_with(stringr::str_c(i, '_')),
+        dplyr::matches(stringr::str_c(i, '_[0-9]')),
         # "_TEXT" question is always removed
         -dplyr::ends_with('_TEXT'),
         # weight is selected if specified
@@ -166,20 +168,20 @@ multi_freqs <- function(
         factor_group = factor_group,
         unweighted_ns = unweighted_ns,
         show_missing_levels = show_missing_levels
-        )
+      )
 
     if (remove_nas == TRUE) {
-
+      
       data <- data %>%
         dplyr::filter(
           !is.na(.data$value)
         )
-
+    
     }
 
     # Adds stem freqs to datalist
     datalist[[i]] <- data
-
+    
     message(
       stringr::str_c(
         'Variable stem "',
