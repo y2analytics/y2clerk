@@ -224,7 +224,10 @@ sig_test_y2 <- function(
           dplyr::mutate(
             ns = rowSums(
               dplyr::across(
-                .cols = dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$')),
+                .cols = c(
+                  sym(var_name),
+                  dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$'))
+                ),
                 .fns = ~ifelse(
                   is.na(.x),
                   FALSE,
@@ -234,7 +237,10 @@ sig_test_y2 <- function(
             ),
             # Set remaining NAs to zero as not to confuse test data
             dplyr::across(
-              .cols = dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$')),
+              .cols = c(
+                sym(var_name),
+                dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$'))
+              ),
               .fns = ~ifelse(
                 is.na(.x),
                 0,
@@ -252,7 +258,7 @@ sig_test_y2 <- function(
         # Add stem to list so it's not filtered again
         filtered_stems <- append(filtered_stems, var_stem)
         
-      } else if (!exists("filtered_dataset")) {
+      } else if (!exists('filtered_dataset')) {
         
         filtered_dataset <- dataset
         
