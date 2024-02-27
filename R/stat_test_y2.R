@@ -225,7 +225,7 @@ sig_test_y2 <- function(
             ns = rowSums(
               dplyr::across(
                 .cols = c(
-                  sym(var_name),
+                  dplyr::sym(var_name),
                   dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$'))
                 ),
                 .fns = ~ifelse(
@@ -238,7 +238,7 @@ sig_test_y2 <- function(
             # Set remaining NAs to zero as not to confuse test data
             dplyr::across(
               .cols = c(
-                sym(var_name),
+                dplyr::sym(var_name),
                 dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$'))
               ),
               .fns = ~ifelse(
