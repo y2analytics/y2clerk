@@ -228,9 +228,10 @@ sig_test_y2 <- function(
                   dplyr::sym(var_name),
                   dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$'))
                 ),
-                .fns = ~dplyr::case_when(
-                  is.na(.x) ~ '0',
-                  !is.na(.x) ~ .x
+                .fns = ~ifelse(
+                  is.na(.x),
+                  FALSE,
+                  TRUE
                 )
               )
             ),
@@ -240,10 +241,9 @@ sig_test_y2 <- function(
                 dplyr::sym(var_name),
                 dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$'))
               ),
-              .fns = ~ifelse(
-                is.na(.x),
-                0,
-                .x
+              .fns = ~dplyr::case_when(
+                is.na(.x) ~ '0',
+                !is.na(.x) ~ .x
               )
             )
           ) %>% 
