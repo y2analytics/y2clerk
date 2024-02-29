@@ -173,6 +173,51 @@ sig_test_y2 <- function(
       
     }
     
+    # Filter dataset to non all NULL responses based on stem
+    var_stem <- stringr::str_remove(var_name, '_[0-9]+$')
+    var_branches <- var_names %>% 
+      stringr::str_subset(stringr::str_c(var_stem, '_[0-9]+$'))
+    
+    if (!var_stem %in% filtered_stems & length(var_branches) > 1 & length(value_levels) <= 2) {
+      
+      # Filter all NA rows for each stem
+      filtered_dataset <- dataset %>%
+        dplyr::mutate(
+          ns = rowSums(
+            dplyr::across(
+              .cols = dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$')),
+              .fns = ~ifelse(
+                is.na(.x),
+                FALSE,
+                TRUE
+              )
+            )
+          ),
+          # Set remaining NAs to zero as not to confuse test data
+          dplyr::across(
+            .cols = dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$')),
+            .fns = ~dplyr::case_when(
+              is.na(.x) ~ 0,
+              !is.na(.x) ~ .x
+            )
+          )
+        ) %>% 
+        dplyr::filter(
+          ns > 0
+        ) %>%
+        dplyr::select(
+          -ns
+        )
+      
+      # Add stem to list so it's not filtered again
+      filtered_stems <- append(filtered_stems, var_stem)
+      
+    } else if (!exists('filtered_dataset')) {
+      
+      filtered_dataset <- dataset
+      
+    }
+    
     ## Populate
     
     # Iterate through each value level (comparing ACROSS groups WITHIN values)
@@ -214,55 +259,6 @@ sig_test_y2 <- function(
         
       }
       
-      # Filter dataset to non all NULL responses based on stem
-      var_stem <- stringr::str_remove(var_name, '_[0-9]+$')
-
-      if (!var_stem %in% filtered_stems) {
-        
-        # Filter all NA rows for each stem
-        filtered_dataset <- dataset %>%
-          dplyr::mutate(
-            ns = rowSums(
-              dplyr::across(
-                .cols = c(
-                  dplyr::sym(var_name),
-                  dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$'))
-                ),
-                .fns = ~ifelse(
-                  is.na(.x),
-                  FALSE,
-                  TRUE
-                )
-              )
-            ),
-            # Set remaining NAs to zero as not to confuse test data
-            dplyr::across(
-              .cols = c(
-                dplyr::sym(var_name),
-                dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$'))
-              ),
-              .fns = ~dplyr::case_when(
-                is.na(.x) ~ '0',
-                !is.na(.x) ~ .x
-              )
-            )
-          ) %>% 
-          dplyr::filter(
-            ns > 0
-          ) %>%
-          dplyr::select(
-            -ns
-          )
-        
-        # Add stem to list so it's not filtered again
-        filtered_stems <- append(filtered_stems, var_stem)
-        
-      } else if (!exists('filtered_dataset')) {
-        
-        filtered_dataset <- dataset
-        
-      }
-    
       # All group_level pairwise combinations
       for (j in group_levels) {
         for (k in group_levels) {
@@ -418,14 +414,14 @@ sig_test_y2 <- function(
                 TRUE ~ ''
               )
               
-            # Skip for any px < py
+              # Skip for any px < py
             } else {
               
               code_result = ''
               
             }
             
-          # Skip if j == k
+            # Skip if j == k
           } else {
             
             code_result = ''
