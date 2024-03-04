@@ -14,6 +14,30 @@ test_df <- data.frame(
     rep('Neither', 125),
     rep('Disagree', 125)
   ),
+  V2_1 = c(
+    rep(1, 100),
+    rep(NA, 200),
+    rep(1, 200),
+    rep(NA, 100),
+    rep(1, 250),
+    rep(NA, 50)
+  ),
+  V2_2 = c(
+    rep(1, 180),
+    rep(NA, 120),
+    rep(1, 100),
+    rep(NA, 200),
+    rep(1, 250),
+    rep(NA, 50)
+  ),
+  V2_3 = c(
+    rep(1, 200),
+    rep(NA, 100),
+    rep(1, 250),
+    rep(NA, 50),
+    rep(1, 250),
+    rep(NA, 50)
+  ),
   group = c(
     rep('Group 1', 300),
     rep('Group 2', 300),
@@ -29,6 +53,24 @@ test_df <- data.frame(
       'Agree',
       'Neither',
       'Disagree'
+    ),
+    V2_1 = labelled::labelled(
+      V2_1,
+      labels = c(
+        'Choice A' = 1
+      )
+    ),
+    V2_2 = labelled::labelled(
+      V2_2,
+      labels = c(
+        'Choice B' = 1
+      )
+    ),
+    V2_3 = labelled::labelled(
+      V2_3,
+      labels = c(
+        'Choice C' = 1
+      )
     )
   )
 
@@ -149,6 +191,36 @@ test_that('Sig Test works on a grouped freqs object of multiple variables', {
     '',
     'B',
     'AB'
+  )
+  
+  expect_equal(sig_actual, sig_expected)
+  
+})
+
+
+test_that('Sig Test works on a grouped freqs object of multi select variables', {
+  
+  frequencies <- test_df %>% 
+    dplyr::group_by(group) %>% 
+    multi_freqs(V2_1) %>% 
+    sig_test_y2(
+      test_df,
+      group
+    )
+  
+  sig_actual <- frequencies %>% 
+    dplyr::pull(sig)
+  
+  sig_expected <- c(
+    '',
+    'A',
+    'AB',
+    'B',
+    '',
+    'AB',
+    '',
+    '',
+    ''
   )
   
   expect_equal(sig_actual, sig_expected)
