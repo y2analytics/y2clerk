@@ -159,6 +159,7 @@ sig_test_y2 <- function(
       # Use value col for haven labelled vars
       value_levels <- frequencies %>%
         dplyr::ungroup() %>%
+        dplyr::filter(.data$variable == var_name) %>% 
         dplyr::count(.data$value) %>%
         dplyr::pull(.data$value) %>%
         as.numeric()
@@ -168,6 +169,7 @@ sig_test_y2 <- function(
       # Label col works for everything else
       value_levels <- frequencies %>%
         dplyr::ungroup() %>%
+        dplyr::filter(.data$variable == var_name) %>% 
         dplyr::count(.data$label) %>%
         dplyr::pull(.data$label)
       
@@ -185,20 +187,12 @@ sig_test_y2 <- function(
         dplyr::mutate(
           ns = rowSums(
             dplyr::across(
-              .cols = dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$')),
+              .cols = dplyr::matches(stringr::str_c('^', var_stem, '_[0-9]+$')),
               .fns = ~ifelse(
                 is.na(.x),
                 FALSE,
                 TRUE
               )
-            )
-          ),
-          # Set remaining NAs to zero as not to confuse test data
-          dplyr::across(
-            .cols = dplyr::matches(stringr::str_c(var_stem, '_[0-9]+$')),
-            .fns = ~dplyr::case_when(
-              is.na(.x) ~ 0,
-              !is.na(.x) ~ .x
             )
           )
         ) %>% 
@@ -208,6 +202,37 @@ sig_test_y2 <- function(
         dplyr::select(
           -ns
         )
+      
+      # Set remaining NAs to zero as not to confuse test data
+      if (haven::is.labelled(dataset[[var_name]]) | is.numeric(dataset[[var_name]])) {
+        
+        # Set to numeric 0 for haven labelled or numeric vars
+        filtered_dataset <- filtered_dataset %>% 
+          dplyr::mutate(
+            dplyr::across(
+              .cols = dplyr::matches(stringr::str_c('^', var_stem, '_[0-9]+$')),
+              .fns = ~dplyr::case_when(
+                is.na(.x) ~ 0,
+                !is.na(.x) ~ .x
+              )
+            )
+          )
+        
+      } else {
+        
+        # Set to character 0 for all else
+        filtered_dataset <- filtered_dataset %>% 
+          dplyr::mutate(
+            dplyr::across(
+              .cols = dplyr::matches(stringr::str_c('^', var_stem, '_[0-9]+$')),
+              .fns = ~dplyr::case_when(
+                is.na(.x) ~ '0',
+                !is.na(.x) ~ .x
+              )
+            )
+          )
+        
+      }
       
       # Add stem to list so it's not filtered again
       filtered_stems <- append(filtered_stems, var_stem)
