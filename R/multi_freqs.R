@@ -144,7 +144,7 @@ multi_freqs <- function(
       # Following lines filter out rows where none of the questions have been answered
       dplyr::mutate(ns = rowSums(
         dplyr::across(
-          .cols = dplyr::starts_with(i),
+          .cols = dplyr::matches(stringr::str_c('^', i, '_[0-9]')),
           .fns = ~ifelse(
             is.na(.x),
             FALSE,
