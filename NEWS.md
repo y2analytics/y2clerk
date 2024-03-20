@@ -1,3 +1,8 @@
+# y2clerk 0.6.14
+## New features
+* `sig_test_y2` can now take a grouped freqs() object of multi-select variables; filters out rows across multi-select variable "stems" that are all NA
+* Fixed a bug in multi_freqs() where the filtering would preserve columns that contained the stem name but don't have the intended stem
+
 # y2clerk 0.6.13
 ## Maintenance 
 * Fixed a bug in multi_freqs() in which variable names being part of other variables' names were causing calculation errors

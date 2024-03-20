@@ -86,7 +86,7 @@ sig_test_y2 <- function(
     wt = NULL,
     layout = c('tall', 'wide')
 ) {
-
+  
   ## Error for missing dataset argument
   if (missing(dataset)) {
     
@@ -104,7 +104,7 @@ sig_test_y2 <- function(
     )
     
   }
-    
+  
   ## Error for labelled double group_var
   if (haven::is.labelled(frequencies$group_var) == TRUE) {
     
@@ -132,6 +132,9 @@ sig_test_y2 <- function(
     dplyr::distinct(.data$variable) %>%
     dplyr::pull()
   
+  # Running list of currently filtered stems
+  filtered_stems <- vector()
+  
   # Define group_var levels from frequencies object
   group_levels <- frequencies %>%
     dplyr::count(.data$group_var) %>%
@@ -148,7 +151,7 @@ sig_test_y2 <- function(
   tested_freqs <- frequencies %>%
     dplyr::mutate(sig = '')
   
-  for (var_name in var_names){
+  for (var_name in var_names) {
     
     # Define value levels from frequencies object
     if (haven::is.labelled(dataset[[var_name]])) {
@@ -156,6 +159,7 @@ sig_test_y2 <- function(
       # Use value col for haven labelled vars
       value_levels <- frequencies %>%
         dplyr::ungroup() %>%
+        dplyr::filter(.data$variable == var_name) %>% 
         dplyr::count(.data$value) %>%
         dplyr::pull(.data$value) %>%
         as.numeric()
@@ -165,8 +169,77 @@ sig_test_y2 <- function(
       # Label col works for everything else
       value_levels <- frequencies %>%
         dplyr::ungroup() %>%
+        dplyr::filter(.data$variable == var_name) %>% 
         dplyr::count(.data$label) %>%
         dplyr::pull(.data$label)
+      
+    }
+    
+    # Filter dataset to non all NULL responses based on stem
+    var_stem <- stringr::str_remove(var_name, '_[0-9]+$')
+    var_branches <- var_names %>% 
+      stringr::str_subset(stringr::str_c(var_stem, '_[0-9]+$'))
+    
+    if (!var_stem %in% filtered_stems & length(var_branches) > 1 & length(value_levels) <= 2) {
+      
+      # Filter all NA rows for each stem
+      filtered_dataset <- dataset %>%
+        dplyr::mutate(
+          ns = rowSums(
+            dplyr::across(
+              .cols = dplyr::matches(stringr::str_c('^', var_stem, '_[0-9]+$')),
+              .fns = ~ifelse(
+                is.na(.x),
+                FALSE,
+                TRUE
+              )
+            )
+          )
+        ) %>% 
+        dplyr::filter(
+          ns > 0
+        ) %>%
+        dplyr::select(
+          -ns
+        )
+      
+      # Set remaining NAs to zero as not to confuse test data
+      if (haven::is.labelled(dataset[[var_name]]) | is.numeric(dataset[[var_name]])) {
+        
+        # Set to numeric 0 for haven labelled or numeric vars
+        filtered_dataset <- filtered_dataset %>% 
+          dplyr::mutate(
+            dplyr::across(
+              .cols = dplyr::matches(stringr::str_c('^', var_stem, '_[0-9]+$')),
+              .fns = ~dplyr::case_when(
+                is.na(.x) ~ 0,
+                !is.na(.x) ~ .x
+              )
+            )
+          )
+        
+      } else {
+        
+        # Set to character 0 for all else
+        filtered_dataset <- filtered_dataset %>% 
+          dplyr::mutate(
+            dplyr::across(
+              .cols = dplyr::matches(stringr::str_c('^', var_stem, '_[0-9]+$')),
+              .fns = ~dplyr::case_when(
+                is.na(.x) ~ '0',
+                !is.na(.x) ~ .x
+              )
+            )
+          )
+        
+      }
+      
+      # Add stem to list so it's not filtered again
+      filtered_stems <- append(filtered_stems, var_stem)
+      
+    } else if (!exists('filtered_dataset')) {
+      
+      filtered_dataset <- dataset
       
     }
     
@@ -176,7 +249,6 @@ sig_test_y2 <- function(
     for (i in value_levels) {
       
       # Process updates
-      
       if (haven::is.labelled(dataset[[var_name]])) {
         
         haven_val_label <- frequencies %>%
@@ -220,12 +292,10 @@ sig_test_y2 <- function(
           if (j != k) {
             
             # Proportions check
-            
             if (haven::is.labelled(dataset[[var_name]])) {
               
               # For haven labelled vars, reference value
-              
-              Px <- frequencies %>%
+              px <- frequencies %>%
                 dplyr::filter(
                   .data$variable == var_name,
                   .data$group_var == j,
@@ -233,7 +303,7 @@ sig_test_y2 <- function(
                 ) %>%
                 dplyr::pull(.data$result)
               
-              Py <- frequencies %>%
+              py <- frequencies %>%
                 dplyr::filter(
                   .data$variable == var_name,
                   .data$group_var == k,
@@ -244,8 +314,7 @@ sig_test_y2 <- function(
             } else {
               
               # Reference label for all else
-              
-              Px <- frequencies %>%
+              px <- frequencies %>%
                 dplyr::filter(
                   .data$variable == var_name,
                   .data$group_var == j,
@@ -253,7 +322,7 @@ sig_test_y2 <- function(
                 ) %>%
                 dplyr::pull(.data$result)
               
-              Py <- frequencies %>%
+              py <- frequencies %>%
                 dplyr::filter(
                   .data$variable == var_name,
                   .data$group_var == k,
@@ -264,30 +333,26 @@ sig_test_y2 <- function(
             }
             
             # In cases where no one in group answered
-            
-            if (rlang::is_empty(Px)) {
+            if (rlang::is_empty(px)) {
               
-              Px <- 0
-              
-            }
-            
-            if (rlang::is_empty(Py)) {
-              
-              Py <- 0
+              px <- 0
               
             }
             
-            # Only where Px is greater than Py
+            if (rlang::is_empty(py)) {
+              
+              py <- 0
+              
+            }
             
-            if (Px > Py) {
+            # Only where px is greater than py
+            if (px > py) {
               
               # Unweighted
-              
               if (weight_exists == FALSE) {
                 
                 # Set up testing data
-                
-                test_data <- dataset %>%
+                test_data <- filtered_dataset %>%
                   dplyr::select(
                     test_var = tidyselect::all_of(var_name),
                     group = {{ banner_var }}
@@ -307,7 +372,6 @@ sig_test_y2 <- function(
                   )
                 
                 # Create survey design object
-                
                 surv_object <- survey::svydesign(
                   id =~ 1,
                   weights = NULL,
@@ -317,12 +381,10 @@ sig_test_y2 <- function(
               }
               
               # Weighted
-              
               if (weight_exists == TRUE) {
                 
                 # Set up testing data
-                
-                test_data <- dataset %>%
+                test_data <- filtered_dataset %>%
                   dplyr::select(
                     test_var = tidyselect::all_of(var_name),
                     group = {{ banner_var }},
@@ -343,7 +405,6 @@ sig_test_y2 <- function(
                   )
                 
                 # Create survey design object
-                
                 surv_object <- survey::svydesign(
                   id =~ 1,
                   weights =~ weight,
@@ -353,7 +414,6 @@ sig_test_y2 <- function(
               }
               
               # Get test results
-              
               p_value <- survey::svychisq(
                 ~test_var + group,
                 surv_object
@@ -361,13 +421,11 @@ sig_test_y2 <- function(
                 purrr::pluck('p.value')
               
               # Get legend code
-              
               group_letter <- sig_codes %>%
                 dplyr::filter(group_levels == k) %>%
                 dplyr::pull(.data$reference)
               
               # FDR correction (default; used in Q crosstabs)
-              
               p_value <- stats::p.adjust(
                 p_value,
                 method = 'fdr',
@@ -381,8 +439,7 @@ sig_test_y2 <- function(
                 TRUE ~ ''
               )
               
-              # Skip for any Px < Py
-              
+              # Skip for any px < py
             } else {
               
               code_result = ''
@@ -390,7 +447,6 @@ sig_test_y2 <- function(
             }
             
             # Skip if j == k
-            
           } else {
             
             code_result = ''
@@ -443,7 +499,6 @@ sig_test_y2 <- function(
   }
   
   ## Final appending group level references
-  
   sig_codes_refs <- sig_codes %>%
     dplyr::mutate(
       group_levels = unlist(
@@ -482,8 +537,8 @@ sig_test_y2 <- function(
     dplyr::select(-'reference')
   
   ## Layout options
-  # Normal Freqs Layout (tall)
   
+  # Normal Freqs Layout (tall)
   if (layout == 'tall') {
     
     return(tested_freqs)
@@ -491,7 +546,6 @@ sig_test_y2 <- function(
   }
   
   # Crosstab Layout (wide)
-  
   if (layout == 'wide') {
     
     # Get wide percentages
@@ -548,7 +602,6 @@ sig_test_y2 <- function(
       )
     
     # Combine
-    
     xtab <- data.frame()
     
     for (i in 1:nrow(xtab_results)) {

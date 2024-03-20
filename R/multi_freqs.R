@@ -119,7 +119,7 @@ multi_freqs <- function(
     type_check <- dataset %>%
       dplyr::ungroup() %>%
       dplyr::select(
-        dplyr::matches(stringr::str_c(i, '_[0-9]'))
+        dplyr::matches(stringr::str_c('^', i, '_[0-9]'))
       )
 
     # Throw warning if stem is character variable
@@ -135,7 +135,7 @@ multi_freqs <- function(
     data <- dataset %>%
       # dataset selects all columns that start with the string or the ith element in the string list
       dplyr::select(
-        dplyr::matches(stringr::str_c(i, '_[0-9]')),
+        dplyr::matches(stringr::str_c('^', i, '_[0-9]')),
         # "_TEXT" question is always removed
         -dplyr::ends_with('_TEXT'),
         # weight is selected if specified
@@ -144,7 +144,7 @@ multi_freqs <- function(
       # Following lines filter out rows where none of the questions have been answered
       dplyr::mutate(ns = rowSums(
         dplyr::across(
-          .cols = dplyr::starts_with(i),
+          .cols = dplyr::matches(stringr::str_c('^', i, '_[0-9]')),
           .fns = ~ifelse(
             is.na(.x),
             FALSE,
