@@ -1,3 +1,7 @@
+# y2clerk 0.6.15
+## Maintenance 
+* Fixed a bug in freqs() in which calculations on datasets with more than one grouping variable were incorrect
+
 # y2clerk 0.6.14
 ## New features
 * `sig_test_y2` can now take a grouped freqs() object of multi-select variables; filters out rows across multi-select variable "stems" that are all NA
