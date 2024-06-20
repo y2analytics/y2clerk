@@ -549,12 +549,14 @@ test_that("multiple group_vars", {
     tidyr::drop_na()
   
   calculated_combs <- frequencies %>% 
+    dplyr::ungroup() %>% 
     dplyr::filter(n > 0) %>% 
     dplyr::select(
       group_var1 = group_var,
       gender_labelled = group_var2,
       q4 = value
     ) %>% 
+    dplyr::mutate(q4 = as.numeric(q4)) %>% 
     dplyr::arrange(
       group_var1,
       gender_labelled,
