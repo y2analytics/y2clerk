@@ -522,7 +522,7 @@ test_that("freqs_wuw, test on responses", {
 })
 
 
-test_that("multiple group_vars"){
+test_that("multiple group_vars", {
   frequencies <- responses %>% 
     dplyr::group_by(
       group_var1,
@@ -562,7 +562,7 @@ test_that("multiple group_vars"){
     )
   
   expect_equal(possible_combs, calculated_combs)
-}
+})
 
 
 # Test on show missing levels ---------------------------------------------
