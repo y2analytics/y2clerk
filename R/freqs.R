@@ -154,7 +154,14 @@ freqs_wuw  <- function(
       show_missing_levels = show_missing_levels
     ) %>%
     dplyr::select('n')
-  
+
+  # Ungroup if freqs are grouped
+  if (dplyr::is.grouped_df(freqs_unweighted)) {
+    freqs_unweighted <- freqs_unweighted %>% 
+      dplyr::ungroup() %>%
+      dplyr::select('n')
+  }
+    
   # bind freqs together
   frequencies <- dplyr::bind_cols(
     freqs_weighted,
