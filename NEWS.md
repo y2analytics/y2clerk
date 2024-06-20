@@ -1,6 +1,7 @@
 # y2clerk 0.6.15
-## Maintenance 
-* Fixed a bug in freqs() in which calculations on datasets with more than one grouping variable were incorrect
+## Bug fixes 
+* `freqs` - bug fix for freqs with multiple group_vars leading to incorrect calculations
+* `freqs` - bug fix for grouped freqs with unweighted ns leading to duplicate group_var columns
 
 # y2clerk 0.6.14
 ## New features
