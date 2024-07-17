@@ -177,7 +177,7 @@ freqs_wuw  <- function(
 
 
 # Try including original freqs function as sub function
-freqs_original  <- function(
+freqs_original <- function(
     dataset,
     ...,
     stat = stat,
@@ -505,84 +505,69 @@ get_summary_output_for_cont_var <- function(dataset, variable, stat, percentile,
 
 group_factor <- function(dataset){
   grouping_vars <- dplyr::group_vars(dataset)
-  if (length(grouping_vars) > 1){ #if there are 2+ grouping vars
-    group_flag <- dplyr::group_vars(dataset)[1] %>% as.symbol()
-    group_flag2 <- dplyr::group_vars(dataset)[2] %>% as.symbol()
+  if (length(grouping_vars) > 0) { # Multiple grouping vars
+    group_flags <- list()
+    for (grouping_var in grouping_vars) {
+      group_flag <- grouping_var %>% as.symbol()
+      group_flags <- c(group_flags, group_flag)
+    }
     dataset <- dataset %>%
       dplyr::ungroup() %>%
-      dplyr::mutate_at(
-        dplyr::vars(
-          tidyselect::all_of(grouping_vars)
-        ),
-        list(~forcats::as_factor(.))
-      ) %>%
-      dplyr::group_by(
-        !!group_flag,
-        !!group_flag2
+      dplyr::mutate(
+        dplyr::across(
+          .cols = tidyselect::all_of(grouping_vars),
+          .fns = ~forcats::as_factor(.x)
+        )
       )
+    for (group_flag in group_flags) {
+      dataset <- dataset %>%
+        dplyr::group_by(
+          !!group_flag,
+          .add = TRUE
+        )
+    }
     return(dataset)
-  } else if (length(grouping_vars) == 1){ #1 grouping var
-    group_flag <- dplyr::group_vars(dataset)[1] %>% as.symbol()
-    dataset <- dataset %>%
-      dplyr::ungroup() %>%
-      dplyr::mutate_at(
-        dplyr::vars(
-          tidyselect::all_of(grouping_vars)
-        ),
-        list(~forcats::as_factor(.))
-      ) %>%
-      dplyr::group_by(
-        !!group_flag
-      )
+  } else { # Not grouped
     return(dataset)
-  } else{ # no grouping vars
-    dataset <- dataset
   }
-  return(dataset)
 }
 
 remove_group_nas <- function(dataset){
   grouping_vars <- dplyr::group_vars(dataset)
-  if (length(grouping_vars) > 1){ #if there are 2+ grouping vars
-    group_flag <- dplyr::group_vars(dataset)[1] %>% as.symbol()
-    group_flag2 <- dplyr::group_vars(dataset)[2] %>% as.symbol()
-    dataset <- dataset %>%
-      dplyr::filter(
-        !is.na(!!group_flag),
-        !is.na(!!group_flag2)
-      )
+  if (length(grouping_vars) > 1){ # Multiple grouping vars
+    group_flags <- list()
+    for (grouping_var in grouping_vars) {
+      group_flag <- grouping_var %>% as.symbol()
+      group_flags <- c(group_flags, group_flag)
+    }
+    for (group_flag in group_flags) {
+      dataset <- dataset %>%
+        dplyr::filter(
+          !is.na(!!group_flag)
+        )
+    }
     return(dataset)
-  } else if (length(grouping_vars) == 1){ #1 grouping var
-    group_flag <- dplyr::group_vars(dataset)[1] %>% as.symbol()
-    dataset <- dataset %>%
-      dplyr::filter(
-        !is.na(!!group_flag)
-      )
+  } else { # Not grouped
     return(dataset)
-  } else{ # no grouping vars
-    dataset <- dataset
   }
-  return(dataset)
 }
 
 group_rename <- function(dataset){
-  if (names(dataset)[1] != 'variable'){
-    if (names(dataset)[2] != 'variable'){ #if there are 2 grouping vars
-      
-      dataset <- dataset %>%
-        dplyr::rename(
-          group_var = names(dataset)[1],
-          group_var2 = names(dataset)[2]
-        )
-    }else{ #if there is 1 grouping var
-      dataset <- dataset %>%
-        dplyr::rename(group_var = names(dataset)[1])
+  grouping_vars <- dplyr::group_vars(dataset)
+  if (length(grouping_vars) > 1){ # Multiple grouping vars
+    for (i in 1:length(grouping_vars)) {
+      if (i == 1) {
+        dataset <- dataset %>% 
+          dplyr::rename(group_var = names(dataset)[1])
+      } else {
+        dataset <- dataset %>% 
+          dplyr::rename(!!sym(stringr::str_c('group_var', i)) := grouping_vars[i])
+      }
     }
-    #NOT GROUPED
-  } else{
-    dataset <- dataset
+    return(dataset)
+  } else { # Not grouped
+    return(dataset)
   }
-  return(dataset)
 }
 
 freq_var <- function(
