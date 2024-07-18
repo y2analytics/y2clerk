@@ -561,7 +561,7 @@ group_rename <- function(dataset){
           dplyr::rename(group_var = names(dataset)[1])
       } else {
         dataset <- dataset %>% 
-          dplyr::rename(!!sym(stringr::str_c('group_var', i)) := grouping_vars[i])
+          dplyr::rename(!!dplyr::sym(stringr::str_c('group_var', i)) := grouping_vars[i])
       }
     }
     return(dataset)
