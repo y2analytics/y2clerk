@@ -555,7 +555,9 @@ remove_group_nas <- function(dataset){
 group_rename <- function(dataset){
   # Assumed, since non-percent calculations aren't grouped dataframes
   grouping_vars <- dataset %>% 
-    dplyr::select(-(variable:dplyr::last_col())) %>% 
+    dplyr::select(
+        -(tidyselect::all_of('variable'):dplyr::last_col())
+    ) %>% 
     names()
 
   if (length(grouping_vars) > 0){ # 1 or more grouping vars
@@ -565,7 +567,7 @@ group_rename <- function(dataset){
           dplyr::rename(group_var = names(dataset)[1])
       } else {
         dataset <- dataset %>%
-          dplyr::rename(!!sym(stringr::str_c('group_var', i)) := grouping_vars[i])
+          dplyr::rename(!!dplyr::sym(stringr::str_c('group_var', i)) := grouping_vars[i])
       }
     }
     return(dataset)
