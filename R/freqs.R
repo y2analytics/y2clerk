@@ -556,7 +556,7 @@ group_rename <- function(dataset){
   # Assumed, since non-percent calculations aren't grouped dataframes
   grouping_vars <- dataset %>% 
     dplyr::select(
-        -(tidyselect::all_of('variable'):dplyr::last_col())
+      -(tidyselect::all_of('variable'):dplyr::last_col())
     ) %>% 
     names()
 
@@ -564,7 +564,7 @@ group_rename <- function(dataset){
     for (i in 1:length(grouping_vars)) {
       if (i == 1) {
         dataset <- dataset %>%
-          dplyr::rename(group_var = names(dataset)[1])
+          dplyr::rename(group_var = grouping_vars[i])
       } else {
         dataset <- dataset %>%
           dplyr::rename(!!dplyr::sym(stringr::str_c('group_var', i)) := grouping_vars[i])
