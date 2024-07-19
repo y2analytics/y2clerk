@@ -1,3 +1,7 @@
+# y2clerk 0.6.16
+## Maintenance
+* `freqs` - Updated to better handle calculating, and formatting freqs objects for a dynamic (greater than 2) number of group_vars
+
 # y2clerk 0.6.15
 ## Bug fixes 
 * `freqs` - bug fix for freqs with multiple grouping variables leading to incorrect calculations
