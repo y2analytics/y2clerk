@@ -13,11 +13,11 @@ sig_test_y2(
 )
 }
 \arguments{
-\item{frequencies}{A frequencies table created using the freqs() function in y2clerk}
+\item{frequencies}{A grouped frequencies table created using the freqs() function in y2clerk}
 
-\item{dataset}{(default: 'responses') The original data frame that the frequencies table came from}
+\item{dataset}{The original data frame that the frequencies table came from}
 
-\item{banner_var}{This will be the banner variables for cross tabs. Same as the grouping variable from the freqs() function.}
+\item{banner_var}{This will be the banner variables for cross tabs. Must be the same as the grouping variable from the freqs() function.}
 
 \item{wt}{The weight variable used in the frequencies function, if applicable}
 
@@ -25,7 +25,7 @@ sig_test_y2(
 }
 \value{
 A table that matches the output of cross tabs, showing significance differences between different groups for any input variables
-stats, cross tabs
+stats, cross tabs. Column comparison symbols: a, b, c... (p <= 0.05), A, B, C... (p <= 0.001); No symbol: not significant at at least (p <= 0.05)
 }
 \description{
 Akin to crosstabs, run significance testing on a grouped frequencies
