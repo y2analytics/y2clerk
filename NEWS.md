@@ -1,3 +1,7 @@
+# y2clerk 0.7.0
+## New function
+*`qnr_converter` - Upload a survey from docx format to the Qualtrics library. The questionnaire doc itself will need to be in the Y2 specified format.
+
 # y2clerk 0.6.16
 ## Maintenance
 * `freqs` - Updated to better handle calculating, and formatting freqs objects for a dynamic number (greater than 2) of group_vars
