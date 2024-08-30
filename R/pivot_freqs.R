@@ -25,7 +25,7 @@ pivot_freqs <- function(
   pivot_errors(dataset)
   
   dataset %>%
-    mutate(
+    dplyr::mutate(
       {{ columns_var }} := ifelse(
         {{ columns_var }} == '',
         NA,
