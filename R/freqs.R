@@ -97,14 +97,20 @@ freqs <- function(
       show_missing_levels = show_missing_levels
     )
   }
-  vars <- unique(frequencies$variable)
-  p <- character(length(vars))
-  names(p) <- vars
 
-  for(var in vars) {
-    p[var] <- labelled::var_label(dataset[[var]]) %||% ""
+  #Attach question wordings
+  if('variable' %in% names(frequencies)) {
+
+    vars <- unique(frequencies$variable)
+    p <- character(length(vars))
+    names(p) <- vars
+
+    for(var in vars) {
+      p[var] <- attr(dataset[[var]], "label", exact = TRUE) %||% ""
+    }
+
+    p <- p[p != ""]
   }
-
   return(as_freq_y2(frequencies, p))
 }
 

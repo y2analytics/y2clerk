@@ -37,7 +37,8 @@ Imports:
     tibble,
     tidyr,
     tidyselect,
-    pillar
+    pillar,
+    cli
 Suggests:
     testthat
 Encoding: UTF-8
