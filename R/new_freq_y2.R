@@ -117,7 +117,7 @@ get_question_wordings <- function(x, setup) {
 }
 
 
-#' @exportS3Method pillar::tbl_format_footer
+#' @export
 tbl_format_footer.freq_y2 <- function(x, setup, ...) {
   footer <- pillar::format_footer(x, setup)
   footer_comment <- pillar::wrap_footer_bullet(footer, setup)
