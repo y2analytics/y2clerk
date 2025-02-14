@@ -523,46 +523,47 @@ test_that("freqs_wuw, test on responses", {
 
 
 test_that("multiple group_vars", {
-  frequencies <- responses %>% 
+  frequencies <- responses %>%
     dplyr::group_by(
       group_var1,
       gender_labelled
-    ) %>% 
+    ) %>%
     freqs(
       q4,
       nas_group = FALSE
     )
-  
-  possible_combs <- responses %>% 
+
+  possible_combs <- responses %>%
     dplyr::select(
       group_var1,
       gender_labelled,
       q4
-    ) %>% 
-    dplyr::distinct() %>% 
-    dplyr::mutate(q4 = as.numeric(q4)) %>% 
+    ) %>%
+    dplyr::distinct() %>%
+    dplyr::mutate(q4 = as.numeric(q4)) %>%
     dplyr::arrange(
       group_var1,
       gender_labelled,
       q4
-    ) %>% 
+    ) %>%
     tidyr::drop_na()
-  
-  calculated_combs <- frequencies %>% 
-    dplyr::ungroup() %>% 
-    dplyr::filter(n > 0) %>% 
+
+  calculated_combs <- frequencies %>%
+    dplyr::ungroup() %>%
+    dplyr::filter(n > 0) %>%
     dplyr::select(
       group_var1 = group_var,
       gender_labelled = group_var2,
       q4 = value
-    ) %>% 
-    dplyr::mutate(q4 = as.numeric(q4)) %>% 
+    ) %>%
+    dplyr::mutate(q4 = as.numeric(q4)) %>%
     dplyr::arrange(
       group_var1,
       gender_labelled,
       q4
-    )
-  
+    ) %>%
+    dplyr::as_tibble()
+
   expect_equal(possible_combs, calculated_combs)
 })
 
