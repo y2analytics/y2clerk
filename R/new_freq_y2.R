@@ -147,7 +147,7 @@ format_footer_advice.freq_y2 <- function(x, setup) {
     .print_buffer$last_freq <- x
 
     rows <- cli::cli_text(cli::col_silver(
-      "# {cli::symbol$info} Use `{.run [print(n = ...)](y2clerk::print_freq_inf(.print_buffer$last_freq))}` to see more rows"
+      "# {cli::symbol$info} Use `{.run [print(n = ...)](y2clerk::print_freq_inf())}` to see more rows"
       ))
     ###cli_text ends this function
   }
@@ -170,8 +170,8 @@ format_footer_advice.freq_y2 <- function(x, setup) {
 #' This function prints prints the most recently displayed frequency tibble with print(n = Inf)
 #'
 #' @export
-print_freq_inf <- function(x) {
-  print(x, n = Inf)
+print_freq_inf <- function() {
+  print(.print_buffer$last_freq, n = Inf)
 }
 
 
