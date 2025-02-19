@@ -16,7 +16,7 @@
 #' @param prompt_rm_pre DEFAULT = ".+\\,.+recommend "; String pattern in the specified `prompt` column before which everything in the column is scrubbed to obtain the "brand"
 #' @param prompt_rm_post DEFAULT = " to a .+\\? \\-.+"; String pattern in the specified `prompt` column after which everything in the column is scrubbed to obtain the "brand"
 #' @param arrange_nps DEFAULT = TRUE; Boolean, whether to arrange the final output by the NPS results, with previous frequencies arrangements/orderings still intact
-#' @param append_nps_to_brand DEFAULT = TRUE; Boolean, whether to append the NPS values to the "brand" column, having the format "{Brand} (NPS = {NPS})"
+#' @param append_nps_to_brand DEFAULT = TRUE; Boolean, whether to append the NPS values to the "brand" column, having the format "["brand"] (NPS = [NPS])"
 #' @param brand_factor DEFAULT = TRUE; Boolean, whether to convert the "brand" variable (with appended NPS values) to a factor for ease of data visualization (argument specification only applied if `append_nps_to_brand` is set to TRUE)
 #' @return An updated frequencies object with the new NPS column (and other specified columns) attached, formatted as specified
 #' @examples
@@ -165,7 +165,7 @@ calculate_nps <- function(
       ) %>% 
       dplyr::mutate(
         dplyr::across(
-          .cols = c(n, result),
+          .cols = c(.data$n, .data$result),
           .fns = ~sum(.x)
         )
       ) %>% 
@@ -223,7 +223,7 @@ calculate_nps <- function(
   if (arrange_nps){
     frequencies <- frequencies %>%
       dplyr::arrange(
-        dplyr::desc(nps),
+        dplyr::desc(.data$nps),
         !!value_flag
       )
   }
@@ -240,7 +240,7 @@ calculate_nps <- function(
         !!brand_flag := stringr::str_c(
           !!brand_flag,
           ' (NPS = ',
-          nps,
+          .data$nps,
           ')'
         )
       )
