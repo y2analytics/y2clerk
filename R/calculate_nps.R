@@ -18,8 +18,7 @@
 #' @param arrange_nps DEFAULT = TRUE; Boolean, whether to arrange the final output by the NPS results, with previous frequencies arrangements/orderings still intact
 #' @param append_nps_to_brand DEFAULT = TRUE; Boolean, whether to append the NPS values to the "brand" column, having the format "{Brand} (NPS = {NPS})"
 #' @param brand_factor DEFAULT = TRUE; Boolean, whether to convert the "brand" variable (with appended NPS values) to a factor for ease of data visualization (argument specification only applied if `append_nps_to_brand` is set to TRUE)
-#' @return An updated frequencies object with the new NPS column (and other specified
-#' columns) attached, formatted as specified
+#' @return An updated frequencies object with the new NPS column (and other specified columns) attached, formatted as specified
 #' @examples
 #'
 #' set.seed(1)
@@ -95,8 +94,8 @@ calculate_nps <- function(
     prompt_rm_pre = '.+\\,.+recommend ',
     prompt_rm_post = ' to a .+\\? \\-.+',
     arrange_nps = TRUE,
-    append_nps_to_brand = TRUE, # WORKING Should arg be consolidated with brand_factor arg? Why else would an analyst order by NPS besides charting? Just for EDA?
-    brand_factor = TRUE # WORKING Convert brand to factor for charting
+    append_nps_to_brand = TRUE,
+    brand_factor = TRUE
 ) {
   
   ## Variable quosures, arg matches
