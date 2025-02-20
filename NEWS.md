@@ -1,6 +1,6 @@
 # y2clerk 0.7.2
 ## New function
-*`calculate_nps()` - Quickly extract the Net Promoter Score (NPS) from a frequencies object of formatted NPS survey questions
+* `calculate_nps()` - Quickly extract the Net Promoter Score (NPS) from a frequencies object of formatted NPS survey questions
 
 # y2clerk 0.7.1
 ## Bug fixes 
@@ -8,7 +8,7 @@
 
 # y2clerk 0.7.0
 ## New function
-*`qnr_converter` - Upload a survey from docx format to the Qualtrics library. The questionnaire doc itself will need to be in the Y2 specified format.
+* `qnr_converter` - Upload a survey from docx format to the Qualtrics library. The questionnaire doc itself will need to be in the Y2 specified format.
 
 # y2clerk 0.6.16
 ## Maintenance
