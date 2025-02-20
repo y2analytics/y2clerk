@@ -1,3 +1,7 @@
+# y2clerk 0.7.2
+## New function
+*`calculate_nps()` - Quickly extract the Net Promoter Score (NPS) from a frequencies object of formatted NPS survey questions
+
 # y2clerk 0.7.1
 ## Bug fixes 
 * `pivot_freqs()` - bug fix for freqs with group_var that has a missing, empty string value for group_var
