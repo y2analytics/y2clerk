@@ -2,6 +2,7 @@
 
 export("%>%")
 export(append_ns)
+export(calculate_nps)
 export(cross_freqs)
 export(freq)
 export(freqs)
