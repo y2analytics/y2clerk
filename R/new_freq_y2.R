@@ -8,7 +8,7 @@
 as_freq_y2 <- function (df, p = NULL) {
   df <- tibble::as_tibble(df)
 
-  if (exists('p')) {
+  if (!is.null(p)) {
     #that p is a named character vector
     if (!is.character(p)) {
       stop("p must be a character vector")
@@ -18,9 +18,10 @@ as_freq_y2 <- function (df, p = NULL) {
     if (any(is.null(names(p))) | any(names(p) == "")) {
       stop("Every element of p must be named")
     }
+
+    attr(df, "prompts") <- p
   }
 
-  attr(df, "prompts") <- p
   class(df) <- c("freq_y2", class(df))
   return(df)
 }
@@ -167,7 +168,7 @@ format_footer_advice.freq_y2 <- function(x, setup) {
 #' Print with n = Inf
 #'
 #' @description
-#' This function prints prints the most recently displayed frequency tibble with print(n = Inf)
+#' This function prints the most recently displayed frequency tibble with print(n = Inf)
 #'
 #' @export
 print_freq_inf <- function() {
@@ -175,7 +176,12 @@ print_freq_inf <- function() {
 }
 
 
-
+#' @exportS3Method dplyr::group_by
+group_by.freq_y2 <- function(.data, ..., .add = FALSE, .drop = dplyr:::group_by_drop_default(.data)) {
+  p <- attr(.data, 'prompts')
+  groups <- group_by_prepare(.data, ..., .add = .add, error_call = rlang:::current_env())
+  grouped_df(groups$data, groups$group_names, .drop) |> as_freq_y2(p)
+}
 
 
 #' Create print buffer environment if it does not exist
