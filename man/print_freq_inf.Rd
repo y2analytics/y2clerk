@@ -4,8 +4,8 @@
 \alias{print_freq_inf}
 \title{Print with n = Inf}
 \usage{
-print_freq_inf(x)
+print_freq_inf()
 }
 \description{
-This function prints prints the most recently displayed frequency tibble with print(n = Inf)
+This function prints the most recently displayed frequency tibble with print(n = Inf)
 }

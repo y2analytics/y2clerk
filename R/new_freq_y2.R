@@ -176,14 +176,6 @@ print_freq_inf <- function() {
 }
 
 
-#' @exportS3Method dplyr::group_by
-group_by.freq_y2 <- function(.data, ..., .add = FALSE, .drop = dplyr:::group_by_drop_default(.data)) {
-  p <- attr(.data, 'prompts')
-  groups <- group_by_prepare(.data, ..., .add = .add, error_call = rlang:::current_env())
-  grouped_df(groups$data, groups$group_names, .drop) |> as_freq_y2(p)
-}
-
-
 #' Create print buffer environment if it does not exist
 create_env_in_global <- function() {
   if (!exists(".print_buffer", envir = .GlobalEnv)) {
