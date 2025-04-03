@@ -19,7 +19,7 @@ calculate_nps(
   prompt_rm_pre = ".+\\\\,.+recommend ",
   prompt_rm_post = " to a .+\\\\? \\\\-.+",
   arrange_nps = TRUE,
-  append_nps_to_brand = TRUE,
+  append_nps_to_brand = FALSE,
   brand_factor = TRUE
 )
 }
@@ -32,7 +32,7 @@ calculate_nps(
 
 \item{value}{DEFAULT = value; The column of NPS question values (levels) used to order the final output}
 
-\item{input_type}{DEFAULT = "grouped"; The input type of the NPS questions. Must be one of either "grouped" or "numeric" corresponding to either pre-formatted or unformatted Qualtrics NPS questions, respectively}
+\item{input_type}{DEFAULT = "grouped"; The input type of the NPS questions. Must be one of either "grouped" or "numeric" corresponding to either pre-formatted (3 groups of "Detractor", "Passive", and "Promoter") or unformatted (scale of 0-10) Qualtrics NPS questions, respectively}
 
 \item{by_variable}{DEFAULT = TRUE; Boolean, controls whether the function calculates the NPS for each unique specified `variable` (question columns) or for the frequencies as a whole}
 
@@ -52,7 +52,7 @@ calculate_nps(
 
 \item{arrange_nps}{DEFAULT = TRUE; Boolean, whether to arrange the final output by the NPS results, with previous frequencies arrangements/orderings still intact}
 
-\item{append_nps_to_brand}{DEFAULT = TRUE; Boolean, whether to append the NPS values to the "brand" column, having the format "["brand"] (NPS = [NPS])"}
+\item{append_nps_to_brand}{DEFAULT = FALSE; Boolean, whether to append the NPS values to the "brand" column, having the format "["brand"] (NPS = [NPS])"}
 
 \item{brand_factor}{DEFAULT = TRUE; Boolean, whether to convert the "brand" variable (with appended NPS values) to a factor for ease of data visualization (argument specification only applied if `append_nps_to_brand` is set to TRUE)}
 }

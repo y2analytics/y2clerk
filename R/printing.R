@@ -18,7 +18,7 @@ print_freq_inf <- function() {
 
 ### These functions all override a part of printing frequency tibbles.
 ### The tibble printing flow is extremely complicated and powerful.
-### It allows overriding parts of the tibble printing while not providing a wholy custom solution.
+### It allows overriding parts of the tibble printing while not providing an entirely custom solution.
 
 #' @exportS3Method pillar::tbl_sum
 tbl_sum.freq_y2 <- function(x, ...) {
