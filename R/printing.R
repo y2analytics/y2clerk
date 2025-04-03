@@ -1,3 +1,6 @@
+# Silence CRAN check over missing global binding (because we make it when the user prints a frequency tibble
+if(getRversion() >= "2.15.1") utils::globalVariables(c(".print_buffer"))
+
 #' @exportS3Method
 print.freq_y2 <- function(x, n, ...) {
   create_env_in_global()
