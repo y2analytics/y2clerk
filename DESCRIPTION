@@ -36,7 +36,9 @@ Imports:
     survey,
     tibble,
     tidyr,
-    tidyselect
+    tidyselect,
+    pillar,
+    cli
 Suggests:
     testthat
 Encoding: UTF-8
