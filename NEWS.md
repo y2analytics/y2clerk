@@ -1,3 +1,9 @@
+# y2clerk 0.7.3
+## Display changes
+* Click to print (n = Inf) - When you run a freq(), the text at teh bottom that says `print(n = ...)` is now clickable and will print the most recently displayed frequency tibble with `n = Inf`.
+* Display Question wordings - When running a freqs, if the variables have haven labels, printing will now include the question wordings above the frequency tibble.
+
+
 # y2clerk 0.7.2
 ## New function
 * `calculate_nps()` - Quickly extract the Net Promoter Score (NPS) from a frequencies object of formatted NPS survey questions
