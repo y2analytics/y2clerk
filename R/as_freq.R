@@ -4,7 +4,6 @@
 #' @param p A length 1+ vector of named prompts
 #'
 #' @returns A freq_y2 class (Subclass of a tibble)
-#' @export
 as_freq_y2 <- function(df, p = NULL) {
   if ('freq_y2' %in% class(df)) {
     return(df)

@@ -1,6 +1,6 @@
 # y2clerk 0.7.3
 ## Display changes
-* Click to print (n = Inf) - When you run a freq(), the text at teh bottom that says `print(n = ...)` is now clickable and will print the most recently displayed frequency tibble with `n = Inf`.
+* Click to print (n = Inf) - When you run a freq(), the text at the bottom that says `print(n = ...)` is now clickable and will print the most recently displayed frequency tibble with `n = Inf`.
 * Display Question wordings - When running a freqs, if the variables have haven labels, printing will now include the question wordings above the frequency tibble.
 
 

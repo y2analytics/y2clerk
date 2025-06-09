@@ -12,8 +12,6 @@ print.freq_y2 <- function(x, n, ...) {
 #'
 #' @description
 #' This function prints the most recently displayed frequency tibble with print(n = Inf)
-#'
-#' @export
 print_freq_inf <- function() {
   print(.print_buffer$last_freq, n = Inf)
 }
