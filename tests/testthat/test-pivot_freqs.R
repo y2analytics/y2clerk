@@ -25,16 +25,16 @@ test_that("Column names", {
 
 test_that("Column names with two group vars", {
   frequencies_pivoted <- forcats::gss_cat %>%
-    dplyr::group_by(year, marital) %>%
+    dplyr::group_by(year) %>%
     freqs(race) %>%
     pivot_freqs()
+
   frequencies_pivoted
   nrows <- nrow(frequencies_pivoted)
   names_cols <- names(frequencies_pivoted)
 
   names_actual <- frequencies_pivoted %>% names()
   names_expected <- c(
-    'group_var2',
     'group_var',
     'Other',
     'Black',

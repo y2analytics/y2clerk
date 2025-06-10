@@ -103,7 +103,8 @@ test_that("multi_freqs - formatting", {
   test <- responses %>% multi_freqs(m_activity_1)
   test_names <- responses %>% multi_freqs(m_activity_1) %>% names()
 
-  expect_equal(class(test)[1], 'tbl_df')
+  expect_equal(class(test)[1], 'freq_y2')
+  expect_equal(class(test)[2], 'tbl_df')
   expect_equal(test_names, c('variable', 'value', 'label', 'n', 'stat', 'result'))
 })
 

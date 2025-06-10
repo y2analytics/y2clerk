@@ -117,7 +117,45 @@ test_that("Incorrect wt argument", {
   expect_error(freqs(mtcars, cyl, wt = 'True'))
 })
 
+### frequency tibble class testing
+#Returns class freq_y2
+test_that("`freq()` returns a frequency tibble", {
+  expect_s3_class(freqs(mtcars, cyl), 'freq_y2')
+})
 
+#Prints the question wordings
+test_that("`freq()` prints question wordings", {
+  test_freq1 <- responses |>
+    dplyr::select(q1) |>
+    freq()
+
+  expect_output(print(test_freq1),
+                'q1: % of males involved in agriculture')
+})
+
+#Prints only three question wordings
+test_that("`freq()` prints only three question wordings", {
+  test_freq <- responses |>
+    dplyr::select(q1, q2, q3, q4) |>
+    freq()
+
+  #Prints The question wordings for the first three
+  expect_output(print(test_freq),
+                'q1: % of males involved in agriculture')
+  expect_output(print(test_freq),
+                'q2: Orange tree ID')
+  expect_output(print(test_freq),
+                'q3: Preferred fruit')
+
+  # Does not print the question wording for the forth
+  output <- capture.output(print(test_freq))
+  expect_false(any(grepl("q4: Duration", output)))
+
+  #Does print message saying how may questions have wordings that are not displayed
+  expect_output(print(test_freq),
+                '1 more questions with labels')
+
+})
 
 ### weights
 test_that("Weights", {
@@ -523,46 +561,47 @@ test_that("freqs_wuw, test on responses", {
 
 
 test_that("multiple group_vars", {
-  frequencies <- responses %>% 
+  frequencies <- responses %>%
     dplyr::group_by(
       group_var1,
       gender_labelled
-    ) %>% 
+    ) %>%
     freqs(
       q4,
       nas_group = FALSE
     )
-  
-  possible_combs <- responses %>% 
+
+  possible_combs <- responses %>%
     dplyr::select(
       group_var1,
       gender_labelled,
       q4
-    ) %>% 
-    dplyr::distinct() %>% 
-    dplyr::mutate(q4 = as.numeric(q4)) %>% 
+    ) %>%
+    dplyr::distinct() %>%
+    dplyr::mutate(q4 = as.numeric(q4)) %>%
     dplyr::arrange(
       group_var1,
       gender_labelled,
       q4
-    ) %>% 
+    ) %>%
     tidyr::drop_na()
-  
-  calculated_combs <- frequencies %>% 
-    dplyr::ungroup() %>% 
-    dplyr::filter(n > 0) %>% 
+
+  calculated_combs <- frequencies %>%
+    dplyr::ungroup() %>%
+    dplyr::filter(n > 0) %>%
     dplyr::select(
       group_var1 = group_var,
       gender_labelled = group_var2,
       q4 = value
-    ) %>% 
-    dplyr::mutate(q4 = as.numeric(q4)) %>% 
+    ) %>%
+    dplyr::mutate(q4 = as.numeric(q4)) %>%
     dplyr::arrange(
       group_var1,
       gender_labelled,
       q4
-    )
-  
+    ) %>%
+    dplyr::as_tibble()
+
   expect_equal(possible_combs, calculated_combs)
 })
 
