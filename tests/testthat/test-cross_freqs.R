@@ -2,13 +2,13 @@
 test_that("Column names", {
   GROUP_VARS1 <- 'am'
 
-  frequencies <- mtcars %>%
+  frequencies <- mtcars |>
     cross_freqs(
       group_vars = GROUP_VARS1,
       gear
     )
   frequencies
-  names_actual <- frequencies %>% names()
+  names_actual <- frequencies |> names()
   names_expected <- c(
     'group_var_name',
     'group_var',
@@ -27,7 +27,7 @@ test_that("Column names", {
 test_that("Multiple freqs vars", {
   GROUP_VARS1 <- 'am'
 
-  frequencies <- mtcars %>%
+  frequencies <- mtcars |>
     cross_freqs(
       group_vars = GROUP_VARS1,
       gear,
@@ -42,15 +42,15 @@ test_that("Multiple freqs vars", {
 
 ### Multiple grouping vars
 test_that("Multiple grouping vars", {
-  GROUP_VARS2 <- mtcars %>% dplyr::select(am, vs) %>% names()
+  GROUP_VARS2 <- mtcars |> dplyr::select(am, vs) |> names()
 
-  frequencies <- mtcars %>%
+  frequencies <- mtcars |>
     cross_freqs(
       group_vars = GROUP_VARS2,
       gear
     )
   grouping_vars <- unique(frequencies$group_var_name)
-  grouping_levels <- unique(frequencies$group_var) %>% as.character()
+  grouping_levels <- unique(frequencies$group_var) |> as.character()
   expect_equal(grouping_vars, c("am", "vs"))
   expect_equal(grouping_levels, c("0", "1"))
 })
@@ -58,9 +58,9 @@ test_that("Multiple grouping vars", {
 
 ### wide = TRUE
 test_that("wide = TRUE", {
-  GROUP_VARS2 <- mtcars %>% dplyr::select(am, vs) %>% names()
+  GROUP_VARS2 <- mtcars |> dplyr::select(am, vs) |> names()
 
-  frequencies <- mtcars %>%
+  frequencies <- mtcars |>
     cross_freqs(
       group_vars = GROUP_VARS2,
       gear,
@@ -78,24 +78,24 @@ test_that("wide = TRUE", {
 
 ### Mixed class group vars
 test_that("Mixed class group vars", {
-  GROUP_VARS2 <- mtcars %>% dplyr::select(am, vs) %>% names()
+  GROUP_VARS2 <- mtcars |> dplyr::select(am, vs) |> names()
 
   # Long
-  frequencies <- mtcars %>%
-    dplyr::mutate(am = forcats::as_factor(am)) %>%
+  frequencies <- mtcars |>
+    dplyr::mutate(am = forcats::as_factor(am)) |>
     cross_freqs(
       group_vars = GROUP_VARS2,
       gear,
       carb
     )
   grouping_vars <- unique(frequencies$group_var_name)
-  grouping_levels <- unique(frequencies$group_var) %>% as.character()
+  grouping_levels <- unique(frequencies$group_var) |> as.character()
   expect_equal(grouping_vars, c("am", "vs"))
   expect_equal(grouping_levels, c("0", "1"))
 
   # Wide
-  frequencies <- mtcars %>%
-    dplyr::mutate(am = forcats::as_factor(am)) %>%
+  frequencies <- mtcars |>
+    dplyr::mutate(am = forcats::as_factor(am)) |>
     cross_freqs(
       group_vars = GROUP_VARS2,
       gear,
@@ -111,7 +111,7 @@ test_that("Mixed class group vars", {
 ### Error messages
 test_that("Error messages", {
   expect_error(
-    frequencies <- mtcars %>%
+    frequencies <- mtcars |>
       cross_freqs(
         group_vars = dplyr::quos(am, vs),
         vs
@@ -121,7 +121,7 @@ test_that("Error messages", {
   )
 
   expect_error(
-    frequencies <- mtcars %>%
+    frequencies <- mtcars |>
       cross_freqs(
         group_vars = am,
         vs
@@ -134,11 +134,11 @@ test_that("Error messages", {
 
 ### exclude_groups
 test_that("exclude_groups, select() method", {
-  GROUP_VARS2 <- mtcars %>% dplyr::select(am, vs) %>% names()
+  GROUP_VARS2 <- mtcars |> dplyr::select(am, vs) |> names()
 
   # Long
-  frequencies <- mtcars %>%
-    dplyr::select(carb, gear, am, vs) %>%
+  frequencies <- mtcars |>
+    dplyr::select(carb, gear, am, vs) |>
     cross_freqs(
       group_vars = GROUP_VARS2, #am & vs
       exclude_groups = TRUE
@@ -147,8 +147,8 @@ test_that("exclude_groups, select() method", {
   expect_equal(grouping_vars, c("carb", "gear"))
 
   # Wide
-  frequencies <- mtcars %>%
-    dplyr::select(carb, gear, am, vs) %>%
+  frequencies <- mtcars |>
+    dplyr::select(carb, gear, am, vs) |>
     cross_freqs(
       group_vars = GROUP_VARS2, #am & vs
       wide = TRUE,
@@ -163,20 +163,20 @@ test_that("exclude_groups, select() method", {
 
 ### include_overall
 test_that("include_overall", {
-  GROUP_VARS2 <- mtcars %>% dplyr::select(am, vs) %>% names()
+  GROUP_VARS2 <- mtcars |> dplyr::select(am, vs) |> names()
 
   # Long
-  frequencies <- mtcars %>%
-    dplyr::select(carb, gear, am, vs) %>%
+  frequencies <- mtcars |>
+    dplyr::select(carb, gear, am, vs) |>
     cross_freqs(
       group_vars = GROUP_VARS2, #am & vs
       exclude_groups = TRUE,
       include_overall = TRUE
     )
   grouping_vars <- unique(frequencies$group_var_name)
-  group_sums <- frequencies %>%
-    dplyr::group_by(group_var_name) %>%
-    dplyr::mutate(sums = sum(n)) %>%
+  group_sums <- frequencies |>
+    dplyr::group_by(group_var_name) |>
+    dplyr::mutate(sums = sum(n)) |>
     dplyr::distinct(group_var_name, .keep_all = TRUE)
   expect_equal(grouping_vars, c("Overall", "am", "vs"))
   expect_equal(length(grouping_vars), 3)
@@ -187,8 +187,8 @@ test_that("include_overall", {
   )
 
   # Wide
-  frequencies <- mtcars %>%
-    dplyr::select(carb, gear, am, vs) %>%
+  frequencies <- mtcars |>
+    dplyr::select(carb, gear, am, vs) |>
     cross_freqs(
       group_vars = GROUP_VARS2, #am & vs
       wide = TRUE,

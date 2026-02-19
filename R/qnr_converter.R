@@ -32,7 +32,7 @@ qnr_converter <- function(
 
   doc <- officer::docx_summary(doc_raw)
 
-  doc <- doc %>%
+  doc <- doc |>
     dplyr::filter(.data$text != "")
 
   # Get survey name ---------------------------------------------------------
@@ -124,7 +124,7 @@ qnr_converter <- function(
           looking_for == "answers" |
           looking_for == "statements")
     ) {
-      data_for_api <- data_for_api %>%
+      data_for_api <- data_for_api |>
         dplyr::add_row(
           type = row_type,
           value = row_value,
@@ -195,7 +195,7 @@ qnr_converter <- function(
       if (grepl("ANSWERS", next_line, fixed = TRUE)) {
         looking_for <- "answers"
 
-        choice_vector <- choice_vector %>%
+        choice_vector <- choice_vector |>
           purrr::set_names(c(1:length(choice_vector)))
 
         row_type <- "statement set"
@@ -222,7 +222,7 @@ qnr_converter <- function(
       ) {
         looking_for <- "question"
 
-        choice_vector <- choice_vector %>%
+        choice_vector <- choice_vector |>
           purrr::set_names(c(1:length(choice_vector)))
 
         row_type <- "answer set"
@@ -298,9 +298,9 @@ qnr_converter <- function(
   # loop through questions --------------------------------------------------
   print("Pushing questions to Qualtrics API")
 
-  data_for_api <- data_for_api %>%
-    dplyr::filter(.data$type != "other") %>%
-    dplyr::filter(.data$type != "logic statement") %>%
+  data_for_api <- data_for_api |>
+    dplyr::filter(.data$type != "other") |>
+    dplyr::filter(.data$type != "logic statement") |>
     dplyr::filter(.data$vector != 'list(Display = "[ANSWERS]")')
 
   numbers_list <- list(

@@ -11,9 +11,9 @@
 #' @return A wide tibble of frequencies with one row for each group (by default)
 #' @export
 #' @examples
-#'   frequencies <- forcats::gss_cat %>%
-#'     dplyr::group_by(year) %>%
-#'       y2clerk::freqs(marital) %>%
+#'   frequencies <- forcats::gss_cat |>
+#'     dplyr::group_by(year) |>
+#'       y2clerk::freqs(marital) |>
 #'       pivot_freqs()
 
 pivot_freqs <- function(
@@ -23,19 +23,19 @@ pivot_freqs <- function(
   label <- NULL
   pivot_errors(dataset)
 
-  dataset %>%
+  dataset |>
     dplyr::mutate(
       {{ columns_var }} := ifelse(
         {{ columns_var }} == '',
         NA,
         {{ columns_var }}
       )
-    ) %>%
+    ) |>
     dplyr::select(
       'group_var',
       'label',
       'result'
-    ) %>%
+    ) |>
     tidyr::pivot_wider(
       names_from = {{ columns_var }},
       values_from = 'result',

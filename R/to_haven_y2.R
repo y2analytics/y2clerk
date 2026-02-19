@@ -8,12 +8,12 @@
 #' @examples
 #'
 #' test <- tibble::tibble(
-#'   color_factor = c('Blue', 'Blue', 'Red', 'Yellow') %>%
+#'   color_factor = c('Blue', 'Blue', 'Red', 'Yellow') |>
 #'     forcats::as_factor()
 #' )
 #'
 #' test$color <- to_haven_y2(test$color_factor)
-#' test <- test %>%
+#' test <- test |>
 #'   dplyr::mutate(
 #'     color = to_haven_y2(color_factor)
 #'   )
@@ -41,8 +41,8 @@ to_haven_y2 <- function(
   }
   var_numeric <- as.numeric(variable)
   var_character <- as.character(variable)
-  var_numeric_unique <- var_numeric %>% unique()
-  var_character_unique <- var_character %>% unique()
+  var_numeric_unique <- var_numeric |> unique()
+  var_character_unique <- var_character |> unique()
 
   matching_vector <- var_numeric_unique
   names(matching_vector) <- var_character_unique

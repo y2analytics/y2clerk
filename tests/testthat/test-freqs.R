@@ -58,7 +58,7 @@ responses <- {
     ),
     # numeric weights
     w = rnorm(25, mean = 1, sd = 0.1)
-  ) %>%
+  ) |>
     labelled::set_value_labels(
       q4 = c(
         `Less than a year` = 1,
@@ -81,7 +81,7 @@ responses <- {
         'female' = 2,
         'other' = 3
       )
-    ) %>%
+    ) |>
     labelled::set_variable_labels(
       q1 = "% of males involved in agriculture",
       q2 = "Orange tree ID",
@@ -90,7 +90,7 @@ responses <- {
       q5 = "Satisfaction",
       w = "Weights",
       gender_labelled = 'gender'
-    ) %>%
+    ) |>
     dplyr::as_tibble()
 }
 
@@ -190,20 +190,20 @@ test_that("nas - group", {
     a2 = c(1, 2, 2, 3, 4, 2, 5),
     g = c(1, 1, 2, 2, 3, NA, 2),
     g2 = c(1, 1, 2, 2, 3, 3, NA)
-  ) %>%
+  ) |>
     dplyr::group_by(g)
 
-  yes_nas <- df %>%
-    dplyr::group_by(g) %>%
+  yes_nas <- df |>
+    dplyr::group_by(g) |>
     freqs(a)
-  no_nas <- df %>%
-    dplyr::group_by(g) %>%
+  no_nas <- df |>
+    dplyr::group_by(g) |>
     freqs(a, nas_group = FALSE)
-  no_nas2 <- df %>%
-    dplyr::group_by(g2) %>%
+  no_nas2 <- df |>
+    dplyr::group_by(g2) |>
     freqs(a2, nas_group = FALSE)
-  group_factors <- df %>%
-    dplyr::group_by(g) %>%
+  group_factors <- df |>
+    dplyr::group_by(g) |>
     freqs(a, factor_group = TRUE)
 
   expect_equal(nrow(yes_nas), 7)
@@ -270,9 +270,9 @@ test_that("filter out groups from vars", {
     b = c(1, 1, 1, 2, 2),
     c = c(2, 3, 4, 5, 6)
   )
-  frequencies <- df %>%
-    dplyr::select(a, b) %>%
-    dplyr::group_by(b) %>%
+  frequencies <- df |>
+    dplyr::select(a, b) |>
+    dplyr::group_by(b) |>
     freqs()
 
   expect_equal(nrow(frequencies), 4)
@@ -284,8 +284,8 @@ test_that("filter out weights from vars", {
     b = c(1, 1, 1, 2, 2),
     c = c(2, 3, 4, 5, 6)
   )
-  frequencies <- df %>%
-    dplyr::select(a, b) %>%
+  frequencies <- df |>
+    dplyr::select(a, b) |>
     freqs(wt = b)
 
   expect_equal(nrow(frequencies), 4)
@@ -302,20 +302,20 @@ test_that("test data is correct", {
 
 test_that("NAs not present, nas = T: n & result are correct", {
   expect_equivalent(
-    responses %>%
-      dplyr::select(q0) %>%
-      freqs(stat = "mean") %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(q0) |>
+      freqs(stat = "mean") |>
+      dplyr::select(result) |>
       dplyr::pull(),
 
     round(mean(responses$q0), 2)
   )
 
   expect_equivalent(
-    responses %>%
-      dplyr::select(q0) %>%
-      freqs(stat = "mean", nas = TRUE) %>%
-      dplyr::select(n) %>%
+    responses |>
+      dplyr::select(q0) |>
+      freqs(stat = "mean", nas = TRUE) |>
+      dplyr::select(n) |>
       dplyr::pull(),
 
     nrow(responses[!is.na(responses$q0), ])
@@ -324,19 +324,19 @@ test_that("NAs not present, nas = T: n & result are correct", {
 
 test_that("NAs not present, nas = F: n & result are correct", {
   expect_equivalent(
-    responses %>%
-      dplyr::select(q0) %>%
-      freqs(stat = "mean", nas = FALSE) %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(q0) |>
+      freqs(stat = "mean", nas = FALSE) |>
+      dplyr::select(result) |>
       dplyr::pull(),
 
     round(mean(responses$q0), 2)
   )
   expect_equivalent(
-    responses %>%
-      dplyr::select(q0) %>%
-      freqs(stat = "mean", nas = FALSE) %>%
-      dplyr::select(n) %>%
+    responses |>
+      dplyr::select(q0) |>
+      freqs(stat = "mean", nas = FALSE) |>
+      dplyr::select(n) |>
       dplyr::pull(),
 
     nrow(responses[!is.na(responses$q0), ])
@@ -345,27 +345,27 @@ test_that("NAs not present, nas = F: n & result are correct", {
 
 test_that("NAs present, nas = T: throws error", {
   expect_error(
-    responses %>%
-      dplyr::select(q1) %>%
+    responses |>
+      dplyr::select(q1) |>
       freqs(stat = "mean")
   )
 })
 
 test_that("NAs present, nas = F: n & result are correct", {
   expect_equal(
-    responses %>%
-      dplyr::select(q1) %>%
-      freqs(stat = "mean", nas = FALSE) %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(q1) |>
+      freqs(stat = "mean", nas = FALSE) |>
+      dplyr::select(result) |>
       dplyr::pull(),
 
     round(mean(responses$q1, na.rm = TRUE), 2)
   )
   expect_equivalent(
-    responses %>%
-      dplyr::select(q1) %>%
-      freqs(stat = "mean", nas = FALSE) %>%
-      dplyr::select(n) %>%
+    responses |>
+      dplyr::select(q1) |>
+      freqs(stat = "mean", nas = FALSE) |>
+      dplyr::select(n) |>
       dplyr::pull(),
 
     nrow(responses[!is.na(responses$q1), ])
@@ -375,8 +375,8 @@ test_that("NAs present, nas = F: n & result are correct", {
 
 test_that("factor variable input: throws error", {
   expect_error(
-    responses %>%
-      select(q2) %>%
+    responses |>
+      select(q2) |>
       freqs(stat = 'mean')
   )
 })
@@ -384,8 +384,8 @@ test_that("factor variable input: throws error", {
 
 test_that("character variable input: throws error", {
   expect_error(
-    responses %>%
-      dplyr::select(q3) %>%
+    responses |>
+      dplyr::select(q3) |>
       freqs(stat = 'mean')
   )
 })
@@ -393,8 +393,8 @@ test_that("character variable input: throws error", {
 
 test_that("column with value labels input: throws error", {
   expect_error(
-    responses %>%
-      dplyr::select(q4) %>%
+    responses |>
+      dplyr::select(q4) |>
       freqs(stat = 'mean')
   )
 })
@@ -402,11 +402,11 @@ test_that("column with value labels input: throws error", {
 test_that("column with value labels input: (potentially misleading) result is correct
           after labels are removed", {
   expect_equivalent(
-    responses %>%
-      dplyr::mutate(q4 = as.numeric(q4)) %>%
-      dplyr::select(q4) %>%
-      freqs(stat = 'mean') %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::mutate(q4 = as.numeric(q4)) |>
+      dplyr::select(q4) |>
+      freqs(stat = 'mean') |>
+      dplyr::select(result) |>
       dplyr::pull(),
     mean(responses$q4)
   )
@@ -414,11 +414,11 @@ test_that("column with value labels input: (potentially misleading) result is co
 
 test_that("column with value labels input: answer is correct after labels removed (even if potentially misleading)", {
   expect_equivalent(
-    responses %>%
-      dplyr::select(q4) %>%
-      labelled::remove_labels() %>%
-      freqs(stat = 'mean') %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(q4) |>
+      labelled::remove_labels() |>
+      freqs(stat = 'mean') |>
+      dplyr::select(result) |>
       dplyr::pull(),
     mean(responses$q4)
   )
@@ -427,13 +427,13 @@ test_that("column with value labels input: answer is correct after labels remove
 
 test_that("using weights: equivalent to weighted.mean() output", {
   expect_equal(
-    responses %>%
-      dplyr::select(q1, w) %>%
-      freqs(stat = 'mean', nas = FALSE, wt = w) %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(q1, w) |>
+      freqs(stat = 'mean', nas = FALSE, wt = w) |>
+      dplyr::select(result) |>
       dplyr::pull(),
 
-    stats::weighted.mean(x = responses$q1, w = responses$w, na.rm = TRUE) %>%
+    stats::weighted.mean(x = responses$q1, w = responses$w, na.rm = TRUE) |>
       round(2)
   )
 })
@@ -441,15 +441,15 @@ test_that("using weights: equivalent to weighted.mean() output", {
 
 test_that("using prompt: variable label is correctly output", {
   expect_equal(
-    responses %>%
-      dplyr::select(q1) %>%
-      freqs(stat = 'mean', nas = FALSE, prompt = TRUE) %>%
-      dplyr::select(prompt) %>%
+    responses |>
+      dplyr::select(q1) |>
+      freqs(stat = 'mean', nas = FALSE, prompt = TRUE) |>
+      dplyr::select(prompt) |>
       dplyr::pull(),
 
-    responses %>%
-      dplyr::select(q1) %>%
-      labelled::var_label() %>%
+    responses |>
+      dplyr::select(q1) |>
+      labelled::var_label() |>
       tibble::deframe()
   )
 })
@@ -457,16 +457,16 @@ test_that("using prompt: variable label is correctly output", {
 
 test_that("using digits: output is precise to multiple decimal places", {
   expect_equal(
-    responses %>%
-      dplyr::select(w) %>%
-      freqs(stat = 'mean', digits = 6, nas = FALSE) %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(w) |>
+      freqs(stat = 'mean', digits = 6, nas = FALSE) |>
+      dplyr::select(result) |>
       dplyr::pull(),
 
-    responses %>%
-      dplyr::select(w) %>%
-      dplyr::pull() %>%
-      mean(na.rm = TRUE) %>%
+    responses |>
+      dplyr::select(w) |>
+      dplyr::pull() |>
+      mean(na.rm = TRUE) |>
       round(digits = 6)
   )
 })
@@ -474,21 +474,21 @@ test_that("using digits: output is precise to multiple decimal places", {
 
 test_that("stat other than 'quantile' gives message when percentile value is provided", {
   expect_message(
-    responses %>%
+    responses |>
       freqs(q1, percentile = 75, stat = 'mean', nas = FALSE)
   )
 })
 
 test_that("stat argument only accepts percent, mean, quantile, or summary", {
   expect_error(
-    responses %>%
+    responses |>
       freqs(q1, stat = 'means', percentile = 75, nas = FALSE)
   )
 })
 
 test_that("function stops when value labels exist", {
   expect_error(
-    responses %>%
+    responses |>
       freqs(q4, stat = 'mean', nas = FALSE)
   )
 })
@@ -496,7 +496,7 @@ test_that("function stops when value labels exist", {
 
 test_that("unweighted_ns = TRUE, but no wt variable", {
   expect_error(
-    responses %>%
+    responses |>
       freqs(
         q4,
         unweighted_ns = TRUE
@@ -506,9 +506,9 @@ test_that("unweighted_ns = TRUE, but no wt variable", {
 })
 
 test_that("freqs_wuw, ns and results are equal", {
-  freqs_normal <- mtcars %>% freqs(gear)
-  freqs_normal_weighted <- mtcars %>% freqs(gear, wt = carb)
-  freqs_wuw_table <- mtcars %>%
+  freqs_normal <- mtcars |> freqs(gear)
+  freqs_normal_weighted <- mtcars |> freqs(gear, wt = carb)
+  freqs_wuw_table <- mtcars |>
     y2clerk:::freqs_wuw(
       gear,
       wt = carb,
@@ -522,7 +522,7 @@ test_that("freqs_wuw, ns and results are equal", {
       factor_group = FALSE,
       show_missing_levels = FALSE
     )
-  freqs_wuw_infreqs <- mtcars %>%
+  freqs_wuw_infreqs <- mtcars |>
     freqs(
       gear,
       wt = carb,
@@ -536,9 +536,9 @@ test_that("freqs_wuw, ns and results are equal", {
 
 
 test_that("freqs_wuw, test on responses", {
-  freqs_normal <- responses %>% freqs(q4)
-  freqs_normal_weighted <- responses %>% freqs(q4, wt = w)
-  freqs_wuw_table <- responses %>%
+  freqs_normal <- responses |> freqs(q4)
+  freqs_normal_weighted <- responses |> freqs(q4, wt = w)
+  freqs_wuw_table <- responses |>
     y2clerk:::freqs_wuw(
       q4,
       wt = w,
@@ -552,7 +552,7 @@ test_that("freqs_wuw, test on responses", {
       factor_group = FALSE,
       show_missing_levels = FALSE
     )
-  freqs_wuw_infreqs <- responses %>%
+  freqs_wuw_infreqs <- responses |>
     freqs(
       q4,
       wt = w,
@@ -566,45 +566,45 @@ test_that("freqs_wuw, test on responses", {
 
 
 test_that("multiple group_vars", {
-  frequencies <- responses %>%
+  frequencies <- responses |>
     dplyr::group_by(
       group_var1,
       gender_labelled
-    ) %>%
+    ) |>
     freqs(
       q4,
       nas_group = FALSE
     )
 
-  possible_combs <- responses %>%
+  possible_combs <- responses |>
     dplyr::select(
       group_var1,
       gender_labelled,
       q4
-    ) %>%
-    dplyr::distinct() %>%
-    dplyr::mutate(q4 = as.numeric(q4)) %>%
+    ) |>
+    dplyr::distinct() |>
+    dplyr::mutate(q4 = as.numeric(q4)) |>
     dplyr::arrange(
       group_var1,
       gender_labelled,
       q4
-    ) %>%
+    ) |>
     tidyr::drop_na()
 
-  calculated_combs <- frequencies %>%
-    dplyr::ungroup() %>%
-    dplyr::filter(n > 0) %>%
+  calculated_combs <- frequencies |>
+    dplyr::ungroup() |>
+    dplyr::filter(n > 0) |>
     dplyr::select(
       group_var1 = group_var,
       gender_labelled = group_var2,
       q4 = value
-    ) %>%
-    dplyr::mutate(q4 = as.numeric(q4)) %>%
+    ) |>
+    dplyr::mutate(q4 = as.numeric(q4)) |>
     dplyr::arrange(
       group_var1,
       gender_labelled,
       q4
-    ) %>%
+    ) |>
     dplyr::as_tibble()
 
   expect_equal(possible_combs, calculated_combs)
@@ -613,30 +613,30 @@ test_that("multiple group_vars", {
 
 # Test on show missing levels ---------------------------------------------
 test_that("multi_freqs - show_missing_levels argument", {
-  test_no_missing_levels <- responses %>%
+  test_no_missing_levels <- responses |>
     freqs(
       gender_labelled,
       show_missing_levels = FALSE
     )
-  test_yes_missing_levels <- responses %>%
+  test_yes_missing_levels <- responses |>
     freqs(
       gender_labelled,
       show_missing_levels = TRUE
     )
-  test_yes_missing_levels_no_nas <- responses %>%
+  test_yes_missing_levels_no_nas <- responses |>
     freqs(
       gender_labelled,
       nas = FALSE,
       show_missing_levels = TRUE
     )
   sum_no_missing <-
-    stringr::str_detect(test_no_missing_levels$label, 'other') %>%
+    stringr::str_detect(test_no_missing_levels$label, 'other') |>
     sum(na.rm = TRUE)
   sum_yes_missing <-
-    stringr::str_detect(test_yes_missing_levels$label, 'other') %>%
+    stringr::str_detect(test_yes_missing_levels$label, 'other') |>
     sum(na.rm = TRUE)
   sum_yes_missing_nas <-
-    stringr::str_detect(test_yes_missing_levels_no_nas$label, 'other') %>%
+    stringr::str_detect(test_yes_missing_levels_no_nas$label, 'other') |>
     sum()
 
   expect_equal(sum_no_missing, 0)
@@ -647,22 +647,22 @@ test_that("multi_freqs - show_missing_levels argument", {
 
 test_that("freqs - show_missing_levels argument", {
   # Missing level shows up in NA group, but not other groups
-  no_missing <- responses %>%
-    dplyr::group_by(group_var1) %>%
+  no_missing <- responses |>
+    dplyr::group_by(group_var1) |>
     freqs(
       gender_labelled,
       nas = FALSE,
       show_missing_levels = FALSE
     )
-  yes_missing <- responses %>%
-    dplyr::group_by(group_var1) %>%
+  yes_missing <- responses |>
+    dplyr::group_by(group_var1) |>
     freqs(
       gender_labelled,
       nas = FALSE,
       show_missing_levels = TRUE
     )
-  yes_missing_no_nas_group <- responses %>%
-    dplyr::group_by(group_var1) %>%
+  yes_missing_no_nas_group <- responses |>
+    dplyr::group_by(group_var1) |>
     freqs(
       gender_labelled,
       nas = FALSE,
@@ -670,13 +670,13 @@ test_that("freqs - show_missing_levels argument", {
       nas_group = FALSE
     )
   sum_no_missing <-
-    stringr::str_detect(no_missing$label, 'other') %>%
+    stringr::str_detect(no_missing$label, 'other') |>
     sum()
   sum_yes_missing <-
-    stringr::str_detect(yes_missing$label, 'other') %>%
+    stringr::str_detect(yes_missing$label, 'other') |>
     sum()
   sum_yes_missing_no_nas_group <-
-    stringr::str_detect(yes_missing_no_nas_group$label, 'other') %>%
+    stringr::str_detect(yes_missing_no_nas_group$label, 'other') |>
     sum()
 
   expect_equal(sum_no_missing, 0)
@@ -698,7 +698,7 @@ test_that("freqs - show_missing_levels ordered", {
       rep(2, 5),
       rep(3, 13)
     )
-  ) %>%
+  ) |>
     labelled::set_value_labels(
       weekdays = c(
         'Monday' = 1,
@@ -714,18 +714,18 @@ test_that("freqs - show_missing_levels ordered", {
       )
     )
 
-  missing_freqs <- missing_tibble %>% freqs(weekdays)
-  missing_freqs_grouped <- missing_tibble %>%
-    dplyr::group_by(pokemon) %>%
+  missing_freqs <- missing_tibble |> freqs(weekdays)
+  missing_freqs_grouped <- missing_tibble |>
+    dplyr::group_by(pokemon) |>
     freqs(weekdays, factor_group = TRUE)
 
-  expect_equal(missing_freqs %>% dplyr::pull(n), c(10, 0, 10, 0, 10))
+  expect_equal(missing_freqs |> dplyr::pull(n), c(10, 0, 10, 0, 10))
   expect_equal(
-    missing_freqs %>% dplyr::pull(label),
+    missing_freqs |> dplyr::pull(label),
     c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
   )
   expect_equal(
-    missing_freqs_grouped %>% dplyr::pull(label) %>% unique(),
+    missing_freqs_grouped |> dplyr::pull(label) |> unique(),
     c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
   )
 })
@@ -735,8 +735,8 @@ test_that("freqs - show_missing_levels ordered", {
 
 test_that("bad input throws error", {
   expect_error(
-    responses %>%
-      dplyr::select(q0) %>%
+    responses |>
+      dplyr::select(q0) |>
       freqs(stat = "perc")
   )
 })
@@ -744,20 +744,20 @@ test_that("bad input throws error", {
 
 test_that("NAs not present, nas = T: n & result are correct", {
   expect_equivalent(
-    responses %>%
-      dplyr::select(q0) %>%
-      freqs(stat = "quantile", percentile = 95) %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(q0) |>
+      freqs(stat = "quantile", percentile = 95) |>
+      dplyr::select(result) |>
       dplyr::pull(),
 
     round(quantile(responses$q0, 0.95), 2)
   )
 
   expect_equivalent(
-    responses %>%
-      dplyr::select(q0) %>%
-      freqs(stat = "mean", nas = TRUE) %>%
-      dplyr::select(n) %>%
+    responses |>
+      dplyr::select(q0) |>
+      freqs(stat = "mean", nas = TRUE) |>
+      dplyr::select(n) |>
       dplyr::pull(),
 
     nrow(responses[!is.na(responses$q0), ])
@@ -766,19 +766,19 @@ test_that("NAs not present, nas = T: n & result are correct", {
 
 test_that("NAs not present, nas = F: n & result are correct", {
   expect_equivalent(
-    responses %>%
-      dplyr::select(q0) %>%
-      freqs(stat = "quantile", nas = FALSE, percentile = 50) %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(q0) |>
+      freqs(stat = "quantile", nas = FALSE, percentile = 50) |>
+      dplyr::select(result) |>
       dplyr::pull(),
 
     round(median(responses$q0), 2)
   )
   expect_equivalent(
-    responses %>%
-      dplyr::select(q0) %>%
-      freqs(stat = "quantile", nas = FALSE, percentile = 50) %>%
-      dplyr::select(n) %>%
+    responses |>
+      dplyr::select(q0) |>
+      freqs(stat = "quantile", nas = FALSE, percentile = 50) |>
+      dplyr::select(n) |>
       dplyr::pull(),
 
     nrow(responses[!is.na(responses$q0), ])
@@ -787,27 +787,27 @@ test_that("NAs not present, nas = F: n & result are correct", {
 
 test_that("NAs present, nas = T: throws error", {
   expect_error(
-    responses %>%
-      dplyr::select(q1) %>%
+    responses |>
+      dplyr::select(q1) |>
       freqs(stat = "quantile", percentile = 95)
   )
 })
 
 test_that("NAs present, nas = F: n & result are correct", {
   expect_equal(
-    responses %>%
-      dplyr::select(q1) %>%
-      freqs(stat = "quantile", nas = FALSE, percentile = 95) %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(q1) |>
+      freqs(stat = "quantile", nas = FALSE, percentile = 95) |>
+      dplyr::select(result) |>
       dplyr::pull(),
 
     round(quantile(responses$q1, 0.95, na.rm = TRUE), 2)
   )
   expect_equivalent(
-    responses %>%
-      dplyr::select(q1) %>%
-      freqs(stat = "quantile", nas = FALSE, percentile = 95) %>%
-      dplyr::select(n) %>%
+    responses |>
+      dplyr::select(q1) |>
+      freqs(stat = "quantile", nas = FALSE, percentile = 95) |>
+      dplyr::select(n) |>
       dplyr::pull(),
 
     nrow(responses[!is.na(responses$q1), ])
@@ -817,8 +817,8 @@ test_that("NAs present, nas = F: n & result are correct", {
 
 test_that("factor variable input: throws error", {
   expect_error(
-    responses %>%
-      dplyr::select(q2) %>%
+    responses |>
+      dplyr::select(q2) |>
       freqs(stat = 'quantile')
   )
 })
@@ -826,8 +826,8 @@ test_that("factor variable input: throws error", {
 
 test_that("character variable input: throws error", {
   expect_error(
-    responses %>%
-      dplyr::select(q3) %>%
+    responses |>
+      dplyr::select(q3) |>
       freqs(stat = 'quantile')
   )
 })
@@ -835,8 +835,8 @@ test_that("character variable input: throws error", {
 
 test_that("column with value labels input: throws error", {
   expect_error(
-    responses %>%
-      dplyr::select(q4) %>%
+    responses |>
+      dplyr::select(q4) |>
       freqs(stat = 'quantile')
   )
 })
@@ -844,11 +844,11 @@ test_that("column with value labels input: throws error", {
 test_that("column with value labels input: (potentially misleading) result is correct
           after labels are removed", {
   expect_equivalent(
-    responses %>%
-      dplyr::mutate(q4 = as.numeric(q4)) %>%
-      dplyr::select(q4) %>%
-      freqs(stat = 'quantile', percentile = 95) %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::mutate(q4 = as.numeric(q4)) |>
+      dplyr::select(q4) |>
+      freqs(stat = 'quantile', percentile = 95) |>
+      dplyr::select(result) |>
       dplyr::pull(),
     quantile(as.numeric(responses$q4), 0.95)
   )
@@ -856,11 +856,11 @@ test_that("column with value labels input: (potentially misleading) result is co
 
 test_that("column with value labels input: answer is correct after labels removed (even if potentially misleading)", {
   expect_equivalent(
-    responses %>%
-      dplyr::select(q4) %>%
-      labelled::remove_labels() %>%
-      freqs(stat = 'quantile', percentile = 95) %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(q4) |>
+      labelled::remove_labels() |>
+      freqs(stat = 'quantile', percentile = 95) |>
+      dplyr::select(result) |>
       dplyr::pull(),
     quantile(as.numeric(responses$q4), 0.95)
   )
@@ -869,10 +869,10 @@ test_that("column with value labels input: answer is correct after labels remove
 
 test_that("using weights: equivalent to wtd.quantile() output", {
   expect_equal(
-    responses %>%
-      dplyr::select(q1, w) %>%
-      freqs(stat = 'quantile', nas = FALSE, wt = w, percentile = 95) %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(q1, w) |>
+      freqs(stat = 'quantile', nas = FALSE, wt = w, percentile = 95) |>
+      dplyr::select(result) |>
       dplyr::pull(),
 
     reldist::wtd.quantile(
@@ -880,7 +880,7 @@ test_that("using weights: equivalent to wtd.quantile() output", {
       q = 0.95,
       weight = responses$w,
       na.rm = TRUE
-    ) %>%
+    ) |>
       round(2)
   )
 })
@@ -888,20 +888,20 @@ test_that("using weights: equivalent to wtd.quantile() output", {
 
 test_that("using prompt: variable label is correctly output", {
   expect_equal(
-    responses %>%
-      dplyr::select(q1) %>%
+    responses |>
+      dplyr::select(q1) |>
       freqs(
         stat = 'quantile',
         nas = FALSE,
         prompt = TRUE,
         percentile = 0.95
-      ) %>%
-      dplyr::select(prompt) %>%
+      ) |>
+      dplyr::select(prompt) |>
       dplyr::pull(),
 
-    responses %>%
-      dplyr::select(q1) %>%
-      labelled::var_label() %>%
+    responses |>
+      dplyr::select(q1) |>
+      labelled::var_label() |>
       tibble::deframe()
   )
 })
@@ -909,16 +909,16 @@ test_that("using prompt: variable label is correctly output", {
 
 test_that("using digits: output is precise to multiple decimal places", {
   expect_equal(
-    responses %>%
-      dplyr::select(w) %>%
-      freqs(stat = 'quantile', percentile = 95, digits = 6, nas = FALSE) %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(w) |>
+      freqs(stat = 'quantile', percentile = 95, digits = 6, nas = FALSE) |>
+      dplyr::select(result) |>
       dplyr::pull(),
 
-    responses %>%
-      dplyr::select(w) %>%
-      dplyr::pull() %>%
-      quantile(0.95, na.rm = TRUE) %>%
+    responses |>
+      dplyr::select(w) |>
+      dplyr::pull() |>
+      quantile(0.95, na.rm = TRUE) |>
       round(digits = 6)
   )
 })
@@ -926,10 +926,10 @@ test_that("using digits: output is precise to multiple decimal places", {
 
 test_that("output from 'percentile = 0' is equivalent to base::min()", {
   expect_equal(
-    responses %>%
-      freqs(q0, stat = 'quantile', percentile = 0) %>%
-      dplyr::select(result) %>%
-      dplyr::pull() %>%
+    responses |>
+      freqs(q0, stat = 'quantile', percentile = 0) |>
+      dplyr::select(result) |>
+      dplyr::pull() |>
       as.numeric(),
 
     min(responses$q0)
@@ -939,10 +939,10 @@ test_that("output from 'percentile = 0' is equivalent to base::min()", {
 
 test_that("output from 'percentile = 100' is equivalent to base::max()", {
   expect_equal(
-    responses %>%
-      freqs(q0, stat = 'quantile', percentile = 100) %>%
-      dplyr::select(result) %>%
-      dplyr::pull() %>%
+    responses |>
+      freqs(q0, stat = 'quantile', percentile = 100) |>
+      dplyr::select(result) |>
+      dplyr::pull() |>
       as.numeric(),
 
     max(responses$q0)
@@ -952,22 +952,22 @@ test_that("output from 'percentile = 100' is equivalent to base::max()", {
 
 test_that("there are 6 lines of output (min, 1st quartile, median, mean, 3rd quartile, max)", {
   expect_equal(
-    responses %>%
-      freqs(q0, stat = 'summary') %>%
+    responses |>
+      freqs(q0, stat = 'summary') |>
       nrow(),
     6
   )
 
   expect_equal(
-    responses %>%
-      freqs(q1, stat = 'summary', nas = FALSE) %>%
+    responses |>
+      freqs(q1, stat = 'summary', nas = FALSE) |>
       nrow(),
     6
   )
 
   expect_equal(
-    responses %>%
-      freqs(q1, stat = 'summary', nas = FALSE, wt = w) %>%
+    responses |>
+      freqs(q1, stat = 'summary', nas = FALSE, wt = w) |>
       nrow(),
     6
   )
@@ -975,24 +975,24 @@ test_that("there are 6 lines of output (min, 1st quartile, median, mean, 3rd qua
 
 test_that("setting a percentile value when stat = 'summary' does not affect output", {
   expect_equal(
-    responses %>%
+    responses |>
       freqs(q0, stat = 'summary', percentile = 0),
-    responses %>%
+    responses |>
       freqs(q0, stat = 'summary')
   )
 })
 
 test_that("stat = 'summary' gives message when percentile value is provided", {
   expect_message(
-    responses %>%
-      dplyr::select(q0, q1, w) %>%
+    responses |>
+      dplyr::select(q0, q1, w) |>
       freqs(percentile = 75, stat = 'summary', wt = w, nas = FALSE)
   )
 })
 
 test_that("stat = 'mean' works when GROUPED", {
-  test <- responses %>%
-    dplyr::group_by(q2) %>%
+  test <- responses |>
+    dplyr::group_by(q2) |>
     freqs(q1, stat = "mean", nas = FALSE, wt = q0)
 
   expect_equal(length(test$group_var), 4)

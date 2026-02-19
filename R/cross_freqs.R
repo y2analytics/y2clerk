@@ -27,16 +27,16 @@
 #' @export
 #' @examples
 #' GROUP_VARS <-
-#'   mtcars %>%
+#'   mtcars |>
 #'   dplyr::select(
 #'     am,
 #'     vs
-#'   ) %>%
+#'   ) |>
 #'   names()
 #'
 #' GROUP_VARS <- c("am", "vs")
 #'
-#' mtcars %>% cross_freqs(
+#' mtcars |> cross_freqs(
 #'   group_vars = GROUP_VARS,
 #'   gear,
 #'   carb
@@ -74,8 +74,8 @@ cross_freqs <-
       group_symbol <- rlang::sym(group_vars[i])
       if (i == 1) {
         results_raw <-
-          dataset %>%
-          dplyr::group_by({{ group_symbol }}) %>%
+          dataset |>
+          dplyr::group_by({{ group_symbol }}) |>
           freqs(
             ...,
             stat = stat,
@@ -86,17 +86,17 @@ cross_freqs <-
             digits = digits,
             nas_group = nas_group,
             factor_group = factor_group
-          ) %>%
+          ) |>
           dplyr::mutate(
             group_var = forcats::as_factor(.data$group_var),
             group_var_name = group_vars[i]
           )
       } else {
         results_raw <-
-          results_raw %>%
+          results_raw |>
           dplyr::bind_rows(
-            dataset %>%
-              dplyr::group_by({{ group_symbol }}) %>%
+            dataset |>
+              dplyr::group_by({{ group_symbol }}) |>
               freqs(
                 ...,
                 stat = stat,
@@ -107,7 +107,7 @@ cross_freqs <-
                 digits = digits,
                 nas_group = nas_group,
                 factor_group = factor_group
-              ) %>%
+              ) |>
               dplyr::mutate(
                 group_var = forcats::as_factor(.data$group_var),
                 group_var_name = group_vars[i]
@@ -122,20 +122,20 @@ cross_freqs <-
     # Run long or wide
     if (wide == FALSE) {
       output <-
-        results_raw %>%
+        results_raw |>
         dplyr::select(
           'group_var_name',
           tidyselect::everything()
-        ) %>%
+        ) |>
         dplyr::ungroup()
     } else {
       output_unnamed <-
-        results_raw %>%
-        pivot_nest() %>%
+        results_raw |>
+        pivot_nest() |>
         dplyr::ungroup()
 
       output <-
-        output_unnamed %>%
+        output_unnamed |>
         dplyr::mutate(
           results = purrr::set_names(
             .data$results,
@@ -178,11 +178,11 @@ exclude_groups_fun <- function(results_raw, group_vars, exclude_groups) {
   if (exclude_groups == FALSE) {
     results_raw <- results_raw
   } else {
-    results_raw <- results_raw %>%
+    results_raw <- results_raw |>
       dplyr::mutate(
         filter_out = as.numeric(.data$variable %in% group_vars) # 1 if matching
-      ) %>%
-      dplyr::filter(.data$filter_out == 0) %>%
+      ) |>
+      dplyr::filter(.data$filter_out == 0) |>
       dplyr::select(-'filter_out')
   }
 }
@@ -193,18 +193,18 @@ pivot_nest <-
   function(
     dataset
   ) {
-    dataset %>%
+    dataset |>
       dplyr::select(
         'group_var_name',
         'group_var',
         'variable',
         'label',
         'result'
-      ) %>%
-      dplyr::ungroup() %>%
+      ) |>
+      dplyr::ungroup() |>
       dplyr::nest_by(
         .data$group_var_name
-      ) %>%
+      ) |>
       dplyr::mutate(
         results = list(
           tidyr::pivot_wider(
@@ -213,7 +213,7 @@ pivot_nest <-
             names_from = 'group_var'
           )
         )
-      ) %>%
+      ) |>
       dplyr::select(
         'group_var_name',
         'results'

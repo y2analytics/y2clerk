@@ -12,19 +12,19 @@
 #' @examples
 #'
 #' # by_group_var = FALSE
-#' ToothGrowth %>%
-#'   freqs(supp) %>%
+#' ToothGrowth |>
+#'   freqs(supp) |>
 #'   append_ns()
 #'
-#' ToothGrowth %>%
-#'   dplyr::group_by(supp) %>%
-#'   freqs(dose) %>%
+#' ToothGrowth |>
+#'   dplyr::group_by(supp) |>
+#'   freqs(dose) |>
 #'   append_ns(newline = TRUE)
 #'
 #' # by_group_var = TRUE
-#' ToothGrowth %>%
-#'   dplyr::group_by(supp) %>%
-#'   freqs(dose) %>%
+#' ToothGrowth |>
+#'   dplyr::group_by(supp) |>
+#'   freqs(dose) |>
 #'   append_ns(
 #'     append_to = group_var,
 #'     by_group_var = TRUE
@@ -45,7 +45,7 @@ append_ns <-
     }
 
     if (by_group_var == FALSE) {
-      dataset %>%
+      dataset |>
         dplyr::mutate(
           '{{append_to}}' := stringr::str_c(
             {{ append_to }},
@@ -57,7 +57,7 @@ append_ns <-
         )
     } else {
       # by_group_var == TRUE
-      dataset %>%
+      dataset |>
         dplyr::mutate(
           n_group = sum(.data$n),
           '{{append_to}}' := stringr::str_c(
@@ -67,7 +67,7 @@ append_ns <-
             as.character(.data$n_group),
             ')'
           )
-        ) %>%
+        ) |>
         dplyr::select(-'n_group')
     }
   }
