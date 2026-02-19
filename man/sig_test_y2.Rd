@@ -58,39 +58,39 @@ df <- data.frame(
 
 # Frequencies
 
-frequencies <- df \%>\%
-  dplyr::group_by(group) \%>\%
+frequencies <- df |>
+  dplyr::group_by(group) |>
   freqs(V1)
 
 # Frequencies with significance tests
 
-tested_freqs <- frequencies \%>\%
+tested_freqs <- frequencies |>
   sig_test_y2(dataset = df,
               banner_var = group)
 
 # Tested frequencies in crosstab format
 
-tested_freqs <- frequencies \%>\%
+tested_freqs <- frequencies |>
   sig_test_y2(dataset = df,
               banner_var = group,
               layout = 'wide')
 
 # Weighted tested frequencies
 
-tested_freqs <- df \%>\%
-  dplyr::group_by(group) \%>\%
+tested_freqs <- df |>
+  dplyr::group_by(group) |>
   freqs(V1,
-        wt = weight) \%>\%
+        wt = weight) |>
   sig_test_y2(dataset = df,
               banner_var = group,
               wt = weight)
 
 # Weighted tested frequencies in crosstab format
 
-tested_freqs <- df \%>\%
-  dplyr::group_by(group) \%>\%
+tested_freqs <- df |>
+  dplyr::group_by(group) |>
   freqs(V1,
-        wt = weight) \%>\%
+        wt = weight) |>
   sig_test_y2(dataset = df,
               banner_var = group,
               wt = weight,
