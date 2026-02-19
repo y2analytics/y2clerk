@@ -20,13 +20,15 @@
 #' @export
 
 to_haven_y2 <- function(
-    variable
+  variable
 ) {
-
   # Errors
   if (class(variable)[1] == 'numeric') {
     variable_char <- deparse(substitute(variable))
-    stop(stringr::str_c('to_haven_y2 cannot be used on numeric variable: ', variable_char))
+    stop(stringr::str_c(
+      'to_haven_y2 cannot be used on numeric variable: ',
+      variable_char
+    ))
   }
   if (class(variable)[1] == 'haven_labelled') {
     variable_char <- deparse(substitute(variable))
@@ -50,5 +52,3 @@ to_haven_y2 <- function(
     labels = c(matching_vector)
   )
 }
-
-

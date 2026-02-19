@@ -1,4 +1,3 @@
-
 ### Column names
 test_that("Column names", {
   frequencies_base <- forcats::gss_cat %>%
@@ -55,14 +54,10 @@ test_that("Each row is a group_var level", {
   names_rows <- as.character(frequencies_pivoted$group_var)
 
   expect_equal(nrows, 8)
-  expect_equal(names_rows, c('2000',
-                             '2002',
-                             '2004',
-                             '2006',
-                             '2008',
-                             '2010',
-                             '2012',
-                             '2014'))
+  expect_equal(
+    names_rows,
+    c('2000', '2002', '2004', '2006', '2008', '2010', '2012', '2014')
+  )
 })
 
 
@@ -77,8 +72,10 @@ test_that("Pivot on group_var", {
   names_cols <- names(frequencies_pivoted)
 
   expect_equal(nrows, 6)
-  expect_equal(names_cols, c('label', '2000', '2002', '2004', '2006',
-                             '2008', '2010', '2012', '2014'))
+  expect_equal(
+    names_cols,
+    c('label', '2000', '2002', '2004', '2006', '2008', '2010', '2012', '2014')
+  )
 })
 
 

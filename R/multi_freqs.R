@@ -50,7 +50,7 @@
 
 multi_freqs <- function(
   dataset,
-  ... ,
+  ...,
   remove_nas = TRUE,
   wt = NULL,
   prompt = FALSE,
@@ -60,10 +60,9 @@ multi_freqs <- function(
   unweighted_ns = FALSE,
   show_missing_levels = TRUE
 ) {
-
   # Creates an empty list to be populated with frequencies data frames
   datalist <- list()
-  
+
   pattern <- dataset %>%
     dplyr::ungroup() %>%
     dplyr::select(...) %>%
@@ -78,7 +77,6 @@ multi_freqs <- function(
 
   # If no variables are specified, assume user wants to run function on entire dataset
   if (length(pattern) == 0 & dplyr::is_grouped_df(dataset) == FALSE) {
-    
     pattern <- dataset %>%
       dplyr::select(-{{ wt }}) %>%
       names() %>%
@@ -89,17 +87,15 @@ multi_freqs <- function(
         '_[0-9]+_TEXT$'
       ) %>%
       unique()
-
   }
 
   # Same as above for grouped, length == 0 dataset
   if (length(pattern) == 0 & dplyr::is_grouped_df(dataset) == TRUE) {
-    
     pattern <- dataset %>%
       dplyr::ungroup() %>%
       dplyr::select(
-          -{{ wt }},
-          -tidyselect::all_of(dplyr::group_vars(dataset))
+        -{{ wt }},
+        -tidyselect::all_of(dplyr::group_vars(dataset))
       ) %>%
       names() %>%
       stringr::str_remove(
@@ -109,12 +105,10 @@ multi_freqs <- function(
         '_[0-9]+_TEXT$'
       ) %>%
       unique()
-
   }
 
   # Creating a filtered frequencies dataframe for each stem
   for (i in pattern) {
-
     # Warning Section
     type_check <- dataset %>%
       dplyr::ungroup() %>%
@@ -124,12 +118,16 @@ multi_freqs <- function(
 
     # Throw warning if stem is character variable
     if (is.character(type_check[, 1])) {
-      warning('Text variable stem detected -- please ensure this is intentional')
+      warning(
+        'Text variable stem detected -- please ensure this is intentional'
+      )
     }
 
     # Throw warning if stem is single select variable
-    if (nrow(freqs(type_check %>% dplyr::select(1), nas = FALSE)) > 1){
-      warning('Single select variable stem detected -- please ensure this is intentional')
+    if (nrow(freqs(type_check %>% dplyr::select(1), nas = FALSE)) > 1) {
+      warning(
+        'Single select variable stem detected -- please ensure this is intentional'
+      )
     }
 
     data <- dataset %>%
@@ -142,16 +140,18 @@ multi_freqs <- function(
         {{ wt }}
       ) %>%
       # Following lines filter out rows where none of the questions have been answered
-      dplyr::mutate(ns = rowSums(
-        dplyr::across(
-          .cols = dplyr::matches(stringr::str_c('^', i, '_[0-9]')),
-          .fns = ~ifelse(
-            is.na(.x),
-            FALSE,
-            TRUE
+      dplyr::mutate(
+        ns = rowSums(
+          dplyr::across(
+            .cols = dplyr::matches(stringr::str_c('^', i, '_[0-9]')),
+            .fns = ~ ifelse(
+              is.na(.x),
+              FALSE,
+              TRUE
+            )
           )
         )
-      )) %>%
+      ) %>%
       dplyr::filter(
         ns > 0
       ) %>%
@@ -171,17 +171,15 @@ multi_freqs <- function(
       )
 
     if (remove_nas == TRUE) {
-      
       data <- data %>%
         dplyr::filter(
           !is.na(.data$value)
         )
-    
     }
 
     # Adds stem freqs to datalist
     datalist[[i]] <- data
-    
+
     message(
       stringr::str_c(
         'Variable stem "',
@@ -189,7 +187,6 @@ multi_freqs <- function(
         '" successfully freq\'d'
       )
     )
-
   }
 
   # Combine
@@ -197,5 +194,4 @@ multi_freqs <- function(
 
   # Returns full data frame
   return(frequencies)
-
 }

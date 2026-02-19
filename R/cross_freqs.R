@@ -60,12 +60,11 @@ cross_freqs <-
     exclude_groups = FALSE,
     include_overall = FALSE
   ) {
-
     # custom error messages
     stat <- rlang::arg_match(stat)
     cross_error_messages(dataset, group_vars)
 
-    if(include_overall == TRUE) {
+    if (include_overall == TRUE) {
       dataset$Overall <- '1'
       group_vars <- c('Overall', group_vars)
     }
@@ -103,7 +102,7 @@ cross_freqs <-
                 stat = stat,
                 percentile = percentile,
                 nas = nas,
-                wt = {{wt}},
+                wt = {{ wt }},
                 prompt = prompt,
                 digits = digits,
                 nas_group = nas_group,
@@ -121,13 +120,13 @@ cross_freqs <-
     results_raw <- exclude_groups_fun(results_raw, group_vars, exclude_groups)
 
     # Run long or wide
-    if (wide == FALSE){
+    if (wide == FALSE) {
       output <-
         results_raw %>%
         dplyr::select(
           'group_var_name',
           tidyselect::everything()
-          ) %>%
+        ) %>%
         dplyr::ungroup()
     } else {
       output_unnamed <-
@@ -141,12 +140,11 @@ cross_freqs <-
           results = purrr::set_names(
             .data$results,
             output_unnamed$group_var_name
-            )
           )
+        )
     }
     return(output)
   }
-
 
 
 # Private functions -------------------------------------------------------
@@ -159,17 +157,20 @@ cross_error_messages <- function(dataset, group_vars) {
     error = function(err) {
       msg <- conditionMessage(err)
       if (grepl("object '.*' not found", msg)) {
-        stop('group_vars should be a character vector of variable names. Try formatting like c("var1", "var2") instead of c(var1, var2) or quos(var1, var2)')
+        stop(
+          'group_vars should be a character vector of variable names. Try formatting like c("var1", "var2") instead of c(var1, var2) or quos(var1, var2)'
+        )
       }
     }
   )
 
   # Not a vector
   if (is.vector(group_vars) == FALSE) {
-    stop('group_vars should be a character vector of variable names. Try formatting like c("var1", "var2") instead of c(var1, var2) or quos(var1, var2)')
+    stop(
+      'group_vars should be a character vector of variable names. Try formatting like c("var1", "var2") instead of c(var1, var2) or quos(var1, var2)'
+    )
   }
 }
-
 
 
 ### exclude_groups
@@ -177,7 +178,7 @@ exclude_groups_fun <- function(results_raw, group_vars, exclude_groups) {
   if (exclude_groups == FALSE) {
     results_raw <- results_raw
   } else {
-    results_raw <- results_raw  %>%
+    results_raw <- results_raw %>%
       dplyr::mutate(
         filter_out = as.numeric(.data$variable %in% group_vars) # 1 if matching
       ) %>%
@@ -185,7 +186,6 @@ exclude_groups_fun <- function(results_raw, group_vars, exclude_groups) {
       dplyr::select(-'filter_out')
   }
 }
-
 
 
 ### pivot_nest
@@ -200,7 +200,7 @@ pivot_nest <-
         'variable',
         'label',
         'result'
-      )  %>%
+      ) %>%
       dplyr::ungroup() %>%
       dplyr::nest_by(
         .data$group_var_name
@@ -210,7 +210,8 @@ pivot_nest <-
           tidyr::pivot_wider(
             .data$data,
             values_from = 'result',
-            names_from = 'group_var')
+            names_from = 'group_var'
+          )
         )
       ) %>%
       dplyr::select(
@@ -218,5 +219,3 @@ pivot_nest <-
         'results'
       )
   }
-
-

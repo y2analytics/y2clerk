@@ -1,15 +1,14 @@
-
 ### Column names
 test_that("Column names", {
   GROUP_VARS1 <- 'am'
 
-    frequencies <- mtcars %>%
+  frequencies <- mtcars %>%
     cross_freqs(
       group_vars = GROUP_VARS1,
       gear
     )
   frequencies
-  names_actual <- frequencies  %>% names()
+  names_actual <- frequencies %>% names()
   names_expected <- c(
     'group_var_name',
     'group_var',
@@ -19,10 +18,9 @@ test_that("Column names", {
     'n',
     'stat',
     'result'
-    )
+  )
   expect_equal(names_actual, names_expected)
 })
-
 
 
 ### Multiple freqs vars
@@ -42,7 +40,6 @@ test_that("Multiple freqs vars", {
 })
 
 
-
 ### Multiple grouping vars
 test_that("Multiple grouping vars", {
   GROUP_VARS2 <- mtcars %>% dplyr::select(am, vs) %>% names()
@@ -57,7 +54,6 @@ test_that("Multiple grouping vars", {
   expect_equal(grouping_vars, c("am", "vs"))
   expect_equal(grouping_levels, c("0", "1"))
 })
-
 
 
 ### wide = TRUE
@@ -77,9 +73,7 @@ test_that("wide = TRUE", {
   expect_equal(class(frequencies$results), "list") # is nested
   expect_equal(grouping_vars, GROUP_VARS2) # id columns contain all group_vars
   expect_equal(length(table1$variable), 3) # only am or vs
-
 })
-
 
 
 ### Mixed class group vars
@@ -114,10 +108,8 @@ test_that("Mixed class group vars", {
 })
 
 
-
 ### Error messages
 test_that("Error messages", {
-
   expect_error(
     frequencies <- mtcars %>%
       cross_freqs(
@@ -206,4 +198,3 @@ test_that("include_overall", {
   expect_equal(nrow(frequencies), 3)
   expect_equal(frequencies[[1]][1], 'Overall')
 })
-

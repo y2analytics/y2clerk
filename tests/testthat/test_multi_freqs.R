@@ -1,16 +1,15 @@
-
 # Setting the data --------------------------------------------------------
 set.seed(532987)
 responses <- data.frame(
   # character, no value labels
   gender = c(
-    rep('male', 8,),
+    rep('male', 8, ),
     rep('female', 12),
     rep('other', 4),
     rep(NA_character_, 1)
   ),
   gender_labelled = c(
-    rep(1, 8,),
+    rep(1, 8, ),
     rep(2, 12),
     rep(3, 4),
     rep(NA_real_, 1)
@@ -95,8 +94,6 @@ responses <- data.frame(
   dplyr::as_tibble()
 
 
-
-
 # Overall functionality --------------------------------------------------------
 
 test_that("multi_freqs - formatting", {
@@ -105,7 +102,10 @@ test_that("multi_freqs - formatting", {
 
   expect_equal(class(test)[1], 'freq_y2')
   expect_equal(class(test)[2], 'tbl_df')
-  expect_equal(test_names, c('variable', 'value', 'label', 'n', 'stat', 'result'))
+  expect_equal(
+    test_names,
+    c('variable', 'value', 'label', 'n', 'stat', 'result')
+  )
 })
 
 
@@ -122,15 +122,16 @@ test_that("multi_freqs - pulls all vars with stem", {
       'm_activity_10',
       'm_activity_21',
       'm_activity_22'
-      )
     )
+  )
 })
 
 
 test_that("multi_freqs - ns and percentages", {
   test <- responses %>% multi_freqs(m_activity_1)
 
-  expected_n <- responses %>% dplyr::count(m_activity_10) %>%
+  expected_n <- responses %>%
+    dplyr::count(m_activity_10) %>%
     dplyr::filter(m_activity_10 == 1) %>%
     dplyr::pull(n)
   total_n <- responses %>%
@@ -140,7 +141,8 @@ test_that("multi_freqs - ns and percentages", {
         !is.na(m_activity_3) |
         !is.na(m_activity_10) |
         !is.na(m_activity_21)
-    ) %>% nrow()
+    ) %>%
+    nrow()
   actual_n <- test %>%
     dplyr::filter(label == 'Baseball') %>%
     dplyr::pull(n)
@@ -158,7 +160,8 @@ test_that("multi_freqs - grouped ns and percentages", {
     dplyr::group_by(gender) %>%
     multi_freqs(m_activity_1)
 
-  expected_n <- responses %>% dplyr::filter(gender == 'other') %>%
+  expected_n <- responses %>%
+    dplyr::filter(gender == 'other') %>%
     dplyr::count(m_activity_10) %>%
     dplyr::filter(m_activity_10 == 1) %>%
     dplyr::pull(n)
@@ -170,7 +173,8 @@ test_that("multi_freqs - grouped ns and percentages", {
         !is.na(m_activity_3) |
         !is.na(m_activity_10) |
         !is.na(m_activity_21)
-    ) %>% nrow()
+    ) %>%
+    nrow()
   actual_n <- test %>%
     dplyr::filter(group_var == 'other' & label == 'Baseball') %>%
     dplyr::pull(n)
@@ -183,9 +187,7 @@ test_that("multi_freqs - grouped ns and percentages", {
 })
 
 
-
 # Individual arguments ----------------------------------------------------
-
 
 test_that("multi_freqs - remove_nas argument", {
   test_false <- responses %>% multi_freqs(m_activity_1, remove_nas = FALSE)
@@ -236,7 +238,7 @@ test_that("multi_freqs - prompt argument", {
   expect_equal(
     test_names,
     c('variable', 'prompt', 'value', 'label', 'n', 'stat', 'result')
-    )
+  )
   expect_equal(
     test$prompt[3],
     'Which of the following activities have you done in the past month? Please select all that apply. - Volleyball'
@@ -245,13 +247,16 @@ test_that("multi_freqs - prompt argument", {
 
 
 test_that("multi_freqs - digits argument", {
-  test_3 <- responses %>% multi_freqs(m_activity_1, digits = 3) %>%
+  test_3 <- responses %>%
+    multi_freqs(m_activity_1, digits = 3) %>%
     dplyr::filter(label == 'Baseball') %>%
     dplyr::pull(result)
-  test_2 <- responses %>% multi_freqs(m_activity_1) %>%
+  test_2 <- responses %>%
+    multi_freqs(m_activity_1) %>%
     dplyr::filter(label == 'Baseball') %>%
     dplyr::pull(result)
-  test_1 <- responses %>% multi_freqs(m_activity_1, digits = 1) %>%
+  test_1 <- responses %>%
+    multi_freqs(m_activity_1, digits = 1) %>%
     dplyr::filter(label == 'Baseball') %>%
     dplyr::pull(result)
 
@@ -267,7 +272,7 @@ test_that("multi_freqs - nas_group argument", {
     multi_freqs(
       m_activity_1,
       nas_group = FALSE
-      )
+    )
 
   # NAs showing up on the unchosen activity
 
@@ -290,7 +295,10 @@ test_that("multi_freqs - factor_group argument", {
     )
 
   expect_equal(stringr::str_detect(test_factor_true$group_var, 'male')[1], TRUE)
-  expect_equal(stringr::str_detect(test_factor_false$group_var, 'male')[1], FALSE)
+  expect_equal(
+    stringr::str_detect(test_factor_false$group_var, 'male')[1],
+    FALSE
+  )
 })
 
 
@@ -308,7 +316,6 @@ test_that("multi_freqs - unweighted_ns argument", {
     multi_freqs(m_activity_1, wt = weights, unweighted_ns = TRUE) %>%
     dplyr::select(result)
 
-
   expect_equal(test_n_standard, test_n_unweighted_ns)
   expect_equal(test_result_weighted, test_result_unweighted_ns)
 })
@@ -319,17 +326,23 @@ test_that("multi_freqs - show_missing_levels argument", {
     multi_freqs(
       m_activity_1,
       show_missing_levels = FALSE
-      )
+    )
   test_yes_missing_levels <- responses %>%
     multi_freqs(
       m_activity_1,
       show_missing_levels = TRUE
     )
   sum_no_missing <-
-    stringr::str_detect(test_no_missing_levels$label, 'An unchosen activity') %>%
+    stringr::str_detect(
+      test_no_missing_levels$label,
+      'An unchosen activity'
+    ) %>%
     sum()
   sum_yes_missing <-
-    stringr::str_detect(test_yes_missing_levels$label, 'An unchosen activity') %>%
+    stringr::str_detect(
+      test_yes_missing_levels$label,
+      'An unchosen activity'
+    ) %>%
     sum()
 
   expect_equal(sum_no_missing, 0)
@@ -365,7 +378,10 @@ test_that("multi_freqs - show_missing_levels argument, grouped", {
     stringr::str_detect(yes_missing$label, 'An unchosen activity') %>%
     sum()
   sum_yes_missing_with_nas_group <-
-    stringr::str_detect(yes_missing_with_nas_group$label, 'An unchosen activity') %>%
+    stringr::str_detect(
+      yes_missing_with_nas_group$label,
+      'An unchosen activity'
+    ) %>%
     sum()
   expect_equal(sum_no_missing, 0)
   expect_equal(sum_yes_missing, 3)

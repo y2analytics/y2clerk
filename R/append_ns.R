@@ -45,17 +45,18 @@ append_ns <-
     }
 
     if (by_group_var == FALSE) {
-    dataset %>%
-      dplyr::mutate(
-        '{{append_to}}' := stringr::str_c(
-          {{ append_to }},
-          character_split,
-          '(n = ',
-          as.character(.data$n),
-          ')'
+      dataset %>%
+        dplyr::mutate(
+          '{{append_to}}' := stringr::str_c(
+            {{ append_to }},
+            character_split,
+            '(n = ',
+            as.character(.data$n),
+            ')'
           )
-      )
-    } else { # by_group_var == TRUE
+        )
+    } else {
+      # by_group_var == TRUE
       dataset %>%
         dplyr::mutate(
           n_group = sum(.data$n),
@@ -70,5 +71,3 @@ append_ns <-
         dplyr::select(-'n_group')
     }
   }
-
-
