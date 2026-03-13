@@ -189,9 +189,8 @@ test_that('Works on Numeric freqs var', {
       )
     )
   
-  expect_no_error(
-    
-    frequencies <- mod_df %>% 
+  expect_snapshot(
+    mod_df %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
@@ -211,9 +210,9 @@ test_that('Works on Character freqs var', {
       V1 = as.character(V1)
     )
   
-  expect_no_error(
+  expect_snapshot(
     
-    frequencies <- mod_df %>% 
+    mod_df %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
@@ -228,9 +227,9 @@ test_that('Works on Character freqs var', {
 
 test_that('Works on Factor freqs var', {
   
-  expect_no_error(
+  expect_snapshot(
     
-    frequencies <- responses3 %>% 
+    responses3 %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
@@ -262,9 +261,9 @@ test_that('Works on labelled freqs var', {
       )
     )
   
-  expect_no_error(
+  expect_snapshot(
     
-    frequencies <- responses3 %>% 
+    responses3 %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
@@ -288,9 +287,9 @@ test_that('Works on numeric group_var', {
       )
     )
   
-  expect_no_error(
+  expect_snapshot(
     
-    frequencies <- mod_df %>% 
+    mod_df %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
@@ -305,9 +304,9 @@ test_that('Works on numeric group_var', {
 
 test_that('Works on character group_var', {
   
-  expect_no_error(
+  expect_snapshot(
     
-    frequencies <- responses3 %>% 
+    responses3 %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
@@ -327,8 +326,8 @@ test_that('Works on factor group_var', {
       group = haven::as_factor(group)
     )
   
-  expect_no_error(
-    frequencies <- mod_df %>% 
+  expect_snapshot(
+    mod_df %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
