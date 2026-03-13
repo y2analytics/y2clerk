@@ -5,7 +5,7 @@
 # Tests -------------------------------------------------------------
 
 test_that("to_haven_y2 error on haven_labelled vars", {
-  expect_error(
+  expect_snapshot(error = TRUE, 
     responses4 %>%
       dplyr::mutate(
       q4_haven = to_haven_y2(q4),
@@ -17,7 +17,7 @@ test_that("to_haven_y2 error on haven_labelled vars", {
 
 
 test_that("to_haven_y2 error on numeric vars", {
-  expect_error(
+  expect_snapshot(error = TRUE, 
     responses4 %>%
       dplyr::mutate(
         q0_haven = to_haven_y2(q0),

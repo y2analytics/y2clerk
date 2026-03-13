@@ -30,7 +30,7 @@ test_that("creates a data frame", {
   labelled::var_label(df_labelled$var1) <- 'My prompt'
 
   frequencies <- verbatims_y2(df_labelled, var1)
-  expect_error(frequencies, NA)
+  expect_no_error(frequencies)
 })
 
 
@@ -47,10 +47,8 @@ test_that("variable with no label - give a warning", {
     )
   )
 
-  expect_warning(
-    verbatims_y2(df_nolab, var1),
-    "You are working with variables that have no labeling. You may want to consider adding a prompt before continuing"
-    )
+  expect_snapshot(
+    verbatims_y2(df_nolab, var1))
 })
 
 
@@ -72,7 +70,7 @@ test_that("empty strings ('')", {
   frequencies <- verbatims_y2(df_empty_strings, var1)
   length_freqs <- dplyr::count(frequencies) %>% as.numeric()
 
-  expect_error(frequencies, NA)
+  expect_no_error(frequencies)
   expect_equal(length_freqs, 6)
 })
 
@@ -93,7 +91,7 @@ test_that("NA strings", {
   frequencies <- verbatims_y2(df_na_strings, var1)
   length_freqs <- dplyr::count(frequencies) %>% as.numeric()
 
-  expect_error(frequencies, NA)
+  expect_no_error(frequencies)
   expect_equal(length_freqs, 6)
 })
 
@@ -149,7 +147,7 @@ test_that("Large data frame", {
   frequencies <- verbatims_y2(df_special, var1)
   length_freqs <- dplyr::count(frequencies) %>% as.numeric()
 
-  expect_error(frequencies, NA)
+  expect_no_error(frequencies)
   expect_equal(length_freqs, 3)
 })
 
@@ -176,7 +174,7 @@ test_that("multiple vars", {
   frequencies <- df_multiple %>% verbatims_y2(var1, var2, var3)
   length_freqs <- dplyr::count(frequencies) %>% as.numeric()
 
-  expect_error(frequencies, NA)
+  expect_no_error(frequencies)
   expect_equal(length_freqs, 18)
 })
 
@@ -203,7 +201,7 @@ test_that("pipe vars", {
     verbatims_y2()
   length_freqs <- dplyr::count(frequencies) %>% as.numeric()
 
-  expect_error(frequencies, NA)
+  expect_no_error(frequencies)
   expect_equal(length_freqs, 18)
 })
 
@@ -244,10 +242,10 @@ test_that("empty variables", {
   labelled::var_label(df_labelled$var2) <- 'My prompt 2'
   labelled::var_label(df_labelled$var3) <- 'My prompt 3'
 
-  expect_error(
-    verbatims_y2(df_labelled),
-    regexp = NA
-    )
+expect_no_error(
+  verbatims_y2(df_labelled)
+  )
+
   expect_equal(
     verbatims_y2(df_labelled) %>% dplyr::pull(variable),
     c('var2', 'var2', 'var2')

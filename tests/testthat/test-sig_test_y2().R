@@ -328,7 +328,6 @@ test_that('Works on factor group_var', {
     )
   
   expect_no_error(
-    
     frequencies <- mod_df %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
@@ -364,16 +363,14 @@ test_that('Haven labelled group_var error', {
       )
     )
   
-  expect_error(
+  expect_snapshot(error = TRUE, 
     frequencies <- mod_df %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
         mod_df,
         group
-      ),
-    'Banner variable "group" is a labelled double; please set "factor_group" equal to TRUE in freqs() for this variable',
-    fixed = TRUE
+      )
   )
   
 })
@@ -381,15 +378,13 @@ test_that('Haven labelled group_var error', {
 
 test_that('Missing dataset', {
   
-  expect_error(
+  expect_snapshot(error = TRUE, 
     frequencies <- responses3 %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
         banner_var = group
-      ),
-    'argument "dataset" is missing, with no default',
-    fixed = TRUE
+      )
   )
   
 })
@@ -397,7 +392,7 @@ test_that('Missing dataset', {
 
 test_that('Missing banner_var', {
   
-  expect_error(
+  expect_snapshot(error = TRUE, 
     frequencies <- responses3 %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 

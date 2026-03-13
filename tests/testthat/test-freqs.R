@@ -6,25 +6,25 @@
 test_that("Not a dataframe error - vectors", {
   df <- c('This', 'is', 'not', 'a', 'dataframe')
   a = c(1, 1, 2, 3, 1)
-  expect_error(freqs(df, a))
+  expect_snapshot(error = TRUE, freqs(df, a))
 })
 test_that("Not a dataframe error - matrix", {
   column_a <- c(1,1,1,1,2,2,3)
   column_b <- c(0.5, 1.2, 0.8, 0.5, 0.2, 0.1, 1)
   table <- rbind(column_a, column_b)
-  expect_error(freqs(table, column_a))
+  expect_snapshot(error = TRUE, freqs(table, column_a))
 })
 #variables
 test_that("Runs on variables, not integers", {
-  expect_error(freqs(mtcars, 10))
+  expect_snapshot(error = TRUE, freqs(mtcars, 10))
 })
 #nas
 test_that("Incorrect nas argument", {
-  expect_error(freqs(mtcars, cyl, nas = 'True'))
+  expect_snapshot(error = TRUE, freqs(mtcars, cyl, nas = 'True'))
 })
 #weights
 test_that("Incorrect wt argument", {
-  expect_error(freqs(mtcars, cyl, wt = 'True'))
+  expect_snapshot(error = TRUE, freqs(mtcars, cyl, wt = 'True'))
 })
 
 ### frequency tibble class testing
@@ -214,7 +214,7 @@ test_that("test data is correct", {
 
 
 test_that("NAs not present, nas = T: n & result are correct", {
-  expect_equivalent(responses %>%
+  expect_equal(responses %>%
                       dplyr::select(q0) %>%
                       freqs(stat = "mean") %>%
                       dplyr::select(result) %>%
@@ -223,7 +223,7 @@ test_that("NAs not present, nas = T: n & result are correct", {
                     round(mean(responses$q0),2)
   )
 
-  expect_equivalent(responses %>%
+  expect_equal(responses %>%
                       dplyr::select(q0) %>%
                       freqs(stat = "mean", nas = TRUE) %>%
                       dplyr::select(n) %>%
@@ -234,7 +234,7 @@ test_that("NAs not present, nas = T: n & result are correct", {
 })
 
 test_that("NAs not present, nas = F: n & result are correct", {
-  expect_equivalent(responses %>%
+  expect_equal(responses %>%
                       dplyr::select(q0) %>%
                       freqs(stat = "mean", nas = FALSE) %>%
                       dplyr::select(result) %>%
@@ -242,7 +242,7 @@ test_that("NAs not present, nas = F: n & result are correct", {
 
                     round(mean(responses$q0),2)
   )
-  expect_equivalent(responses %>%
+  expect_equal(responses %>%
                       dplyr::select(q0) %>%
                       freqs(stat = "mean", nas = FALSE) %>%
                       dplyr::select(n) %>%
@@ -253,7 +253,7 @@ test_that("NAs not present, nas = F: n & result are correct", {
 })
 
 test_that("NAs present, nas = T: throws error", {
-  expect_error(responses %>%
+  expect_snapshot(error = TRUE, responses %>%
                  dplyr::select(q1) %>%
                  freqs(stat = "mean")
   )
@@ -268,7 +268,7 @@ test_that("NAs present, nas = F: n & result are correct", {
 
                round(mean(responses$q1, na.rm = TRUE), 2)
   )
-  expect_equivalent(responses %>%
+  expect_equal(responses %>%
                       dplyr::select(q1) %>%
                       freqs(stat = "mean", nas = FALSE) %>%
                       dplyr::select(n) %>%
@@ -280,7 +280,7 @@ test_that("NAs present, nas = F: n & result are correct", {
 
 
 test_that("factor variable input: throws error", {
-  expect_error(
+  expect_snapshot(error = TRUE, 
     responses %>%
       select(q2) %>%
       freqs(stat = 'mean')
@@ -289,7 +289,7 @@ test_that("factor variable input: throws error", {
 
 
 test_that("character variable input: throws error", {
-  expect_error(
+  expect_snapshot(error = TRUE, 
     responses %>%
       dplyr::select(q3) %>%
       freqs(stat = 'mean')
@@ -298,7 +298,7 @@ test_that("character variable input: throws error", {
 
 
 test_that("column with value labels input: throws error", {
-  expect_error(
+  expect_snapshot(error = TRUE, 
     responses %>%
       dplyr::select(q4) %>%
       freqs(stat = 'mean')
@@ -307,7 +307,7 @@ test_that("column with value labels input: throws error", {
 
 test_that("column with value labels input: (potentially misleading) result is correct
           after labels are removed", {
-            expect_equivalent(
+            expect_equal(
               responses %>%
                 dplyr::mutate(q4 = as.numeric(q4)) %>%
                 dplyr::select(q4) %>%
@@ -319,7 +319,7 @@ test_that("column with value labels input: (potentially misleading) result is co
             })
 
 test_that("column with value labels input: answer is correct after labels removed (even if potentially misleading)", {
-  expect_equivalent(
+  expect_equal(
     responses %>%
       dplyr::select(q4) %>%
       labelled::remove_labels() %>%
@@ -389,14 +389,14 @@ test_that("stat other than 'quantile' gives message when percentile value is pro
 })
 
 test_that("stat argument only accepts percent, mean, quantile, or summary", {
-  expect_error(
+  expect_snapshot(error = TRUE, 
     responses %>%
       freqs(q1, stat = 'means', percentile = 75, nas = FALSE)
   )
 })
 
 test_that("function stops when value labels exist", {
-  expect_error(
+  expect_snapshot(error = TRUE, 
     responses %>%
       freqs(q4, stat = 'mean', nas = FALSE)
   )
@@ -404,13 +404,12 @@ test_that("function stops when value labels exist", {
 
 
 test_that("unweighted_ns = TRUE, but no wt variable", {
-  expect_error(
+  expect_snapshot(error = TRUE, 
     responses %>%
       freqs(
         q4,
         unweighted_ns = TRUE
-      ),
-    "If you use unweighted_ns = TRUE, you must specify a wt variable"
+      )
   )
 })
 
@@ -640,7 +639,7 @@ test_that("freqs - show_missing_levels ordered", {
 # Percentile tests --------------------------------------------------------
 
 test_that("bad input throws error", {
-  expect_error(
+  expect_snapshot(error = TRUE, 
     responses %>%
       dplyr::select(q0) %>%
       freqs(stat = "perc")
@@ -649,7 +648,7 @@ test_that("bad input throws error", {
 
 
 test_that("NAs not present, nas = T: n & result are correct", {
-  expect_equivalent(responses %>%
+  expect_equal(responses %>%
                       dplyr::select(q0) %>%
                       freqs(stat = "quantile", percentile = 95) %>%
                       dplyr::select(result) %>%
@@ -658,7 +657,7 @@ test_that("NAs not present, nas = T: n & result are correct", {
                     round(quantile(responses$q0, 0.95),2)
   )
 
-  expect_equivalent(responses %>%
+  expect_equal(responses %>%
                       dplyr::select(q0) %>%
                       freqs(stat = "mean", nas = TRUE) %>%
                       dplyr::select(n) %>%
@@ -669,15 +668,15 @@ test_that("NAs not present, nas = T: n & result are correct", {
 })
 
 test_that("NAs not present, nas = F: n & result are correct", {
-  expect_equivalent(responses %>%
+  expect_equal(responses %>%
                       dplyr::select(q0) %>%
                       freqs(stat = "quantile", nas = FALSE, percentile = 50) %>%
                       dplyr::select(result) %>%
                       dplyr::pull(),
 
-                    round(median(responses$q0),2)
+                    rlang::set_names(round(median(responses$q0),2), "50%")
   )
-  expect_equivalent(responses %>%
+  expect_equal(responses %>%
                       dplyr::select(q0) %>%
                       freqs(stat = "quantile", nas = FALSE, percentile = 50) %>%
                       dplyr::select(n) %>%
@@ -688,7 +687,7 @@ test_that("NAs not present, nas = F: n & result are correct", {
 })
 
 test_that("NAs present, nas = T: throws error", {
-  expect_error(
+  expect_snapshot(error = TRUE, 
     responses %>%
       dplyr::select(q1) %>%
       freqs(stat = "quantile", percentile = 95)
@@ -704,7 +703,7 @@ test_that("NAs present, nas = F: n & result are correct", {
 
                round(quantile(responses$q1, 0.95, na.rm = TRUE), 2)
   )
-  expect_equivalent(responses %>%
+  expect_equal(responses %>%
                       dplyr::select(q1) %>%
                       freqs(stat = "quantile", nas = FALSE, percentile = 95) %>%
                       dplyr::select(n) %>%
@@ -716,7 +715,7 @@ test_that("NAs present, nas = F: n & result are correct", {
 
 
 test_that("factor variable input: throws error", {
-  expect_error(
+  expect_snapshot(error = TRUE, 
     responses %>%
       dplyr::select(q2) %>%
       freqs(stat = 'quantile')
@@ -725,7 +724,7 @@ test_that("factor variable input: throws error", {
 
 
 test_that("character variable input: throws error", {
-  expect_error(
+  expect_snapshot(error = TRUE, 
     responses %>%
       dplyr::select(q3) %>%
       freqs(stat = 'quantile')
@@ -734,7 +733,7 @@ test_that("character variable input: throws error", {
 
 
 test_that("column with value labels input: throws error", {
-  expect_error(
+  expect_snapshot(error = TRUE, 
     responses %>%
       dplyr::select(q4) %>%
       freqs(stat = 'quantile')
@@ -743,7 +742,7 @@ test_that("column with value labels input: throws error", {
 
 test_that("column with value labels input: (potentially misleading) result is correct
           after labels are removed", {
-            expect_equivalent(
+            expect_equal(
               responses %>%
                 dplyr::mutate(q4 = as.numeric(q4)) %>%
                 dplyr::select(q4) %>%
@@ -755,7 +754,7 @@ test_that("column with value labels input: (potentially misleading) result is co
           })
 
 test_that("column with value labels input: answer is correct after labels removed (even if potentially misleading)", {
-  expect_equivalent(
+  expect_equal(
     responses %>%
       dplyr::select(q4) %>%
       labelled::remove_labels() %>%

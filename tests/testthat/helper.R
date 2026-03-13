@@ -259,7 +259,7 @@ responses3 <- data.frame(
 
 
 set.seed(100)
-response4 <- {
+responses4 <- {
   data.frame(
 
     # continuous numeric, no variable label, no NA
