@@ -1,88 +1,12 @@
-# Test Data --------------------------------------------------------------
-
-set.seed(1)
-
-test_df <- data.frame(
-  V1 = c(
-    rep('Agree', 100),
-    rep('Neither', 100),
-    rep('Disagree', 100),
-    rep('Agree', 200),
-    rep('Neither', 50),
-    rep('Disagree', 50),
-    rep('Agree', 50),
-    rep('Neither', 125),
-    rep('Disagree', 125)
-  ),
-  V2_1 = c(
-    rep(1, 100),
-    rep(NA, 200),
-    rep(1, 200),
-    rep(NA, 100),
-    rep(1, 250),
-    rep(NA, 50)
-  ),
-  V2_2 = c(
-    rep(1, 180),
-    rep(NA, 120),
-    rep(1, 100),
-    rep(NA, 200),
-    rep(1, 250),
-    rep(NA, 50)
-  ),
-  V2_3 = c(
-    rep(1, 200),
-    rep(NA, 100),
-    rep(1, 250),
-    rep(NA, 50),
-    rep(1, 250),
-    rep(NA, 50)
-  ),
-  group = c(
-    rep('Group 1', 300),
-    rep('Group 2', 300),
-    rep('Group 3', 300)
-  ),
-  weight = c(
-    rnorm(900, 1, 0.25)
-  )
-) %>% 
-  dplyr::mutate(
-    V1 = forcats::fct_relevel(
-      V1,
-      'Agree',
-      'Neither',
-      'Disagree'
-    ),
-    V2_1 = labelled::labelled(
-      V2_1,
-      labels = c(
-        'Choice A' = 1
-      )
-    ),
-    V2_2 = labelled::labelled(
-      V2_2,
-      labels = c(
-        'Choice B' = 1
-      )
-    ),
-    V2_3 = labelled::labelled(
-      V2_3,
-      labels = c(
-        'Choice C' = 1
-      )
-    )
-  )
-
 # Overall ----------------------------------------------------------------
 
 test_that('`sig` Column Created', {
   
-  frequencies <- test_df %>% 
+  frequencies <- responses3 %>% 
     dplyr::group_by(group) %>% 
     freqs(V1) %>% 
     sig_test_y2(
-      test_df,
+      responses3,
       group
     )
   
@@ -107,11 +31,11 @@ test_that('`sig` Column Created', {
 
 test_that('Sig Tests Results Correctly Ordered', {
   
-  frequencies <- test_df %>% 
+  frequencies <- responses3 %>% 
     dplyr::group_by(group) %>% 
     freqs(V1) %>% 
     sig_test_y2(
-      test_df,
+      responses3,
       group
     )
   
@@ -137,7 +61,7 @@ test_that('Sig Tests Results Correctly Ordered', {
 
 test_that('Sig Test works on a grouped freqs object of multiple variables', {
   
-  mod_df <- test_df %>% 
+  mod_df <- responses3 %>% 
     dplyr::mutate(
       V2 = c(
         rep('Agree', 100),
@@ -200,11 +124,11 @@ test_that('Sig Test works on a grouped freqs object of multiple variables', {
 
 test_that('Sig Test works on a grouped freqs object of multi select variables', {
   
-  frequencies <- test_df %>% 
+  frequencies <- responses3 %>% 
     dplyr::group_by(group) %>% 
     multi_freqs(V2_1) %>% 
     sig_test_y2(
-      test_df,
+      responses3,
       group
     )
   
@@ -230,11 +154,11 @@ test_that('Sig Test works on a grouped freqs object of multi select variables', 
 
 test_that('Group References Appended Correctly', {
   
-  frequencies <- test_df %>% 
+  frequencies <- responses3 %>% 
     dplyr::group_by(group) %>% 
     freqs(V1) %>% 
     sig_test_y2(
-      test_df,
+      responses3,
       group
     )
   
@@ -256,7 +180,7 @@ test_that('Group References Appended Correctly', {
 
 test_that('Works on Numeric freqs var', {
   
-  mod_df <- test_df %>% 
+  mod_df <- responses3 %>% 
     dplyr::mutate(
       V1 = dplyr::case_when(
         V1 == 'Agree' ~ 1,
@@ -282,7 +206,7 @@ test_that('Works on Numeric freqs var', {
 
 test_that('Works on Character freqs var', {
   
-  mod_df <- test_df %>% 
+  mod_df <- responses3 %>% 
     dplyr::mutate(
       V1 = as.character(V1)
     )
@@ -306,11 +230,11 @@ test_that('Works on Factor freqs var', {
   
   expect_no_error(
     
-    frequencies <- test_df %>% 
+    frequencies <- responses3 %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
-        test_df,
+        responses3,
         group
       )
     
@@ -321,7 +245,7 @@ test_that('Works on Factor freqs var', {
 
 test_that('Works on labelled freqs var', {
   
-  mod_df <- test_df %>% 
+  mod_df <- responses3 %>% 
     dplyr::mutate(
       V1 = dplyr::case_when(
         V1 == 'Agree' ~ 1,
@@ -340,7 +264,7 @@ test_that('Works on labelled freqs var', {
   
   expect_no_error(
     
-    frequencies <- test_df %>% 
+    frequencies <- responses3 %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
@@ -355,7 +279,7 @@ test_that('Works on labelled freqs var', {
 
 test_that('Works on numeric group_var', {
   
-  mod_df <- test_df %>% 
+  mod_df <- responses3 %>% 
     dplyr::mutate(
       group = dplyr::case_when(
         group == 'Group 1' ~ 1,
@@ -383,11 +307,11 @@ test_that('Works on character group_var', {
   
   expect_no_error(
     
-    frequencies <- test_df %>% 
+    frequencies <- responses3 %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
-        test_df,
+        responses3,
         group
       )
     
@@ -398,7 +322,7 @@ test_that('Works on character group_var', {
 
 test_that('Works on factor group_var', {
   
-  mod_df <- test_df %>% 
+  mod_df <- responses3 %>% 
     dplyr::mutate(
       group = haven::as_factor(group)
     )
@@ -409,7 +333,7 @@ test_that('Works on factor group_var', {
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
-        test_df,
+        responses3,
         group
       )
     
@@ -423,7 +347,7 @@ test_that('Works on factor group_var', {
 
 test_that('Haven labelled group_var error', {
   
-  mod_df <- test_df %>% 
+  mod_df <- responses3 %>% 
     dplyr::mutate(
       group = dplyr::case_when(
         group == 'Group 1' ~ 1,
@@ -458,7 +382,7 @@ test_that('Haven labelled group_var error', {
 test_that('Missing dataset', {
   
   expect_error(
-    frequencies <- test_df %>% 
+    frequencies <- responses3 %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
@@ -474,11 +398,11 @@ test_that('Missing dataset', {
 test_that('Missing banner_var', {
   
   expect_error(
-    frequencies <- test_df %>% 
+    frequencies <- responses3 %>% 
       dplyr::group_by(group) %>% 
       freqs(V1) %>% 
       sig_test_y2(
-        dataset = test_df
+        dataset = responses3
       )
   )
   
