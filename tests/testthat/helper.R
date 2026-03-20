@@ -1,4 +1,3 @@
-
 set.seed(100)
 responses <- {
   data.frame(
@@ -6,35 +5,41 @@ responses <- {
     q0 = sample(
       x = datasets::swiss$Agriculture,
       size = 25,
-      replace = TRUE),
+      replace = TRUE
+    ),
     # continuous numeric, variable label, incl. NA
     q1 = sample(
       x = c(datasets::swiss$Agriculture, NA),
       size = 25,
-      prob = c(rep(.8/47,47), 0.2),
-      replace = TRUE),
+      prob = c(rep(.8 / 47, 47), 0.2),
+      replace = TRUE
+    ),
     # factor (numbers), no value labels
     q2 = sample(
       x = datasets::Orange$Tree,
       size = 25,
-      replace = TRUE),
+      replace = TRUE
+    ),
     # character, no value labels
     q3 = sample(
       stringr::fruit,
       25,
-      prob = 1/(1:80 * sum(1/(1:80))),
-      replace = TRUE),
+      prob = 1 / (1:80 * sum(1 / (1:80))),
+      replace = TRUE
+    ),
     # numeric values, discrete numeric value labels
     q4 = sample(
       1:8,
       25,
-      replace = TRUE),
+      replace = TRUE
+    ),
     # character values, discrete character value labels
     q5 = sample(
       letters[1:4],
       25,
-      prob = c(0.4,0.3,0.2,0.1),
-      replace = TRUE),
+      prob = c(0.4, 0.3, 0.2, 0.1),
+      replace = TRUE
+    ),
     # character, no value labels
     gender_labelled = c(
       rep(1, 12),
@@ -53,14 +58,16 @@ responses <- {
     w = rnorm(25, mean = 1, sd = 0.1)
   ) %>%
     labelled::set_value_labels(
-      q4 = c(`Less than a year` = 1,
-             `1-2 years` = 2,
-             `3-4 years` = 3,
-             `5-10 years` = 4,
-             `10-20 years` = 5,
-             `20-50 years` = 6,
-             `50-100 years` = 7,
-             `More than 100 years` = 8),
+      q4 = c(
+        `Less than a year` = 1,
+        `1-2 years` = 2,
+        `3-4 years` = 3,
+        `5-10 years` = 4,
+        `10-20 years` = 5,
+        `20-50 years` = 6,
+        `50-100 years` = 7,
+        `More than 100 years` = 8
+      ),
       q5 = c(
         `Very happy` = "a",
         `Somewhat happy` = "b",
@@ -86,18 +93,17 @@ responses <- {
 }
 
 
-
 set.seed(532987)
 responses2 <- data.frame(
   # character, no value labels
   gender = c(
-    rep('male', 8,),
+    rep('male', 8, ),
     rep('female', 12),
     rep('other', 4),
     rep(NA_character_, 1)
   ),
   gender_labelled = c(
-    rep(1, 8,),
+    rep(1, 8, ),
     rep(2, 12),
     rep(3, 4),
     rep(NA_real_, 1)
@@ -182,7 +188,6 @@ responses2 <- data.frame(
   dplyr::as_tibble()
 
 
-
 set.seed(1)
 
 responses3 <- data.frame(
@@ -261,65 +266,74 @@ responses3 <- data.frame(
 set.seed(100)
 responses4 <- {
   data.frame(
-
     # continuous numeric, no variable label, no NA
     q0 = sample(
       x = datasets::swiss$Agriculture,
       size = 25,
-      replace = TRUE),
+      replace = TRUE
+    ),
 
     # continuous numeric, variable label, incl. NA
     q1 = sample(
       x = c(datasets::swiss$Agriculture, NA),
       size = 25,
-      prob = c(rep(.8/47,47), 0.2),
-      replace = TRUE),
+      prob = c(rep(.8 / 47, 47), 0.2),
+      replace = TRUE
+    ),
 
     # factor (numbers), no value labels
     q2 = sample(
       x = datasets::Orange$Tree,
       size = 25,
-      replace = TRUE),
+      replace = TRUE
+    ),
 
     # character, no value labels
     q3 = sample(
       stringr::fruit,
       25,
-      prob = 1/(1:80 * sum(1/(1:80))),
-      replace = TRUE),
+      prob = 1 / (1:80 * sum(1 / (1:80))),
+      replace = TRUE
+    ),
 
     # numeric values, discrete numeric value labels
     q4 = sample(
       1:8,
       25,
-      replace = TRUE),
+      replace = TRUE
+    ),
 
     # character values, discrete character value labels
     q5 = sample(
       letters[1:4],
       25,
-      prob = c(0.4,0.3,0.2,0.1),
-      replace = TRUE),
+      prob = c(0.4, 0.3, 0.2, 0.1),
+      replace = TRUE
+    ),
 
     # factor (strings), no value labels
     q6 = sample(
       stringr::fruit,
       25,
-      prob = 1/(1:80 * sum(1/(1:80))),
-      replace = TRUE) %>% forcats::as_factor(),
+      prob = 1 / (1:80 * sum(1 / (1:80))),
+      replace = TRUE
+    ) %>%
+      forcats::as_factor(),
 
     # numeric weights
     w = rnorm(25, mean = 1, sd = 0.1)
   ) %>%
     labelled::set_value_labels(
-      q4 = c(`Less than a year` = 1,
-             `1-2 years` = 2,
-             `3-4 years` = 3,
-             `5-10 years` = 4,
-             `10-20 years` = 5,
-             `20-50 years` = 6,
-             `50-100 years` = 7,
-             `More than 100 years` = 8),
+      q4 = c(
+        `Less than a year` = 1,
+        `1-2 years` = 2,
+        `3-4 years` = 3,
+        `5-10 years` = 4,
+        `10-20 years` = 5,
+        `20-50 years` = 6,
+        `50-100 years` = 7,
+        `More than 100 years` = 8
+      ),
       q5 = c(
         `Very happy` = "a",
         `Somewhat happy` = "b",
