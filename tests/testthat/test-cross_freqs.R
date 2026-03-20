@@ -182,7 +182,10 @@ test_that("include_overall", {
   expect_equal(length(grouping_vars), 3)
   expect_equal(
     group_sums$sums[1],
-    group_sums$sums[2],
+    group_sums$sums[2]
+  )
+  expect_equal(
+    group_sums$sums[1],
     group_sums$sums[3]
   )
 

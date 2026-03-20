@@ -1,104 +1,8 @@
-# Setting the data --------------------------------------------------------
-set.seed(532987)
-responses <- data.frame(
-  # character, no value labels
-  gender = c(
-    rep('male', 8, ),
-    rep('female', 12),
-    rep('other', 4),
-    rep(NA_character_, 1)
-  ),
-  gender_labelled = c(
-    rep(1, 8, ),
-    rep(2, 12),
-    rep(3, 4),
-    rep(NA_real_, 1)
-  ),
-  # single select, not all options selected
-  s_activity_1 = sample(
-    1:5,
-    25,
-    prob = c(.4, .3, .2, .0, .1),
-    replace = TRUE
-  ),
-  # multiple select
-  m_activity_1 = sample(
-    c(NA_real_, 1),
-    25,
-    prob = c(.9, .1),
-    replace = TRUE
-  ),
-  m_activity_2 = sample(
-    c(NA_real_, 1),
-    25,
-    prob = c(.6, .4),
-    replace = TRUE
-  ),
-  m_activity_3 = sample(
-    c(NA_real_, 1),
-    25,
-    prob = c(.8, .2),
-    replace = TRUE
-  ),
-  m_activity_10 = sample(
-    c(NA_real_, 1),
-    25,
-    prob = c(.5, .5),
-    replace = TRUE
-  ),
-  m_activity_21 = sample(
-    c(NA_real_, 1),
-    25,
-    prob = c(.1, .9),
-    replace = TRUE
-  ),
-  m_activity_22 = NA_real_,
-  # numeric weights
-  weights = sample(
-    c(.5, 1, 2, 4),
-    25,
-    prob = rep(.25, 4),
-    replace = TRUE
-  )
-) |>
-  labelled::set_value_labels(
-    s_activity_1 = c(
-      'Basketball' = 1,
-      'Football' = 2,
-      'Volleyball' = 3,
-      'Baseball' = 4,
-      'Underwater Basket Weaving' = 5
-    ),
-    m_activity_1 = c('Basketball' = 1),
-    m_activity_2 = c('Football' = 1),
-    m_activity_3 = c('Volleyball' = 1),
-    m_activity_10 = c('Baseball' = 1),
-    m_activity_21 = c('Underwater Basket Weaving' = 1),
-    m_activity_22 = c('An unchosen activity' = 1),
-    gender_labelled = c(
-      'male' = 1,
-      'female' = 2,
-      'other' = 3
-    )
-  ) |>
-  labelled::set_variable_labels(
-    gender_labelled = "Which of the following best describes how you think of yourself?",
-    s_activity_1 = "Which of the following is your preferred activity?",
-    m_activity_1 = "Which of the following activities have you done in the past month? Please select all that apply. - Basketball",
-    m_activity_2 = "Which of the following activities have you done in the past month? Please select all that apply. - Football",
-    m_activity_3 = "Which of the following activities have you done in the past month? Please select all that apply. - Volleyball",
-    m_activity_10 = "Which of the following activities have you done in the past month? Please select all that apply. - Baseball",
-    m_activity_21 = "Which of the following activities have you done in the past month? Please select all that apply. - Underwater Basket Weaving",
-    weights = "Weights"
-  ) |>
-  dplyr::as_tibble()
-
-
 # Overall functionality --------------------------------------------------------
 
 test_that("multi_freqs - formatting", {
-  test <- responses |> multi_freqs(m_activity_1)
-  test_names <- responses |> multi_freqs(m_activity_1) |> names()
+  test <- responses2 |> multi_freqs(m_activity_1)
+  test_names <- responses2 |> multi_freqs(m_activity_1) |> names()
 
   expect_equal(class(test)[1], 'freq_y2')
   expect_equal(class(test)[2], 'tbl_df')
@@ -110,7 +14,7 @@ test_that("multi_freqs - formatting", {
 
 
 test_that("multi_freqs - pulls all vars with stem", {
-  test <- responses |> multi_freqs(m_activity_1)
+  test <- responses2 |> multi_freqs(m_activity_1)
   check_vars_pulled <- test |> dplyr::pull(variable)
 
   expect_equal(
@@ -128,13 +32,13 @@ test_that("multi_freqs - pulls all vars with stem", {
 
 
 test_that("multi_freqs - ns and percentages", {
-  test <- responses |> multi_freqs(m_activity_1)
+  test <- responses2 |> multi_freqs(m_activity_1)
 
-  expected_n <- responses |>
+  expected_n <- responses2 |>
     dplyr::count(m_activity_10) |>
     dplyr::filter(m_activity_10 == 1) |>
     dplyr::pull(n)
-  total_n <- responses |>
+  total_n <- responses2 |>
     dplyr::filter(
       !is.na(m_activity_1) |
         !is.na(m_activity_2) |
@@ -156,16 +60,16 @@ test_that("multi_freqs - ns and percentages", {
 
 
 test_that("multi_freqs - grouped ns and percentages", {
-  test <- responses |>
+  test <- responses2 |>
     dplyr::group_by(gender) |>
     multi_freqs(m_activity_1)
 
-  expected_n <- responses |>
+  expected_n <- responses2 |>
     dplyr::filter(gender == 'other') |>
     dplyr::count(m_activity_10) |>
     dplyr::filter(m_activity_10 == 1) |>
     dplyr::pull(n)
-  total_n <- responses |>
+  total_n <- responses2 |>
     dplyr::filter(gender == 'other') |>
     dplyr::filter(
       !is.na(m_activity_1) |
@@ -190,8 +94,8 @@ test_that("multi_freqs - grouped ns and percentages", {
 # Individual arguments ----------------------------------------------------
 
 test_that("multi_freqs - remove_nas argument", {
-  test_false <- responses |> multi_freqs(m_activity_1, remove_nas = FALSE)
-  test_true <- responses |> multi_freqs(m_activity_1, remove_nas = TRUE)
+  test_false <- responses2 |> multi_freqs(m_activity_1, remove_nas = FALSE)
+  test_true <- responses2 |> multi_freqs(m_activity_1, remove_nas = TRUE)
 
   expect_equal(nrow(test_false), 12)
   expect_equal(nrow(test_true), 6)
@@ -199,16 +103,16 @@ test_that("multi_freqs - remove_nas argument", {
 
 
 test_that("multi_freqs - wt argument", {
-  test <- responses |> multi_freqs(m_activity_1, wt = weights)
+  test <- responses2 |> multi_freqs(m_activity_1, wt = weights)
 
-  expected_n <- responses |>
+  expected_n <- responses2 |>
     dplyr::mutate(
       weighted_n = m_activity_3 * weights,
       sum_weighted_n = sum(weighted_n, na.rm = TRUE)
     ) |>
     dplyr::distinct(sum_weighted_n) |>
     dplyr::pull(sum_weighted_n)
-  total_n <- responses |>
+  total_n <- responses2 |>
     dplyr::filter(
       !is.na(m_activity_1) |
         !is.na(m_activity_2) |
@@ -232,7 +136,7 @@ test_that("multi_freqs - wt argument", {
 
 
 test_that("multi_freqs - prompt argument", {
-  test <- responses |> multi_freqs(m_activity_1, prompt = TRUE)
+  test <- responses2 |> multi_freqs(m_activity_1, prompt = TRUE)
   test_names <- test |> names()
 
   expect_equal(
@@ -247,15 +151,15 @@ test_that("multi_freqs - prompt argument", {
 
 
 test_that("multi_freqs - digits argument", {
-  test_3 <- responses |>
+  test_3 <- responses2 |>
     multi_freqs(m_activity_1, digits = 3) |>
     dplyr::filter(label == 'Baseball') |>
     dplyr::pull(result)
-  test_2 <- responses |>
+  test_2 <- responses2 |>
     multi_freqs(m_activity_1) |>
     dplyr::filter(label == 'Baseball') |>
     dplyr::pull(result)
-  test_1 <- responses |>
+  test_1 <- responses2 |>
     multi_freqs(m_activity_1, digits = 1) |>
     dplyr::filter(label == 'Baseball') |>
     dplyr::pull(result)
@@ -267,7 +171,7 @@ test_that("multi_freqs - digits argument", {
 
 
 test_that("multi_freqs - nas_group argument", {
-  test <- responses |>
+  test <- responses2 |>
     dplyr::group_by(gender) |>
     multi_freqs(
       m_activity_1,
@@ -281,13 +185,13 @@ test_that("multi_freqs - nas_group argument", {
 
 
 test_that("multi_freqs - factor_group argument", {
-  test_factor_true <- responses |>
+  test_factor_true <- responses2 |>
     dplyr::group_by(gender_labelled) |>
     multi_freqs(
       m_activity_1,
       factor_group = TRUE
     )
-  test_factor_false <- responses |>
+  test_factor_false <- responses2 |>
     dplyr::group_by(gender_labelled) |>
     multi_freqs(
       m_activity_1,
@@ -303,16 +207,16 @@ test_that("multi_freqs - factor_group argument", {
 
 
 test_that("multi_freqs - unweighted_ns argument", {
-  test_n_standard <- responses |>
+  test_n_standard <- responses2 |>
     multi_freqs(m_activity_1) |>
     dplyr::select(n)
-  test_result_weighted <- responses |>
+  test_result_weighted <- responses2 |>
     multi_freqs(m_activity_1, wt = weights) |>
     dplyr::select(result)
-  test_n_unweighted_ns <- responses |>
+  test_n_unweighted_ns <- responses2 |>
     multi_freqs(m_activity_1, wt = weights, unweighted_ns = TRUE) |>
     dplyr::select(n)
-  test_result_unweighted_ns <- responses |>
+  test_result_unweighted_ns <- responses2 |>
     multi_freqs(m_activity_1, wt = weights, unweighted_ns = TRUE) |>
     dplyr::select(result)
 
@@ -322,12 +226,12 @@ test_that("multi_freqs - unweighted_ns argument", {
 
 
 test_that("multi_freqs - show_missing_levels argument", {
-  test_no_missing_levels <- responses |>
+  test_no_missing_levels <- responses2 |>
     multi_freqs(
       m_activity_1,
       show_missing_levels = FALSE
     )
-  test_yes_missing_levels <- responses |>
+  test_yes_missing_levels <- responses2 |>
     multi_freqs(
       m_activity_1,
       show_missing_levels = TRUE
@@ -351,21 +255,21 @@ test_that("multi_freqs - show_missing_levels argument", {
 
 
 test_that("multi_freqs - show_missing_levels argument, grouped", {
-  no_missing <- responses |>
+  no_missing <- responses2 |>
     dplyr::group_by(gender) |>
     multi_freqs(
       m_activity_1,
       nas_group = FALSE,
       show_missing_levels = FALSE
     )
-  yes_missing <- responses |>
+  yes_missing <- responses2 |>
     dplyr::group_by(gender) |>
     multi_freqs(
       m_activity_1,
       nas_group = FALSE,
       show_missing_levels = TRUE
     )
-  yes_missing_with_nas_group <- responses |>
+  yes_missing_with_nas_group <- responses2 |>
     dplyr::group_by(gender) |>
     multi_freqs(
       m_activity_1,
