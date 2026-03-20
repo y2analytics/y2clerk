@@ -27,16 +27,16 @@
 #' @export
 #' @examples
 #' GROUP_VARS <-
-#'   mtcars %>%
+#'   mtcars |>
 #'   dplyr::select(
 #'     am,
 #'     vs
-#'   ) %>%
+#'   ) |>
 #'   names()
 #'
 #' GROUP_VARS <- c("am", "vs")
 #'
-#' mtcars %>% cross_freqs(
+#' mtcars |> cross_freqs(
 #'   group_vars = GROUP_VARS,
 #'   gear,
 #'   carb
@@ -60,12 +60,11 @@ cross_freqs <-
     exclude_groups = FALSE,
     include_overall = FALSE
   ) {
-
     # custom error messages
     stat <- rlang::arg_match(stat)
     cross_error_messages(dataset, group_vars)
 
-    if(include_overall == TRUE) {
+    if (include_overall == TRUE) {
       dataset$Overall <- '1'
       group_vars <- c('Overall', group_vars)
     }
@@ -75,8 +74,8 @@ cross_freqs <-
       group_symbol <- rlang::sym(group_vars[i])
       if (i == 1) {
         results_raw <-
-          dataset %>%
-          dplyr::group_by({{ group_symbol }}) %>%
+          dataset |>
+          dplyr::group_by({{ group_symbol }}) |>
           freqs(
             ...,
             stat = stat,
@@ -87,28 +86,28 @@ cross_freqs <-
             digits = digits,
             nas_group = nas_group,
             factor_group = factor_group
-          ) %>%
+          ) |>
           dplyr::mutate(
             group_var = forcats::as_factor(.data$group_var),
             group_var_name = group_vars[i]
           )
       } else {
         results_raw <-
-          results_raw %>%
+          results_raw |>
           dplyr::bind_rows(
-            dataset %>%
-              dplyr::group_by({{ group_symbol }}) %>%
+            dataset |>
+              dplyr::group_by({{ group_symbol }}) |>
               freqs(
                 ...,
                 stat = stat,
                 percentile = percentile,
                 nas = nas,
-                wt = {{wt}},
+                wt = {{ wt }},
                 prompt = prompt,
                 digits = digits,
                 nas_group = nas_group,
                 factor_group = factor_group
-              ) %>%
+              ) |>
               dplyr::mutate(
                 group_var = forcats::as_factor(.data$group_var),
                 group_var_name = group_vars[i]
@@ -121,32 +120,31 @@ cross_freqs <-
     results_raw <- exclude_groups_fun(results_raw, group_vars, exclude_groups)
 
     # Run long or wide
-    if (wide == FALSE){
+    if (wide == FALSE) {
       output <-
-        results_raw %>%
+        results_raw |>
         dplyr::select(
           'group_var_name',
           tidyselect::everything()
-          ) %>%
+        ) |>
         dplyr::ungroup()
     } else {
       output_unnamed <-
-        results_raw %>%
-        pivot_nest() %>%
+        results_raw |>
+        pivot_nest() |>
         dplyr::ungroup()
 
       output <-
-        output_unnamed %>%
+        output_unnamed |>
         dplyr::mutate(
           results = purrr::set_names(
             .data$results,
             output_unnamed$group_var_name
-            )
           )
+        )
     }
     return(output)
   }
-
 
 
 # Private functions -------------------------------------------------------
@@ -159,17 +157,20 @@ cross_error_messages <- function(dataset, group_vars) {
     error = function(err) {
       msg <- conditionMessage(err)
       if (grepl("object '.*' not found", msg)) {
-        stop('group_vars should be a character vector of variable names. Try formatting like c("var1", "var2") instead of c(var1, var2) or quos(var1, var2)')
+        stop(
+          'group_vars should be a character vector of variable names. Try formatting like c("var1", "var2") instead of c(var1, var2) or quos(var1, var2)'
+        )
       }
     }
   )
 
   # Not a vector
   if (is.vector(group_vars) == FALSE) {
-    stop('group_vars should be a character vector of variable names. Try formatting like c("var1", "var2") instead of c(var1, var2) or quos(var1, var2)')
+    stop(
+      'group_vars should be a character vector of variable names. Try formatting like c("var1", "var2") instead of c(var1, var2) or quos(var1, var2)'
+    )
   }
 }
-
 
 
 ### exclude_groups
@@ -177,15 +178,14 @@ exclude_groups_fun <- function(results_raw, group_vars, exclude_groups) {
   if (exclude_groups == FALSE) {
     results_raw <- results_raw
   } else {
-    results_raw <- results_raw  %>%
+    results_raw <- results_raw |>
       dplyr::mutate(
         filter_out = as.numeric(.data$variable %in% group_vars) # 1 if matching
-      ) %>%
-      dplyr::filter(.data$filter_out == 0) %>%
+      ) |>
+      dplyr::filter(.data$filter_out == 0) |>
       dplyr::select(-'filter_out')
   }
 }
-
 
 
 ### pivot_nest
@@ -193,30 +193,29 @@ pivot_nest <-
   function(
     dataset
   ) {
-    dataset %>%
+    dataset |>
       dplyr::select(
         'group_var_name',
         'group_var',
         'variable',
         'label',
         'result'
-      )  %>%
-      dplyr::ungroup() %>%
+      ) |>
+      dplyr::ungroup() |>
       dplyr::nest_by(
         .data$group_var_name
-      ) %>%
+      ) |>
       dplyr::mutate(
         results = list(
           tidyr::pivot_wider(
             .data$data,
             values_from = 'result',
-            names_from = 'group_var')
+            names_from = 'group_var'
+          )
         )
-      ) %>%
+      ) |>
       dplyr::select(
         'group_var_name',
         'results'
       )
   }
-
-

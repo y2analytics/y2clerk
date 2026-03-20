@@ -21,7 +21,6 @@
 #'
 #' verbatims_y2(responses, var1)
 
-
 #### Public function ####
 verbatims_y2 <- function(
   dataset,
@@ -35,19 +34,20 @@ verbatims_y2 <- function(
     freq_flags <- column_quos_verbatims(dataset)
   }
 
-    frequencies <- purrr::map_dfr(
-      .x = freq_flags,
-      .f = function(freq_flag) {
-        verbatims_y2_single(dataset, !!freq_flag)
-      }
-    )
+  frequencies <- purrr::map_dfr(
+    .x = freq_flags,
+    .f = function(freq_flag) {
+      verbatims_y2_single(dataset, !!freq_flag)
+    }
+  )
 
   if ("No label" %in% frequencies$prompt == TRUE) {
-    warning("You are working with variables that have no labeling. You may want to consider adding a prompt before continuing")
+    warning(
+      "You are working with variables that have no labeling. You may want to consider adding a prompt before continuing"
+    )
   }
 
   return(frequencies)
-
 }
 
 
@@ -56,16 +56,16 @@ taking_names <- function(dataset) {
   labels <- sapply(dataset, function(x) attr(x, "label"))
   tibble::tibble(
     name = names(labels),
-    label = labels %>% as.character()
-    )
+    label = labels |> as.character()
+  )
 }
 
 
 column_quos_verbatims <- function(dataset) {
-  col_names <- dataset %>% colnames()
-  col_syms <- col_names %>% dplyr::syms()
+  col_names <- dataset |> colnames()
+  col_syms <- col_names |> dplyr::syms()
   col_quos <- purrr::map(col_syms, dplyr::quo)
-  class(col_quos) <- append(class(col_quos),"quosures", after = 0)
+  class(col_quos) <- append(class(col_quos), "quosures", after = 0)
   return(col_quos)
 }
 
@@ -77,72 +77,70 @@ verbatims_y2_single <- function(
   freq_flag <- dplyr::enquo(freq_var)
   freq_var_char <- rlang::quo_name(freq_flag) #convert quoed var into a string
 
-  var_label_list <- taking_names(dataset) %>%
+  var_label_list <- taking_names(dataset) |>
     dplyr::mutate(
       label = as.character(.data$label)
-    ) %>%
+    ) |>
     dplyr::mutate(
       label = dplyr::case_when(
         .data$label == "NULL" ~ "No label",
         .data$label == "" ~ "No label",
         TRUE ~ .data$label
       )
-    ) %>%
+    ) |>
     dplyr::select(
       'label'
-    ) %>%
+    ) |>
     unlist()
 
   labelled::var_label(dataset) <- var_label_list
 
-  freq_df <- dataset %>%
+  freq_df <- dataset |>
     dplyr::select(
       !!freq_flag
-    ) %>%
-    dplyr::mutate(variable = freq_var_char) %>%
+    ) |>
+    dplyr::mutate(variable = freq_var_char) |>
     dplyr::select(
       'variable',
       label = !!freq_flag
-      )
+    )
 
-  labels <- dataset %>%
+  labels <- dataset |>
     dplyr::select(
       !!freq_flag
-    ) %>%
+    ) |>
     dplyr::mutate_all(
       list(
-        ~dplyr::case_when(
+        ~ dplyr::case_when(
           is.na(.) ~ labelled::var_label(.),
           TRUE ~ labelled::var_label(.)
         )
       )
-    ) %>%
-    dplyr::mutate(variable = freq_var_char) %>%
+    ) |>
+    dplyr::mutate(variable = freq_var_char) |>
     dplyr::select(
       'variable',
       prompt = !!freq_flag
-    ) %>%
+    ) |>
     dplyr::distinct(
       .data$variable,
       .keep_all = T
     )
 
-  dplyr::left_join(freq_df, labels, by = c("variable")) %>%
+  dplyr::left_join(freq_df, labels, by = c("variable")) |>
     dplyr::select(
       'variable',
       'prompt',
       'label'
-    ) %>%
+    ) |>
     dplyr::filter(
       .data$label != "",
       .data$label != "NA"
-    ) %>%
+    ) |>
     dplyr::mutate(
       variable = as.character(.data$variable),
       prompt = as.character(.data$prompt),
       label = as.character(.data$label)
-    ) %>%
+    ) |>
     dplyr::add_count(name = 'base_ns')
-
 }
-

@@ -25,32 +25,32 @@
 #'   Q1_2 = c(1, 1, NA, 1, NA, 1, NA),
 #'   Q1_3 = c(NA, 1, 1, NA, 4, 1, NA),
 #'   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
-#' ) %>%
+#' ) |>
 #'   tidyr::as_tibble()
 #'
 #'
 #' # All 3 methods below give the same output
 #' multi_freqs(df, Q1_1)
-#' df %>% multi_freqs(Q1_1)
-#' df %>%
-#'   dplyr::select(dplyr::starts_with("Q1")) %>%
+#' df |> multi_freqs(Q1_1)
+#' df |>
+#'   dplyr::select(dplyr::starts_with("Q1")) |>
 #'   multi_freqs()
 #'
 #'
 #' # Grouped examples with weights (both have same outputs)
-#' df %>%
-#'   dplyr::group_by(a) %>%
+#' df |>
+#'   dplyr::group_by(a) |>
 #'   multi_freqs(Q1_1, wt = weights)
-#' df %>%
-#'   dplyr::group_by(a) %>%
-#'   dplyr::select(starts_with("Q1"), weights) %>%
+#' df |>
+#'   dplyr::group_by(a) |>
+#'   dplyr::select(starts_with("Q1"), weights) |>
 #'   multi_freqs(wt = weights)
 #'
 #' @export
 
 multi_freqs <- function(
   dataset,
-  ... ,
+  ...,
   remove_nas = TRUE,
   wt = NULL,
   prompt = FALSE,
@@ -60,79 +60,77 @@ multi_freqs <- function(
   unweighted_ns = FALSE,
   show_missing_levels = TRUE
 ) {
-
   # Creates an empty list to be populated with frequencies data frames
   datalist <- list()
-  
-  pattern <- dataset %>%
-    dplyr::ungroup() %>%
-    dplyr::select(...) %>%
-    names() %>%
+
+  pattern <- dataset |>
+    dplyr::ungroup() |>
+    dplyr::select(...) |>
+    names() |>
     stringr::str_remove(
       '_[0-9]+$'
-    ) %>%
+    ) |>
     stringr::str_remove(
       '_[0-9]+_TEXT$'
-    ) %>%
+    ) |>
     unique()
 
   # If no variables are specified, assume user wants to run function on entire dataset
   if (length(pattern) == 0 & dplyr::is_grouped_df(dataset) == FALSE) {
-    
-    pattern <- dataset %>%
-      dplyr::select(-{{ wt }}) %>%
-      names() %>%
+    pattern <- dataset |>
+      dplyr::select(-{{ wt }}) |>
+      names() |>
       stringr::str_remove(
         '_[0-9]+$'
-      ) %>%
+      ) |>
       stringr::str_remove(
         '_[0-9]+_TEXT$'
-      ) %>%
+      ) |>
       unique()
-
   }
 
   # Same as above for grouped, length == 0 dataset
   if (length(pattern) == 0 & dplyr::is_grouped_df(dataset) == TRUE) {
-    
-    pattern <- dataset %>%
-      dplyr::ungroup() %>%
+    pattern <- dataset |>
+      dplyr::ungroup() |>
       dplyr::select(
-          -{{ wt }},
-          -tidyselect::all_of(dplyr::group_vars(dataset))
-      ) %>%
-      names() %>%
+        -{{ wt }},
+        -tidyselect::all_of(dplyr::group_vars(dataset))
+      ) |>
+      names() |>
       stringr::str_remove(
         '_[0-9]+$'
-      ) %>%
+      ) |>
       stringr::str_remove(
         '_[0-9]+_TEXT$'
-      ) %>%
+      ) |>
       unique()
-
   }
 
   # Creating a filtered frequencies dataframe for each stem
   for (i in pattern) {
-
     # Warning Section
-    type_check <- dataset %>%
-      dplyr::ungroup() %>%
+    type_check <- dataset |>
+      dplyr::ungroup() |>
       dplyr::select(
         dplyr::matches(stringr::str_c('^', i, '_[0-9]'))
       )
 
     # Throw warning if stem is character variable
     if (is.character(type_check[, 1])) {
-      warning('Text variable stem detected -- please ensure this is intentional')
+      warning(
+        'Text variable stem detected -- please ensure this is intentional'
+      )
     }
 
     # Throw warning if stem is single select variable
-    if (nrow(freqs(type_check %>% dplyr::select(1), nas = FALSE)) > 1){
-      warning('Single select variable stem detected -- please ensure this is intentional')
+    if (nrow(freqs(type_check |> dplyr::select(1), nas = FALSE)) > 1) {
+      warning(
+        'Single select variable stem detected -- please ensure this is intentional'
+      )
     }
 
-    data <- dataset %>%
+    data <- dataset |>
       # dataset selects all columns that start with the string or the ith element in the string list
       dplyr::select(
         dplyr::matches(stringr::str_c('^', i, '_[0-9]')),
@@ -140,24 +138,26 @@ multi_freqs <- function(
         -dplyr::ends_with('_TEXT'),
         # weight is selected if specified
         {{ wt }}
-      ) %>%
+      ) |>
       # Following lines filter out rows where none of the questions have been answered
-      dplyr::mutate(ns = rowSums(
-        dplyr::across(
-          .cols = dplyr::matches(stringr::str_c('^', i, '_[0-9]')),
-          .fns = ~ifelse(
-            is.na(.x),
-            FALSE,
-            TRUE
+      dplyr::mutate(
+        ns = rowSums(
+          dplyr::across(
+            .cols = dplyr::matches(stringr::str_c('^', i, '_[0-9]')),
+            .fns = ~ ifelse(
+              is.na(.x),
+              FALSE,
+              TRUE
+            )
           )
         )
-      )) %>%
+      ) |>
       dplyr::filter(
         ns > 0
-      ) %>%
+      ) |>
       dplyr::select(
         -ns
-      ) %>%
+      ) |>
       # Original freqs operation
       freqs(
         nas = TRUE,
@@ -171,17 +171,15 @@ multi_freqs <- function(
       )
 
     if (remove_nas == TRUE) {
-      
-      data <- data %>%
+      data <- data |>
         dplyr::filter(
           !is.na(.data$value)
         )
-    
     }
 
     # Adds stem freqs to datalist
     datalist[[i]] <- data
-    
+
     message(
       stringr::str_c(
         'Variable stem "',
@@ -189,7 +187,6 @@ multi_freqs <- function(
         '" successfully freq\'d'
       )
     )
-
   }
 
   # Combine
@@ -197,5 +194,4 @@ multi_freqs <- function(
 
   # Returns full data frame
   return(frequencies)
-
 }

@@ -1,4 +1,3 @@
-
 test_that("single string var, no errors", {
   df_labelled <- tibble::tibble(
     var1 = c(
@@ -50,7 +49,7 @@ test_that("variable with no label - give a warning", {
   expect_warning(
     verbatims_y2(df_nolab, var1),
     "You are working with variables that have no labeling. You may want to consider adding a prompt before continuing"
-    )
+  )
 })
 
 
@@ -65,12 +64,12 @@ test_that("empty strings ('')", {
       'One last sentence about dogs',
       'Cats collars are typically cooler than dogs'
     )
-  ) %>%
+  ) |>
     dplyr::add_row(var1 = c("", ""))
   labelled::var_label(df_empty_strings$var1) <- 'My prompt'
 
   frequencies <- verbatims_y2(df_empty_strings, var1)
-  length_freqs <- dplyr::count(frequencies) %>% as.numeric()
+  length_freqs <- dplyr::count(frequencies) |> as.numeric()
 
   expect_error(frequencies, NA)
   expect_equal(length_freqs, 6)
@@ -86,12 +85,12 @@ test_that("NA strings", {
       'One last sentence about dogs',
       'Cats collars are typically cooler than dogs'
     )
-  ) %>%
+  ) |>
     dplyr::add_row(var1 = c(NA_character_, NA_character_))
   labelled::var_label(df_na_strings$var1) <- 'My prompt'
 
   frequencies <- verbatims_y2(df_na_strings, var1)
-  length_freqs <- dplyr::count(frequencies) %>% as.numeric()
+  length_freqs <- dplyr::count(frequencies) |> as.numeric()
 
   expect_error(frequencies, NA)
   expect_equal(length_freqs, 6)
@@ -117,7 +116,7 @@ test_that("Duplicates not removed", {
   labelled::var_label(df_duplicates$var1) <- 'My prompt'
 
   frequencies <- verbatims_y2(df_duplicates, var1)
-  length_freqs <- dplyr::count(frequencies) %>% as.numeric()
+  length_freqs <- dplyr::count(frequencies) |> as.numeric()
 
   expect_equal(length_freqs, 12)
 })
@@ -129,7 +128,7 @@ test_that("Large data frame", {
   labelled::var_label(df_large$var1) <- 'My prompt'
 
   frequencies <- verbatims_y2(df_large, var1)
-  length_freqs <- dplyr::count(frequencies) %>% as.numeric()
+  length_freqs <- dplyr::count(frequencies) |> as.numeric()
 
   expect_equal(length_freqs, 100000)
 })
@@ -147,7 +146,7 @@ test_that("Large data frame", {
   labelled::var_label(df_special$var1) <- 'My prompt'
 
   frequencies <- verbatims_y2(df_special, var1)
-  length_freqs <- dplyr::count(frequencies) %>% as.numeric()
+  length_freqs <- dplyr::count(frequencies) |> as.numeric()
 
   expect_error(frequencies, NA)
   expect_equal(length_freqs, 3)
@@ -167,14 +166,14 @@ test_that("multiple vars", {
     )
   )
   labelled::var_label(df_labelled$var1) <- 'My prompt'
-  df_multiple <- df_labelled %>%
+  df_multiple <- df_labelled |>
     dplyr::mutate(
       var2 = var1,
       var3 = var1
     )
 
-  frequencies <- df_multiple %>% verbatims_y2(var1, var2, var3)
-  length_freqs <- dplyr::count(frequencies) %>% as.numeric()
+  frequencies <- df_multiple |> verbatims_y2(var1, var2, var3)
+  length_freqs <- dplyr::count(frequencies) |> as.numeric()
 
   expect_error(frequencies, NA)
   expect_equal(length_freqs, 18)
@@ -192,16 +191,16 @@ test_that("pipe vars", {
     )
   )
   labelled::var_label(df_labelled$var1) <- 'My prompt'
-  df_multiple <- df_labelled %>%
+  df_multiple <- df_labelled |>
     dplyr::mutate(
       var2 = var1,
       var3 = var1
     )
 
-  frequencies <- df_multiple %>%
-    dplyr::select(dplyr::starts_with('var')) %>%
+  frequencies <- df_multiple |>
+    dplyr::select(dplyr::starts_with('var')) |>
     verbatims_y2()
-  length_freqs <- dplyr::count(frequencies) %>% as.numeric()
+  length_freqs <- dplyr::count(frequencies) |> as.numeric()
 
   expect_error(frequencies, NA)
   expect_equal(length_freqs, 18)
@@ -219,26 +218,26 @@ test_that("base_ns", {
     )
   )
   labelled::var_label(df_labelled$var1) <- 'My prompt'
-  ns <- df_labelled %>%
+  ns <- df_labelled |>
     verbatims_y2(var1)
 
   expect_equal(names(ns)[4], 'base_ns')
   expect_equal(
-    ns %>% dplyr::pull(base_ns),
+    ns |> dplyr::pull(base_ns),
     c(4, 4, 4, 4)
-    )
+  )
 })
 
 
 test_that("empty variables", {
   df_labelled <- tibble::tibble(
-    var1 = c('','',''),
+    var1 = c('', '', ''),
     var2 = c(
       'I like to talk about dogs',
       'Dogs are cool but cats are aight too',
       "My dog's collars are always too tight"
     ),
-    var3 = c('NA','NA','NA')
+    var3 = c('NA', 'NA', 'NA')
   )
   labelled::var_label(df_labelled$var1) <- 'My prompt'
   labelled::var_label(df_labelled$var2) <- 'My prompt 2'
@@ -247,9 +246,9 @@ test_that("empty variables", {
   expect_error(
     verbatims_y2(df_labelled),
     regexp = NA
-    )
+  )
   expect_equal(
-    verbatims_y2(df_labelled) %>% dplyr::pull(variable),
+    verbatims_y2(df_labelled) |> dplyr::pull(variable),
     c('var2', 'var2', 'var2')
   )
 })

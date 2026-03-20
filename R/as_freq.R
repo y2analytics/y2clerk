@@ -13,7 +13,6 @@ as_freq_y2 <- function(df, p = NULL) {
     df <- tibble::as_tibble(df)
   }
 
-
   if (!is.null(p)) {
     #that p is a named character vector
     if (!is.character(p)) {
@@ -58,18 +57,13 @@ as.data.frame.freq_y2 <- function(
 
 
 #' @exportS3Method dplyr::group_by
-group_by.freq_y2 <- function(.data, ..., add = FALSE, .drop = dplyr::group_by_drop_default(.data)) {
+group_by.freq_y2 <- function(
+  .data,
+  ...,
+  add = FALSE,
+  .drop = dplyr::group_by_drop_default(.data)
+) {
   prompts <- attr(.data, "prompts")
   class(.data) <- setdiff(class(.data), "freq_y2")
   as_freq_y2(NextMethod(), p = prompts)
 }
-
-
-
-
-
-
-
-
-
-

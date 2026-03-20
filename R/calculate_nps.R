@@ -39,7 +39,7 @@
 #'     size = 200,
 #'     replace = TRUE
 #'   )
-#' ) %>%
+#' ) |>
 #'   labelled::set_value_labels(
 #'     brand1_NPS_GROUP = c(
 #'       'Promoter' = 3,
@@ -56,16 +56,16 @@
 #'       'Passive' = 2,
 #'       'Detractor' = 1
 #'     )
-#'   ) %>%
+#'   ) |>
 #'   labelled::set_variable_labels(
 #'     brand1_NPS_GROUP = "How likely are you to recommend Brand1 to a friend or colleague? - Group",
 #'     brand2_NPS_GROUP = "How likely are you to recommend Brand2 to a friend or colleague? - Group",
 #'     brand3_NPS_GROUP = "How likely are you to recommend Brand3 to a friend or colleague? - Group"
-#'   ) %>%
+#'   ) |>
 #'   tidyr::as_tibble()
 #'
 #' # Frequencies
-#' frequencies <- df %>%
+#' frequencies <- df |>
 #'   freqs(
 #'     brand1_NPS_GROUP,
 #'     brand2_NPS_GROUP,
@@ -80,24 +80,23 @@
 #' @export
 
 calculate_nps <- function(
-    frequencies,
-    result = result,
-    label = label,
-    value = value,
-    input_type = c('grouped', 'numeric'),
-    by_variable = TRUE,
-    variable = variable,
-    add_group = TRUE,
-    get_brand = TRUE,
-    prompt = prompt,
-    brand_var_name = 'brand',
-    prompt_rm_pre = '.+\\,.+recommend ',
-    prompt_rm_post = ' to a .+\\? \\-.+',
-    arrange_nps = TRUE,
-    append_nps_to_brand = FALSE,
-    brand_factor = TRUE
+  frequencies,
+  result = result,
+  label = label,
+  value = value,
+  input_type = c('grouped', 'numeric'),
+  by_variable = TRUE,
+  variable = variable,
+  add_group = TRUE,
+  get_brand = TRUE,
+  prompt = prompt,
+  brand_var_name = 'brand',
+  prompt_rm_pre = '.+\\,.+recommend ',
+  prompt_rm_post = ' to a .+\\? \\-.+',
+  arrange_nps = TRUE,
+  append_nps_to_brand = FALSE,
+  brand_factor = TRUE
 ) {
-
   ## Variable quosures, arg matches
   result_flag <- dplyr::enquo(result)
   label_flag <- dplyr::enquo(label)
@@ -112,41 +111,54 @@ calculate_nps <- function(
   # Result
   result_exists <- deparse(substitute(result)) %in% colnames(frequencies)
   if (!result_exists) {
-    stop('`result` variable not provided: please provide a result variable in input frequencies')
+    stop(
+      '`result` variable not provided: please provide a result variable in input frequencies'
+    )
   }
 
   # Label
   label_exists <- deparse(substitute(label)) %in% colnames(frequencies)
   if (!label_exists) {
-    stop('`label` variable not provided: please provide a label variable in input frequencies')
+    stop(
+      '`label` variable not provided: please provide a label variable in input frequencies'
+    )
   }
 
   # Prompt
   prompt_exists <- deparse(substitute(prompt)) %in% colnames(frequencies)
   if (!prompt_exists & get_brand) {
-    stop('`prompt` variable not provided: either specify a prompt variable or set `get_brand` to FALSE')
+    stop(
+      '`prompt` variable not provided: either specify a prompt variable or set `get_brand` to FALSE'
+    )
   }
 
   # Warning about `by_variable` if freqs are not grouped but appear to need grouping
   if ((by_variable == FALSE) & (nrow(frequencies) > 3)) {
-    warning('Input frequencies appear to be grouped by brand/variable. Did you mean to set `by_variable` to `TRUE`?')
+    warning(
+      'Input frequencies appear to be grouped by brand/variable. Did you mean to set `by_variable` to `TRUE`?'
+    )
   }
 
   # Checking for all the appropriate rollup label values
   if (input_type == 'rollup') {
-    label_vals <- frequencies %>%
-      dplyr::distinct(!!label_flag) %>%
+    label_vals <- frequencies |>
+      dplyr::distinct(!!label_flag) |>
       dplyr::pull(!!label_flag)
 
-    if (!('Detractor' %in% label_vals) | !('Passive' %in% label_vals) | !('Promoter' %in% label_vals)) {
-      stop('Input variables are not correctly formatted. Please use correctly formatted variables (labels reading "Promoter", "Passive", and "Detractor") or set `input_type` to `numeric`')
+    if (
+      !('Detractor' %in% label_vals) |
+        !('Passive' %in% label_vals) |
+        !('Promoter' %in% label_vals)
+    ) {
+      stop(
+        'Input variables are not correctly formatted. Please use correctly formatted variables (labels reading "Promoter", "Passive", and "Detractor") or set `input_type` to `numeric`'
+      )
     }
   }
 
   ## Manual roll-up if inputs are numeric
   if (input_type == 'numeric') {
-
-    frequencies <- frequencies %>%
+    frequencies <- frequencies |>
       dplyr::mutate(
         !!label_flag := dplyr::case_when(
           dplyr::between(as.numeric(!!value_flag), 0, 6) ~ 'Detractor',
@@ -158,30 +170,29 @@ calculate_nps <- function(
           !!label_flag == 'Passive' ~ '2',
           !!label_flag == 'Promoter' ~ '3'
         )
-      ) %>%
+      ) |>
       dplyr::group_by(
         !!variable_flag,
         !!label_flag
-      ) %>%
+      ) |>
       dplyr::mutate(
         dplyr::across(
           .cols = c(.data$n, .data$result),
-          .fns = ~sum(.x)
+          .fns = ~ sum(.x)
         )
-      ) %>%
+      ) |>
       dplyr::distinct(
         !!variable_flag,
         !!label_flag,
         .keep_all = TRUE
-      ) %>%
+      ) |>
       dplyr::ungroup()
-
   }
 
   ## New columns
   # Grouping by specified var
   if (by_variable == TRUE) {
-    frequencies <- frequencies %>%
+    frequencies <- frequencies |>
       dplyr::group_by(
         !!variable_flag,
         .add = add_group
@@ -189,23 +200,22 @@ calculate_nps <- function(
   }
 
   # NPS col
-  frequencies <- frequencies %>%
+  frequencies <- frequencies |>
     dplyr::mutate(
       nps = dplyr::case_when(
         !!label_flag == 'Promoter' ~ !!result_flag,
         !!label_flag == 'Passive' ~ 0,
         !!label_flag == 'Detractor' ~ !!result_flag * -1
-      ) %>%
-        sum() %>%
-        # (\(.x) .x * 100)() %>% # NOTE: Can also be done using this code BUT only necessary if using the native pipe operator
-        (function(x) x * 100)() %>% # NOTE: This is done in-pipeline because an arithmetic vectorized transform in a pipeline throws off the next function
+      ) |>
+        sum() |>
+        (\(x) x * 100)() |>
         round()
-    ) %>%
+    ) |>
     dplyr::ungroup()
 
   # Brand col
   if (get_brand) {
-    frequencies <- frequencies %>%
+    frequencies <- frequencies |>
       dplyr::mutate(
         !!brand_flag := stringr::str_remove(
           !!prompt_flag,
@@ -220,8 +230,8 @@ calculate_nps <- function(
 
   ## Final formatting
   # Arranging by NPS
-  if (arrange_nps){
-    frequencies <- frequencies %>%
+  if (arrange_nps) {
+    frequencies <- frequencies |>
       dplyr::arrange(
         dplyr::desc(.data$nps),
         !!value_flag
@@ -230,12 +240,13 @@ calculate_nps <- function(
 
   # Append NPS to brand
   if (append_nps_to_brand) {
-
     if (!get_brand) {
-      stop('Cannot append NPS to brand if `get_brand` is set to FALSE. Please set `get_brand` to TRUE')
+      stop(
+        'Cannot append NPS to brand if `get_brand` is set to FALSE. Please set `get_brand` to TRUE'
+      )
     }
 
-    frequencies <- frequencies %>%
+    frequencies <- frequencies |>
       dplyr::mutate(
         !!brand_flag := stringr::str_c(
           !!brand_flag,
@@ -247,13 +258,11 @@ calculate_nps <- function(
 
     # Convert brand to factor
     if (brand_factor) {
-      frequencies <- frequencies %>%
+      frequencies <- frequencies |>
         dplyr::mutate(!!brand_flag := forcats::as_factor(!!brand_flag))
     }
-
   }
 
   ## Output
   return(frequencies)
-
 }

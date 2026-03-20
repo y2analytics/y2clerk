@@ -1,5 +1,5 @@
 # Silence CRAN check over missing global binding (because we make it when the user prints a frequency tibble
-if(getRversion() >= "2.15.1") utils::globalVariables(c(".print_buffer"))
+if (getRversion() >= "2.15.1") utils::globalVariables(c(".print_buffer"))
 
 #' @exportS3Method
 print.freq_y2 <- function(x, n, ...) {
@@ -24,7 +24,7 @@ print_freq_inf <- function() {
 #' @exportS3Method pillar::tbl_sum
 tbl_sum.freq_y2 <- function(x, ...) {
   header <- c(`A frequency tibble` = pillar::dim_desc(x))
-  if('grouped_df' %in% class(x)) {
+  if ('grouped_df' %in% class(x)) {
     header <- c(header, c(Groups = dplyr:::group_sum(x)))
   }
   return(header)

@@ -79,8 +79,8 @@ freqs(df, a, b)
 freqs(df, a, b, wt = weights)
 freq(df, stat = 'mean', nas = FALSE)
 freq(df, stat = 'mean', nas = FALSE, wt = weights)
-df \%>\%
-  dplyr::group_by(a) \%>\%
+df |>
+  dplyr::group_by(a) |>
   freqs(b, nas = FALSE, wt = weights)
 
 # Note that percentile = 60 will return an estimate
