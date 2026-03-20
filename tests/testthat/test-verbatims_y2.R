@@ -47,7 +47,8 @@ test_that("variable with no label - give a warning", {
   )
 
   expect_snapshot(
-    verbatims_y2(df_nolab, var1))
+    verbatims_y2(df_nolab, var1)
+  )
 })
 
 
@@ -241,8 +242,8 @@ test_that("empty variables", {
   labelled::var_label(df_labelled$var2) <- 'My prompt 2'
   labelled::var_label(df_labelled$var3) <- 'My prompt 3'
 
-expect_snapshot(
-  verbatims_y2(df_labelled)
+  expect_snapshot(
+    verbatims_y2(df_labelled)
   )
 
   expect_equal(

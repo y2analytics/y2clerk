@@ -34,7 +34,8 @@ test_that("multi_freqs - pulls all vars with stem", {
 test_that("multi_freqs - ns and percentages", {
   test <- responses2 |> multi_freqs(m_activity_1)
 
-  expected_n <- responses2 |> dplyr::count(m_activity_10) |>
+  expected_n <- responses2 |>
+    dplyr::count(m_activity_10) |>
     dplyr::filter(m_activity_10 == 1) |>
     dplyr::pull(n)
   total_n <- responses2 |>
@@ -229,7 +230,7 @@ test_that("multi_freqs - show_missing_levels argument", {
     multi_freqs(
       m_activity_1,
       show_missing_levels = FALSE
-      )
+    )
   test_yes_missing_levels <- responses2 |>
     multi_freqs(
       m_activity_1,

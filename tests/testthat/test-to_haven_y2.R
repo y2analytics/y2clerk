@@ -1,10 +1,10 @@
 # Data --------------------------------------------------------------------
 
-
 # Tests -------------------------------------------------------------
 
 test_that("to_haven_y2 error on haven_labelled vars", {
-  expect_snapshot(error = TRUE, 
+  expect_snapshot(
+    error = TRUE,
     responses4 |>
       dplyr::mutate(
         q4_haven = to_haven_y2(q4),
@@ -16,8 +16,9 @@ test_that("to_haven_y2 error on haven_labelled vars", {
 
 
 test_that("to_haven_y2 error on numeric vars", {
-  expect_snapshot(error = TRUE, 
-    responses4|>
+  expect_snapshot(
+    error = TRUE,
+    responses4 |>
       dplyr::mutate(
         q0_haven = to_haven_y2(q0),
         'to_haven_y2 cannot be used on numeric variable: q0',

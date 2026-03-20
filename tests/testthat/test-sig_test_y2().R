@@ -235,9 +235,7 @@ test_that('Works on labelled freqs var', {
         )
       )
     )
-  
   expect_snapshot(
-    
     responses3 |>
       dplyr::group_by(group) |>
       freqs(V1) |>
@@ -250,7 +248,6 @@ test_that('Works on labelled freqs var', {
 
 
 test_that('Works on numeric group_var', {
-  
   mod_df <- responses3 |>
     dplyr::mutate(
       group = dplyr::case_when(
@@ -259,9 +256,7 @@ test_that('Works on numeric group_var', {
         group == 'Group 3' ~ 3
       )
     )
-  
   expect_snapshot(
-    
     mod_df |>
       dplyr::group_by(group) |>
       freqs(V1) |>
@@ -274,9 +269,7 @@ test_that('Works on numeric group_var', {
 
 
 test_that('Works on character group_var', {
-  
   expect_snapshot(
-    
     responses3 |>
       dplyr::group_by(group) |>
       freqs(V1) |>
@@ -289,12 +282,10 @@ test_that('Works on character group_var', {
 
 
 test_that('Works on factor group_var', {
-  
   mod_df <- responses3 |>
     dplyr::mutate(
       group = haven::as_factor(group)
     )
-  
   expect_snapshot(
     mod_df |>
       dplyr::group_by(group) |>
@@ -310,7 +301,6 @@ test_that('Works on factor group_var', {
 # Errors and Warnings ----------------------------------------------------
 
 test_that('Haven labelled group_var error', {
-  
   mod_df <- responses3 |>
     dplyr::mutate(
       group = dplyr::case_when(
@@ -327,8 +317,9 @@ test_that('Haven labelled group_var error', {
         )
       )
     )
-  
-  expect_snapshot(error = TRUE, 
+
+  expect_snapshot(
+    error = TRUE,
     frequencies <- mod_df |>
       dplyr::group_by(group) |>
       freqs(V1) |>
@@ -341,8 +332,8 @@ test_that('Haven labelled group_var error', {
 
 
 test_that('Missing dataset', {
-  
-  expect_snapshot(error = TRUE, 
+  expect_snapshot(
+    error = TRUE,
     frequencies <- responses3 |>
       dplyr::group_by(group) |>
       freqs(V1) |>
@@ -354,11 +345,11 @@ test_that('Missing dataset', {
 
 
 test_that('Missing banner_var', {
-  
-  expect_snapshot(error = TRUE, 
-    frequencies <- responses3 |> 
-      dplyr::group_by(group) |> 
-      freqs(V1) |> 
+  expect_snapshot(
+    error = TRUE,
+    frequencies <- responses3 |>
+      dplyr::group_by(group) |>
+      freqs(V1) |>
       sig_test_y2(
         dataset = responses3
       )
