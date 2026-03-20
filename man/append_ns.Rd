@@ -21,19 +21,19 @@ Uses the output from the y2clerk freqs() function and adds (n = ...) to the end 
 \examples{
 
 # by_group_var = FALSE
-ToothGrowth \%>\%
-  freqs(supp) \%>\%
+ToothGrowth |>
+  freqs(supp) |>
   append_ns()
 
-ToothGrowth \%>\%
-  dplyr::group_by(supp) \%>\%
-  freqs(dose) \%>\%
+ToothGrowth |>
+  dplyr::group_by(supp) |>
+  freqs(dose) |>
   append_ns(newline = TRUE)
 
 # by_group_var = TRUE
-ToothGrowth \%>\%
-  dplyr::group_by(supp) \%>\%
-  freqs(dose) \%>\%
+ToothGrowth |>
+  dplyr::group_by(supp) |>
+  freqs(dose) |>
   append_ns(
     append_to = group_var,
     by_group_var = TRUE

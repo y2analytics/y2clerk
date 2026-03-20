@@ -15,12 +15,10 @@
 #' }
 #' @export
 
-
 qnr_converter <- function(
-    file_path,
-    api_token
-    ) {
-
+  file_path,
+  api_token
+) {
   # set api variables -------------------------------------------------------
 
   apiToken <- api_token
@@ -30,11 +28,11 @@ qnr_converter <- function(
   # set up questionnaire doc ------------------------------------------------
   print("Loading Questionnaire")
 
-  doc_raw <- officer::read_docx (file_path)
+  doc_raw <- officer::read_docx(file_path)
 
   doc <- officer::docx_summary(doc_raw)
 
-  doc <- doc %>%
+  doc <- doc |>
     dplyr::filter(.data$text != "")
 
   # Get survey name ---------------------------------------------------------
@@ -60,7 +58,7 @@ qnr_converter <- function(
     encode = "raw",
     httr::add_headers(
       `x-api-token` = apiToken,
-      `content-type`= 'application/json',
+      `content-type` = 'application/json',
       `Accept` = 'application/json'
     )
   )
@@ -69,40 +67,38 @@ qnr_converter <- function(
 
   # set survey id -----------------------------------------------------------
 
-  getSurveyQuestionUrl <- stringr::str_c(response$url, "/", survey_id, "/questions")
+  getSurveyQuestionUrl <- stringr::str_c(
+    response$url,
+    "/",
+    survey_id,
+    "/questions"
+  )
   getSurveyBlockUrl <- stringr::str_c(response$url, "/", survey_id, "/blocks")
 
   # split up question parts -------------------------------------------------
 
   get_text <- function(line) {
-
     line_text <- doc$text[line]
     next_line <- doc$text[line + 1]
     overall_text <- ""
 
     if (stringr::str_detect(next_line, "_")) {
       overall_text <- line_text
-    }
-    else {
-
-      while(!stringr::str_detect(line_text, "\\[")) {
-
+    } else {
+      while (!stringr::str_detect(line_text, "\\[")) {
         line <- line + 1
 
         if (overall_text == "") {
           overall_text <- line_text
-        }
-        else {
+        } else {
           overall_text <- stringr::str_c(overall_text, "\n", line_text)
         }
 
         line_text <- doc$text[line]
-
       }
     }
 
     return(overall_text)
-
   }
 
   looking_for <- "question"
@@ -112,22 +108,29 @@ qnr_converter <- function(
   row_value <- ""
   row_label <- ""
 
-  data_for_api <- dplyr::tibble(type = character(),
-                                value = character(),
-                                vector = list(),
-                                label = character(),
-                                iteration = numeric())
+  data_for_api <- dplyr::tibble(
+    type = character(),
+    value = character(),
+    vector = list(),
+    label = character(),
+    iteration = numeric()
+  )
 
   for (line in 1:nrow(doc)) {
-
     # add to api data
-    if (line > 1 & (looking_for == "question" | looking_for == "answers" | looking_for == "statements")) {
-      data_for_api <- data_for_api %>%
-        dplyr::add_row(type = row_type,
-                       value = row_value,
-                       vector = row_vector_set,
-                       label = row_label,
-                       iteration = line
+    if (
+      line > 1 &
+        (looking_for == "question" |
+          looking_for == "answers" |
+          looking_for == "statements")
+    ) {
+      data_for_api <- data_for_api |>
+        dplyr::add_row(
+          type = row_type,
+          value = row_value,
+          vector = row_vector_set,
+          label = row_label,
+          iteration = line
         )
     }
 
@@ -145,19 +148,27 @@ qnr_converter <- function(
     line_text <- doc$text[line]
     next_line <- doc$text[line + 1]
 
-
     if (looking_for == "question") {
-      if (stringr::str_detect(line_text, "_") & !stringr::str_detect(line_text, "\\[")) {
+      if (
+        stringr::str_detect(line_text, "_") &
+          !stringr::str_detect(line_text, "\\[")
+      ) {
         looking_for <- "question text"
       }
-      if (stringr::str_detect(line_text, "_") & stringr::str_detect(line_text, "\\[")) {
+      if (
+        stringr::str_detect(line_text, "_") &
+          stringr::str_detect(line_text, "\\[")
+      ) {
         looking_for <- "question"
         row_type <- "logic statement"
         row_value <- line_text
         row_vector_set <- NULL
         row_label <- ""
       }
-      if (stringr::str_detect(line_text, "\\]") & stringr::str_detect(line_text, "\\[")) {
+      if (
+        stringr::str_detect(line_text, "\\]") &
+          stringr::str_detect(line_text, "\\[")
+      ) {
         looking_for <- "question"
         row_type <- "logic statement"
         row_value <- line_text
@@ -170,21 +181,21 @@ qnr_converter <- function(
       if (stringr::str_detect(stringr::str_to_lower(line_text), "text_")) {
         looking_for <- "text block"
       }
-    }
-    else if (looking_for == "statement set") {
-
+    } else if (looking_for == "statement set") {
       if (is.null(choice_vector)) {
         choice_vector <- list(list(Display = line_text))
-      }
-      else {
-        choice_vector <- append(choice_vector, list(`1` = list(Display = line_text)))
+      } else {
+        choice_vector <- append(
+          choice_vector,
+          list(`1` = list(Display = line_text))
+        )
       }
 
       # check for end of statement set
       if (grepl("ANSWERS", next_line, fixed = TRUE)) {
         looking_for <- "answers"
 
-        choice_vector <- choice_vector %>%
+        choice_vector <- choice_vector |>
           purrr::set_names(c(1:length(choice_vector)))
 
         row_type <- "statement set"
@@ -194,23 +205,24 @@ qnr_converter <- function(
 
         choice_vector <- NULL
       }
-
-    }
-    else if (looking_for == "answer set") {
-
+    } else if (looking_for == "answer set") {
       if (is.null(choice_vector)) {
         choice_vector <- list(list(Display = line_text))
-      }
-      else {
-        choice_vector <- append(choice_vector, list(`1` = list(Display = line_text)))
+      } else {
+        choice_vector <- append(
+          choice_vector,
+          list(`1` = list(Display = line_text))
+        )
       }
 
       # check for end of answer set
-      if ((grepl("_", next_line, fixed = TRUE) |
-          grepl("INTRO", next_line, fixed = TRUE))) {
+      if (
+        (grepl("_", next_line, fixed = TRUE) |
+          grepl("INTRO", next_line, fixed = TRUE))
+      ) {
         looking_for <- "question"
 
-        choice_vector <- choice_vector %>%
+        choice_vector <- choice_vector |>
           purrr::set_names(c(1:length(choice_vector)))
 
         row_type <- "answer set"
@@ -220,10 +232,7 @@ qnr_converter <- function(
 
         choice_vector <- NULL
       }
-
-    }
-    else if (looking_for == "intro text") {
-
+    } else if (looking_for == "intro text") {
       line_text <- get_text(line)
 
       row_type <- "intro text"
@@ -232,9 +241,7 @@ qnr_converter <- function(
       row_label <- prev_text
 
       looking_for <- "question"
-    }
-    else if (looking_for == "text block") {
-
+    } else if (looking_for == "text block") {
       line_text <- get_text(line)
 
       row_type <- "text block"
@@ -243,9 +250,7 @@ qnr_converter <- function(
       row_label <- prev_text
 
       looking_for <- "question"
-    }
-    else if (looking_for == "question text") {
-
+    } else if (looking_for == "question text") {
       q_text <- get_text(line)
 
       q_text <- stringr::str_remove(line_text, "\\[.+")
@@ -287,31 +292,61 @@ qnr_converter <- function(
       row_label <- prev_text
       row_value <- q_text
       row_vector_set <- NULL
-
     }
   }
 
   # loop through questions --------------------------------------------------
   print("Pushing questions to Qualtrics API")
 
-  data_for_api <- data_for_api %>%
-    dplyr::filter(.data$type != "other") %>%
-    dplyr::filter(.data$type != "logic statement") %>%
+  data_for_api <- data_for_api |>
+    dplyr::filter(.data$type != "other") |>
+    dplyr::filter(.data$type != "logic statement") |>
     dplyr::filter(.data$vector != 'list(Display = "[ANSWERS]")')
 
-  numbers_list <- list(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30)
-
+  numbers_list <- list(
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30
+  )
 
   for (line in 1:nrow(data_for_api)) {
-
     line_type <- data_for_api$type[line]
     line_text <- data_for_api$value[line]
     line_label <- data_for_api$label[line]
     line_answers <- list()
     line_statements <- list()
 
-    if ((stringr::str_detect(line_type, "text block")) | (stringr::str_detect(line_type, "intro text"))) {
-
+    if (
+      (stringr::str_detect(line_type, "text block")) |
+        (stringr::str_detect(line_type, "intro text"))
+    ) {
       questionDef <- list(
         QuestionText = line_text,
         DataExportTag = line_label,
@@ -321,8 +356,7 @@ qnr_converter <- function(
           QuestionDescriptionOption = "UseText"
         ),
         Validation = list(
-          Settings = list(
-          )
+          Settings = list()
         ),
         Language = list(),
         NextChoiceId = 3,
@@ -338,20 +372,23 @@ qnr_converter <- function(
         body = questionDef_json,
         httr::add_headers(
           `x-api-token` = apiToken,
-          `content-type`= 'application/json',
+          `content-type` = 'application/json',
           `Accept` = 'application/json'
         )
       )
-
     }
 
     if (stringr::str_detect(line_type, "E-SELECT")) {
-
       answer_line_number <- line + 1
 
-      while((data_for_api$type[answer_line_number] == "answer set") & (answer_line_number <= nrow(data_for_api))) {
-
-        line_answers <- append(line_answers, data_for_api$vector[answer_line_number])
+      while (
+        (data_for_api$type[answer_line_number] == "answer set") &
+          (answer_line_number <= nrow(data_for_api))
+      ) {
+        line_answers <- append(
+          line_answers,
+          data_for_api$vector[answer_line_number]
+        )
 
         answer_line_number <- answer_line_number + 1
       }
@@ -392,14 +429,11 @@ qnr_converter <- function(
         body = questionDef_json,
         httr::add_headers(
           `x-api-token` = apiToken,
-          `content-type`= 'application/json',
+          `content-type` = 'application/json',
           `Accept` = 'application/json'
         )
       )
-
-    }
-    else if (stringr::str_detect(line_type, "OPEN-ENDED")) {
-
+    } else if (stringr::str_detect(line_type, "OPEN-ENDED")) {
       questionDef <- list(
         QuestionText = line_text,
         DataExportTag = line_label,
@@ -427,27 +461,35 @@ qnr_converter <- function(
         body = questionDef_json,
         httr::add_headers(
           `x-api-token` = apiToken,
-          `content-type`= 'application/json',
+          `content-type` = 'application/json',
           `Accept` = 'application/json'
         )
       )
-
-    }
-    else if (stringr::str_detect(line_type, "MATRIX")) {
+    } else if (stringr::str_detect(line_type, "MATRIX")) {
       statements_line_number <- line + 1
 
-      while((data_for_api$type[statements_line_number] == "statement set") & (statements_line_number <= nrow(data_for_api))) {
-
-        line_statements <- append(line_statements, data_for_api$vector[statements_line_number])
+      while (
+        (data_for_api$type[statements_line_number] == "statement set") &
+          (statements_line_number <= nrow(data_for_api))
+      ) {
+        line_statements <- append(
+          line_statements,
+          data_for_api$vector[statements_line_number]
+        )
 
         statements_line_number <- statements_line_number + 1
       }
 
       answer_line_number <- statements_line_number
 
-      while((data_for_api$type[answer_line_number] == "answer set") & (answer_line_number <= nrow(data_for_api))) {
-
-        line_answers <- append(line_answers, data_for_api$vector[answer_line_number])
+      while (
+        (data_for_api$type[answer_line_number] == "answer set") &
+          (answer_line_number <= nrow(data_for_api))
+      ) {
+        line_answers <- append(
+          line_answers,
+          data_for_api$vector[answer_line_number]
+        )
 
         answer_line_number <- answer_line_number + 1
       }
@@ -486,7 +528,7 @@ qnr_converter <- function(
         body = questionDef_json,
         httr::add_headers(
           `x-api-token` = apiToken,
-          `content-type`= 'application/json',
+          `content-type` = 'application/json',
           `Accept` = 'application/json'
         )
       )
@@ -494,5 +536,4 @@ qnr_converter <- function(
   }
 
   print("Converter finished!")
-
 }

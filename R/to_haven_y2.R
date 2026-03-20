@@ -8,25 +8,27 @@
 #' @examples
 #'
 #' test <- tibble::tibble(
-#'   color_factor = c('Blue', 'Blue', 'Red', 'Yellow') %>%
+#'   color_factor = c('Blue', 'Blue', 'Red', 'Yellow') |>
 #'     forcats::as_factor()
 #' )
 #'
 #' test$color <- to_haven_y2(test$color_factor)
-#' test <- test %>%
+#' test <- test |>
 #'   dplyr::mutate(
 #'     color = to_haven_y2(color_factor)
 #'   )
 #' @export
 
 to_haven_y2 <- function(
-    variable
+  variable
 ) {
-
   # Errors
   if (class(variable)[1] == 'numeric') {
     variable_char <- deparse(substitute(variable))
-    stop(stringr::str_c('to_haven_y2 cannot be used on numeric variable: ', variable_char))
+    stop(stringr::str_c(
+      'to_haven_y2 cannot be used on numeric variable: ',
+      variable_char
+    ))
   }
   if (class(variable)[1] == 'haven_labelled') {
     variable_char <- deparse(substitute(variable))
@@ -39,8 +41,8 @@ to_haven_y2 <- function(
   }
   var_numeric <- as.numeric(variable)
   var_character <- as.character(variable)
-  var_numeric_unique <- var_numeric %>% unique()
-  var_character_unique <- var_character %>% unique()
+  var_numeric_unique <- var_numeric |> unique()
+  var_character_unique <- var_character |> unique()
 
   matching_vector <- var_numeric_unique
   names(matching_vector) <- var_character_unique
@@ -50,5 +52,3 @@ to_haven_y2 <- function(
     labels = c(matching_vector)
   )
 }
-
-

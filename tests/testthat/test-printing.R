@@ -17,4 +17,3 @@ test_that("`create_env_in_global()` creates .print_buffer environment if it does
   # Clean up
   rm(".print_buffer", envir = .GlobalEnv)
 })
-
