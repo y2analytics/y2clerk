@@ -1,8 +1,8 @@
 # Overall functionality --------------------------------------------------------
 
 test_that("multi_freqs - formatting", {
-  test <- responses2 %>% multi_freqs(m_activity_1)
-  test_names <- responses2 %>% multi_freqs(m_activity_1) %>% names()
+  test <- responses2 |> multi_freqs(m_activity_1)
+  test_names <- responses2 |> multi_freqs(m_activity_1) |> names()
 
   expect_equal(class(test)[1], 'freq_y2')
   expect_equal(class(test)[2], 'tbl_df')

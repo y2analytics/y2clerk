@@ -112,7 +112,7 @@
 # NAs present, nas = T: throws error
 
     Code
-      responses %>% dplyr::select(q1) %>% freqs(stat = "mean")
+      freqs(dplyr::select(responses, q1), stat = "mean")
     Condition
       Error in `map()`:
       i In index: 1.
@@ -122,7 +122,7 @@
 ---
 
     Code
-      responses %>% dplyr::select(q1) %>% freqs(stat = "quantile", percentile = 95)
+      freqs(dplyr::select(responses, q1), stat = "quantile", percentile = 95)
     Condition
       Error in `map()`:
       i In index: 1.
@@ -132,7 +132,7 @@
 # factor variable input: throws error
 
     Code
-      responses %>% select(q2) %>% freqs(stat = "mean")
+      freqs(select(responses, q2), stat = "mean")
     Condition
       Error in `select()`:
       ! could not find function "select"
@@ -140,7 +140,7 @@
 ---
 
     Code
-      responses %>% dplyr::select(q2) %>% freqs(stat = "quantile")
+      freqs(dplyr::select(responses, q2), stat = "quantile")
     Condition
       Error in `map()`:
       i In index: 1.
@@ -150,7 +150,7 @@
 # character variable input: throws error
 
     Code
-      responses %>% dplyr::select(q3) %>% freqs(stat = "mean")
+      freqs(dplyr::select(responses, q3), stat = "mean")
     Condition
       Error in `map()`:
       i In index: 1.
@@ -160,7 +160,7 @@
 ---
 
     Code
-      responses %>% dplyr::select(q3) %>% freqs(stat = "quantile")
+      freqs(dplyr::select(responses, q3), stat = "quantile")
     Condition
       Error in `map()`:
       i In index: 1.
@@ -170,7 +170,7 @@
 # column with value labels input: throws error
 
     Code
-      responses %>% dplyr::select(q4) %>% freqs(stat = "mean")
+      freqs(dplyr::select(responses, q4), stat = "mean")
     Condition
       Error in `map()`:
       i In index: 1.
@@ -180,7 +180,7 @@
 ---
 
     Code
-      responses %>% dplyr::select(q4) %>% freqs(stat = "quantile")
+      freqs(dplyr::select(responses, q4), stat = "quantile")
     Condition
       Error in `map()`:
       i In index: 1.
@@ -190,7 +190,7 @@
 # stat argument only accepts percent, mean, quantile, or summary
 
     Code
-      responses %>% freqs(q1, stat = "means", percentile = 75, nas = FALSE)
+      freqs(responses, q1, stat = "means", percentile = 75, nas = FALSE)
     Condition
       Error in `freqs()`:
       ! `stat` must be one of "percent", "mean", "median", "min", "max", "quantile", or "summary", not "means".
@@ -199,7 +199,7 @@
 # function stops when value labels exist
 
     Code
-      responses %>% freqs(q4, stat = "mean", nas = FALSE)
+      freqs(responses, q4, stat = "mean", nas = FALSE)
     Condition
       Error in `map()`:
       i In index: 1.
@@ -209,7 +209,7 @@
 # unweighted_ns = TRUE, but no wt variable
 
     Code
-      responses %>% freqs(q4, unweighted_ns = TRUE)
+      freqs(responses, q4, unweighted_ns = TRUE)
     Condition
       Error in `freqs()`:
       ! If you use unweighted_ns = TRUE, you must specify a wt variable
@@ -217,7 +217,7 @@
 # bad input throws error
 
     Code
-      responses %>% dplyr::select(q0) %>% freqs(stat = "perc")
+      freqs(dplyr::select(responses, q0), stat = "perc")
     Condition
       Error in `freqs()`:
       ! `stat` must be one of "percent", "mean", "median", "min", "max", "quantile", or "summary", not "perc".

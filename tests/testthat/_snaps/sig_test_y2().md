@@ -1,7 +1,7 @@
 # Works on Numeric freqs var
 
     Code
-      mod_df %>% dplyr::group_by(group) %>% freqs(V1) %>% sig_test_y2(mod_df, group)
+      sig_test_y2(freqs(dplyr::group_by(mod_df, group), V1), mod_df, group)
     Message
       Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "-1" for group_var "group"
@@ -25,7 +25,7 @@
 # Works on Character freqs var
 
     Code
-      mod_df %>% dplyr::group_by(group) %>% freqs(V1) %>% sig_test_y2(mod_df, group)
+      sig_test_y2(freqs(dplyr::group_by(mod_df, group), V1), mod_df, group)
     Message
       Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "Agree" for group_var "group"
@@ -49,8 +49,7 @@
 # Works on Factor freqs var
 
     Code
-      responses3 %>% dplyr::group_by(group) %>% freqs(V1) %>% sig_test_y2(responses3,
-        group)
+      sig_test_y2(freqs(dplyr::group_by(responses3, group), V1), responses3, group)
     Message
       Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "Agree" for group_var "group"
@@ -74,8 +73,7 @@
 # Works on labelled freqs var
 
     Code
-      responses3 %>% dplyr::group_by(group) %>% freqs(V1) %>% sig_test_y2(mod_df,
-        group)
+      sig_test_y2(freqs(dplyr::group_by(responses3, group), V1), mod_df, group)
     Message
       Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "Agree" for group_var "group"
@@ -99,7 +97,7 @@
 # Works on numeric group_var
 
     Code
-      mod_df %>% dplyr::group_by(group) %>% freqs(V1) %>% sig_test_y2(mod_df, group)
+      sig_test_y2(freqs(dplyr::group_by(mod_df, group), V1), mod_df, group)
     Message
       Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "Agree" for group_var "group"
@@ -123,8 +121,7 @@
 # Works on character group_var
 
     Code
-      responses3 %>% dplyr::group_by(group) %>% freqs(V1) %>% sig_test_y2(responses3,
-        group)
+      sig_test_y2(freqs(dplyr::group_by(responses3, group), V1), responses3, group)
     Message
       Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "Agree" for group_var "group"
@@ -148,8 +145,7 @@
 # Works on factor group_var
 
     Code
-      mod_df %>% dplyr::group_by(group) %>% freqs(V1) %>% sig_test_y2(responses3,
-        group)
+      sig_test_y2(freqs(dplyr::group_by(mod_df, group), V1), responses3, group)
     Message
       Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "Agree" for group_var "group"
@@ -173,8 +169,8 @@
 # Haven labelled group_var error
 
     Code
-      frequencies <- mod_df %>% dplyr::group_by(group) %>% freqs(V1) %>% sig_test_y2(
-        mod_df, group)
+      frequencies <- sig_test_y2(freqs(dplyr::group_by(mod_df, group), V1), mod_df,
+      group)
     Message
       Adding missing grouping variables: `group`
     Condition
@@ -184,8 +180,8 @@
 # Missing dataset
 
     Code
-      frequencies <- responses3 %>% dplyr::group_by(group) %>% freqs(V1) %>%
-        sig_test_y2(banner_var = group)
+      frequencies <- sig_test_y2(freqs(dplyr::group_by(responses3, group), V1),
+      banner_var = group)
     Condition
       Error in `sig_test_y2()`:
       ! argument "dataset" is missing, with no default
@@ -193,8 +189,8 @@
 # Missing banner_var
 
     Code
-      frequencies <- responses3 %>% dplyr::group_by(group) %>% freqs(V1) %>%
-        sig_test_y2(dataset = responses3)
+      frequencies <- sig_test_y2(freqs(dplyr::group_by(responses3, group), V1),
+      dataset = responses3)
     Condition
       Error in `sig_test_y2()`:
       ! argument "banner_var" is missing, with no default

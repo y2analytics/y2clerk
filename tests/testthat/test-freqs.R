@@ -198,20 +198,20 @@ test_that("test data is correct", {
 
 test_that("NAs not present, nas = T: n & result are correct", {
   expect_equal(
-    responses %>%
-      dplyr::select(q0) %>%
-      freqs(stat = "mean") %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(q0) |>
+      freqs(stat = "mean") |>
+      dplyr::select(result) |>
       dplyr::pull(),
 
     round(mean(responses$q0), 2)
   )
 
   expect_equal(
-    responses %>%
-      dplyr::select(q0) %>%
-      freqs(stat = "mean", nas = TRUE) %>%
-      dplyr::select(n) %>%
+    responses |>
+      dplyr::select(q0) |>
+      freqs(stat = "mean", nas = TRUE) |>
+      dplyr::select(n) |>
       dplyr::pull(),
 
     nrow(responses[!is.na(responses$q0), ])
@@ -220,19 +220,19 @@ test_that("NAs not present, nas = T: n & result are correct", {
 
 test_that("NAs not present, nas = F: n & result are correct", {
   expect_equal(
-    responses %>%
-      dplyr::select(q0) %>%
-      freqs(stat = "mean", nas = FALSE) %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(q0) |>
+      freqs(stat = "mean", nas = FALSE) |>
+      dplyr::select(result) |>
       dplyr::pull(),
 
     round(mean(responses$q0), 2)
   )
   expect_equal(
-    responses %>%
-      dplyr::select(q0) %>%
-      freqs(stat = "mean", nas = FALSE) %>%
-      dplyr::select(n) %>%
+    responses |>
+      dplyr::select(q0) |>
+      freqs(stat = "mean", nas = FALSE) |>
+      dplyr::select(n) |>
       dplyr::pull(),
 
     nrow(responses[!is.na(responses$q0), ])
@@ -242,8 +242,8 @@ test_that("NAs not present, nas = F: n & result are correct", {
 test_that("NAs present, nas = T: throws error", {
   expect_snapshot(
     error = TRUE,
-    responses %>%
-      dplyr::select(q1) %>%
+    responses |>
+      dplyr::select(q1) |>
       freqs(stat = "mean")
   )
 })
@@ -259,10 +259,10 @@ test_that("NAs present, nas = F: n & result are correct", {
     round(mean(responses$q1, na.rm = TRUE), 2)
   )
   expect_equal(
-    responses %>%
-      dplyr::select(q1) %>%
-      freqs(stat = "mean", nas = FALSE) %>%
-      dplyr::select(n) %>%
+    responses |>
+      dplyr::select(q1) |>
+      freqs(stat = "mean", nas = FALSE) |>
+      dplyr::select(n) |>
       dplyr::pull(),
 
     nrow(responses[!is.na(responses$q1), ])
@@ -273,8 +273,8 @@ test_that("NAs present, nas = F: n & result are correct", {
 test_that("factor variable input: throws error", {
   expect_snapshot(
     error = TRUE,
-    responses %>%
-      select(q2) %>%
+    responses |>
+      select(q2) |>
       freqs(stat = 'mean')
   )
 })
@@ -283,8 +283,8 @@ test_that("factor variable input: throws error", {
 test_that("character variable input: throws error", {
   expect_snapshot(
     error = TRUE,
-    responses %>%
-      dplyr::select(q3) %>%
+    responses |>
+      dplyr::select(q3) |>
       freqs(stat = 'mean')
   )
 })
@@ -293,8 +293,8 @@ test_that("character variable input: throws error", {
 test_that("column with value labels input: throws error", {
   expect_snapshot(
     error = TRUE,
-    responses %>%
-      dplyr::select(q4) %>%
+    responses |>
+      dplyr::select(q4) |>
       freqs(stat = 'mean')
   )
 })
@@ -302,11 +302,11 @@ test_that("column with value labels input: throws error", {
 test_that("column with value labels input: (potentially misleading) result is correct
           after labels are removed", {
   expect_equal(
-    responses %>%
-      dplyr::mutate(q4 = as.numeric(q4)) %>%
-      dplyr::select(q4) %>%
-      freqs(stat = 'mean') %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::mutate(q4 = as.numeric(q4)) |>
+      dplyr::select(q4) |>
+      freqs(stat = 'mean') |>
+      dplyr::select(result) |>
       dplyr::pull(),
     mean(responses$q4)
   )
@@ -314,11 +314,11 @@ test_that("column with value labels input: (potentially misleading) result is co
 
 test_that("column with value labels input: answer is correct after labels removed (even if potentially misleading)", {
   expect_equal(
-    responses %>%
-      dplyr::select(q4) %>%
-      labelled::remove_labels() %>%
-      freqs(stat = 'mean') %>%
-      dplyr::select(result) %>%
+    responses |>
+      dplyr::select(q4) |>
+      labelled::remove_labels() |>
+      freqs(stat = 'mean') |>
+      dplyr::select(result) |>
       dplyr::pull(),
     mean(responses$q4)
   )
@@ -775,10 +775,10 @@ test_that("column with value labels input: answer is correct after labels remove
 
 
 test_that("quantiles using weights: equivalent to svyquantile() output", {
-  freq_output <- responses %>%
-    dplyr::select(q1, w) %>%
-    freqs(stat = 'quantile', nas = FALSE, wt = w, percentile = 95) %>%
-    dplyr::select(result) %>%
+  freq_output <- responses |>
+    dplyr::select(q1, w) |>
+    freqs(stat = 'quantile', nas = FALSE, wt = w, percentile = 95) |>
+    dplyr::select(result) |>
     dplyr::pull()
 
   surv_design <- survey::svydesign(
