@@ -31,7 +31,6 @@ Imports:
     magrittr,
     officer,
     purrr,
-    reldist,
     rlang,
     stringr,
     survey,

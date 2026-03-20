@@ -300,18 +300,35 @@ calculate_result_for_cont_var <- function(
           n = base::length(!!variable),
           result = stats::quantile(x = !!variable, probs = percentile / 100)
         )
-    } # 2) wt exists in dataset
-    else {
-      out_df <- dataset |>
-        dplyr::filter(!is.na(!!variable)) |>
-        dplyr::summarise(
-          n = base::length(!!variable),
-          result = reldist::wtd.quantile(
-            !!variable,
-            q = percentile / 100,
-            weight = !!wt
-          )
-        )
+    } else {
+      # 2) wt exists in dataset
+      filtered_data <- dataset |>
+        dplyr::filter(!is.na(!!variable))
+
+      surv_design <- survey::svydesign(
+        id = ~1,
+        weights = stats::reformulate(rlang::as_name(wt)),
+        data = filtered_data
+      )
+
+      quantile_algorithm <- getOption(
+        'y2clerk.quantile_algorithm',
+        default = "hf8"
+      )
+
+      q_result <- survey::svyquantile(
+        x = stats::reformulate(rlang::as_name(variable)),
+        design = surv_design,
+        quantiles = percentile / 100,
+        na.rm = TRUE,
+        ci = FALSE,
+        qrule = quantile_algorithm
+      )
+
+      out_df <- tibble::tibble(
+        n = nrow(filtered_data),
+        result = as.numeric(stats::coef(q_result))
+      )
     }
   }
   return(out_df)

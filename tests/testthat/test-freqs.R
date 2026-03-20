@@ -867,21 +867,33 @@ test_that("column with value labels input: answer is correct after labels remove
 })
 
 
-test_that("using weights: equivalent to wtd.quantile() output", {
-  expect_equal(
-    responses |>
-      dplyr::select(q1, w) |>
-      freqs(stat = 'quantile', nas = FALSE, wt = w, percentile = 95) |>
-      dplyr::select(result) |>
-      dplyr::pull(),
+test_that("quantiles using weights: equivalent to svyquantile() output", {
+  freq_output <- responses %>%
+    dplyr::select(q1, w) %>%
+    freqs(stat = 'quantile', nas = FALSE, wt = w, percentile = 95) %>%
+    dplyr::select(result) %>%
+    dplyr::pull()
 
-    reldist::wtd.quantile(
-      x = responses$q1,
-      q = 0.95,
-      weight = responses$w,
-      na.rm = TRUE
-    ) |>
-      round(2)
+  surv_design <- survey::svydesign(
+    id = ~1,
+    weights = ~w,
+    data = responses |> dplyr::filter(!is.na(.data$q1))
+  )
+
+  q_result <- survey::svyquantile(
+    x = ~q1,
+    design = surv_design,
+    quantiles = 0.95,
+    na.rm = TRUE,
+    ci = FALSE,
+    qrule = "hf8"
+  )
+
+  survey_output <- stats::coef(q_result) |> as.numeric() |> round(2)
+
+  expect_equal(
+    freq_output,
+    survey_output
   )
 })
 
