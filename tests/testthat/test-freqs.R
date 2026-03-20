@@ -873,14 +873,13 @@ test_that("quantiles using weights: equivalent to svyquantile() output", {
     freqs(stat = 'quantile', nas = FALSE, wt = w, percentile = 95) %>%
     dplyr::select(result) %>%
     dplyr::pull()
-  
 
   surv_design <- survey::svydesign(
     id = ~1,
     weights = ~w,
     data = responses |> dplyr::filter(!is.na(.data$q1))
-  ) 
-  
+  )
+
   q_result <- survey::svyquantile(
     x = ~q1,
     design = surv_design,

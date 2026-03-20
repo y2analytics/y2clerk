@@ -311,7 +311,10 @@ calculate_result_for_cont_var <- function(
         data = filtered_data
       )
 
-      quantile_algorithm <- getOption('y2clerk.quantile_algorithm', default = "hf8")
+      quantile_algorithm <- getOption(
+        'y2clerk.quantile_algorithm',
+        default = "hf8"
+      )
 
       q_result <- survey::svyquantile(
         x = stats::reformulate(rlang::as_name(variable)),
