@@ -54,25 +54,25 @@ df <- data.frame(
   Q1_2 = c(1, 1, NA, 1, NA, 1, NA),
   Q1_3 = c(NA, 1, 1, NA, 4, 1, NA),
   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
-) \%>\%
+) |>
   tidyr::as_tibble()
 
 
 # All 3 methods below give the same output
 multi_freqs(df, Q1_1)
-df \%>\% multi_freqs(Q1_1)
-df \%>\%
-  dplyr::select(dplyr::starts_with("Q1")) \%>\%
+df |> multi_freqs(Q1_1)
+df |>
+  dplyr::select(dplyr::starts_with("Q1")) |>
   multi_freqs()
 
 
 # Grouped examples with weights (both have same outputs)
-df \%>\%
-  dplyr::group_by(a) \%>\%
+df |>
+  dplyr::group_by(a) |>
   multi_freqs(Q1_1, wt = weights)
-df \%>\%
-  dplyr::group_by(a) \%>\%
-  dplyr::select(starts_with("Q1"), weights) \%>\%
+df |>
+  dplyr::group_by(a) |>
+  dplyr::select(starts_with("Q1"), weights) |>
   multi_freqs(wt = weights)
 
 }

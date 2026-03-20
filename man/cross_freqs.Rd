@@ -62,16 +62,16 @@ Create a frequencies table with multiple distinct grouping variables/banners
 }
 \examples{
 GROUP_VARS <-
-  mtcars \%>\%
+  mtcars |>
   dplyr::select(
     am,
     vs
-  ) \%>\%
+  ) |>
   names()
 
 GROUP_VARS <- c("am", "vs")
 
-mtcars \%>\% cross_freqs(
+mtcars |> cross_freqs(
   group_vars = GROUP_VARS,
   gear,
   carb
