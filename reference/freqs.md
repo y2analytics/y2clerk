@@ -155,8 +155,8 @@ freq(df, stat = 'mean', nas = FALSE, wt = weights)
 #>   <chr>    <chr> <chr> <dbl> <chr>  <dbl>
 #> 1 a        ""    ""        6 mean    2.37
 #> 2 b        ""    ""        6 mean    2.2 
-df %>%
-  dplyr::group_by(a) %>%
+df |>
+  dplyr::group_by(a) |>
   freqs(b, nas = FALSE, wt = weights)
 #> Adding missing grouping variables: `a`
 #> # A frequency tibble: 5 × 7
