@@ -1,10 +1,9 @@
 # Overall ----------------------------------------------------------------
 
 test_that('`sig` Column Created', {
-  
-  frequencies <- responses3 |> 
-    dplyr::group_by(group) |> 
-    freqs(V1) |> 
+  frequencies <- responses3 |>
+    dplyr::group_by(group) |>
+    freqs(V1) |>
     sig_test_y2(
       responses3,
       group
@@ -29,10 +28,9 @@ test_that('`sig` Column Created', {
 
 
 test_that('Sig Tests Results Correctly Ordered', {
-  
-  frequencies <- responses3 |> 
-    dplyr::group_by(group) |> 
-    freqs(V1) |> 
+  frequencies <- responses3 |>
+    dplyr::group_by(group) |>
+    freqs(V1) |>
     sig_test_y2(
       responses3,
       group
@@ -58,8 +56,7 @@ test_that('Sig Tests Results Correctly Ordered', {
 
 
 test_that('Sig Test works on a grouped freqs object of multiple variables', {
-  
-  mod_df <- responses3 |> 
+  mod_df <- responses3 |>
     dplyr::mutate(
       V2 = c(
         rep('Agree', 100),
@@ -119,10 +116,9 @@ test_that('Sig Test works on a grouped freqs object of multiple variables', {
 
 
 test_that('Sig Test works on a grouped freqs object of multi select variables', {
-  
-  frequencies <- responses3 |> 
-    dplyr::group_by(group) |> 
-    multi_freqs(V2_1) |> 
+  frequencies <- responses3 |>
+    dplyr::group_by(group) |>
+    multi_freqs(V2_1) |>
     sig_test_y2(
       responses3,
       group
@@ -148,10 +144,9 @@ test_that('Sig Test works on a grouped freqs object of multi select variables', 
 
 
 test_that('Group References Appended Correctly', {
-  
-  frequencies <- responses3 |> 
-    dplyr::group_by(group) |> 
-    freqs(V1) |> 
+  frequencies <- responses3 |>
+    dplyr::group_by(group) |>
+    freqs(V1) |>
     sig_test_y2(
       responses3,
       group
@@ -173,8 +168,7 @@ test_that('Group References Appended Correctly', {
 
 
 test_that('Works on Numeric freqs var', {
-  
-  mod_df <- responses3 |> 
+  mod_df <- responses3 |>
     dplyr::mutate(
       V1 = dplyr::case_when(
         V1 == 'Agree' ~ 1,
@@ -182,11 +176,10 @@ test_that('Works on Numeric freqs var', {
         V1 == 'Disagree' ~ -1
       )
     )
-  
   expect_snapshot(
-    mod_df |> 
-      dplyr::group_by(group) |> 
-      freqs(V1) |> 
+    mod_df |>
+      dplyr::group_by(group) |>
+      freqs(V1) |>
       sig_test_y2(
         mod_df,
         group
@@ -196,14 +189,11 @@ test_that('Works on Numeric freqs var', {
 
 
 test_that('Works on Character freqs var', {
-  
-  mod_df <- responses3 |> 
+  mod_df <- responses3 |>
     dplyr::mutate(
       V1 = as.character(V1)
     )
-  
   expect_snapshot(
-    
     mod_df |>
       dplyr::group_by(group) |>
       freqs(V1) |>
@@ -216,10 +206,8 @@ test_that('Works on Character freqs var', {
 
 
 test_that('Works on Factor freqs var', {
-  
   expect_snapshot(
-    
-    responses3 |> 
+    responses3 |>
       dplyr::group_by(group) |>
       freqs(V1) |>
       sig_test_y2(
@@ -231,7 +219,6 @@ test_that('Works on Factor freqs var', {
 
 
 test_that('Works on labelled freqs var', {
-  
   mod_df <- responses3 |>
     dplyr::mutate(
       V1 = dplyr::case_when(
