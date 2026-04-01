@@ -3,7 +3,7 @@
 #' Run frequencies for multiple variables
 #'
 #' @param dataset A dataframe.
-#' @param ... The unquoted names of a set of variables in the dataset. If nothing
+#' @param ... <tidy-select> One or more unquoted expressions separated by commas. Variable names can be used as if they were positions in the data frame, so expressions like x:y can be used to select a range of variables. If nothing
 #' is specified, the function runs a frequency on every column in given dataset.
 #' @param stat Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').
 #' @param percentile Double, for use when stat = 'quantile.' Input should be a real number x such that 0 <= x <= 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)
@@ -266,6 +266,7 @@ calculate_result_for_cont_var <- function(
   if (stat == 'mean') {
     # 1) wt = NULL
     if (rlang::quo_is_null(wt)) {
+      # 2) wt exists in dataset
       out_df <- dataset |>
         # always filter nas because the function previously checked
         # to ensure nas = FALSE is set if necessary
@@ -274,8 +275,7 @@ calculate_result_for_cont_var <- function(
           n = base::length(!!variable),
           result = base::mean(!!variable)
         )
-    } # 2) wt exists in dataset
-    else {
+    } else {
       out_df <- dataset |>
         dplyr::filter(!is.na(!!variable)) |>
         dplyr::summarise(
@@ -356,19 +356,22 @@ validate_inputs <- function(
   # "failing fast"
 
   # 0) validate percentile rank
-  if (stat == 'quantile' & is.null(percentile))
+  if (stat == 'quantile' & is.null(percentile)) {
     stop("No input given for percentile (percentile rank)")
-
-  if (stat == 'quantile' & !is.null(percentile)) {
-    if (percentile < 0 | percentile > 100)
-      stop('Percentile rank should be between 0 and 100, inclusive')
   }
 
   if (stat == 'quantile' & !is.null(percentile)) {
-    if (percentile < 1)
+    if (percentile < 0 | percentile > 100) {
+      stop('Percentile rank should be between 0 and 100, inclusive')
+    }
+  }
+
+  if (stat == 'quantile' & !is.null(percentile)) {
+    if (percentile < 1) {
       rlang::inform(
         'Remember that percentile ranges between 0 and 100. percentile = 0.5 returns the bottom half percentile, whereas percentile = 50 returns the median.'
       )
+    }
   }
 
   # 1) if there are NAs in the data, you should use nas = FALSE
@@ -376,8 +379,9 @@ validate_inputs <- function(
     count_nas <- dataset |>
       dplyr::filter(is.na(!!variable)) |>
       base::nrow()
-    if (count_nas != 0)
+    if (count_nas != 0) {
       stop('NAs present in variable(s); to proceed, set nas = F')
+    }
   }
 
   # 2) can't take mean of categorical variable
@@ -392,8 +396,9 @@ validate_inputs <- function(
   check_class <- stringr::str_c(check_class, collapse = " ")
 
   # if not one of these types, stop
-  if (!(check_class %in% c("numeric", "integer")))
+  if (!(check_class %in% c("numeric", "integer"))) {
     stop("Can't take mean of non-numeric variable")
+  }
 
   # 3) stop if value labels exist
   check_labels <- dataset |>
@@ -402,17 +407,19 @@ validate_inputs <- function(
     labelled::val_labels() |>
     tibble::deframe() |>
     base::is.null()
-  if (!check_labels)
+  if (!check_labels) {
     stop(
       "Value labels exist; consider converting values to labels or using stat = 'percent'"
     )
+  }
 
   # 4) give reminder if percentile input given when stat is not set to 'quantile'
   if (!(stat %in% c('quantile', 'summary'))) {
-    if (!is.null(percentile))
+    if (!is.null(percentile)) {
       rlang::inform(
         "Remember that the percentile rank argument impacts output only when stat = 'quantile'"
       )
+    }
   }
 }
 
@@ -556,10 +563,11 @@ get_summary_output_for_cont_var <- function(
 ) {
   # add redundant reminder because  subsequent code overrides user inputs for stat & percentile
   # [for other cases, this reminder is also present in validate_inputs()]
-  if (!is.null(percentile))
+  if (!is.null(percentile)) {
     rlang::inform(
       "Remember that the percentile rank argument impacts output only when stat = 'quantile'"
     )
+  }
 
   out <- dplyr::bind_rows(
     get_output_for_cont_var(
@@ -726,7 +734,6 @@ freq_var <- function(
   show_missing_levels = show_missing_levels,
   nas_group
 ) {
-
   variable <- rlang::sym(col_name)
   wt <- dplyr::enquo(wt)
 
@@ -734,10 +741,11 @@ freq_var <- function(
   if (
     !(stat %in%
       c('percent', 'mean', 'quantile', 'summary', 'min', 'max', 'median'))
-  )
+  ) {
     stop(
       '"stat" argument must receive a value from c("percent", "mean", "quantile", "summary", "min", "median", "max")'
     )
+  }
 
   if (stat == 'percent') {
     base <- ns(dataset, variable, wt, prompt, show_missing_levels, nas_group)
@@ -932,7 +940,9 @@ labelled_ns <- function(
 }
 
 unlabelled_ns <- function(dataset, variable, weight, prompt) {
-  if (class(dataset |> dplyr::ungroup() |> dplyr::pull(!!variable))[1] == 'factor') {
+  if (
+    class(dataset |> dplyr::ungroup() |> dplyr::pull(!!variable))[1] == 'factor'
+  ) {
     counts <- base_ns(dataset, variable, weight) |>
       dplyr::mutate(
         label = forcats::as_factor(.data$value) |> as.character(),

@@ -38,7 +38,7 @@ freq(
 \arguments{
 \item{dataset}{A dataframe.}
 
-\item{...}{The unquoted names of a set of variables in the dataset. If nothing
+\item{...}{<tidy-select> One or more unquoted expressions separated by commas. Variable names can be used as if they were positions in the data frame, so expressions like x:y can be used to select a range of variables. If nothing
 is specified, the function runs a frequency on every column in given dataset.}
 
 \item{stat}{Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').}
