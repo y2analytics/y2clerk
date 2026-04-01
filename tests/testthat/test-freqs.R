@@ -14,10 +14,59 @@ test_that("Not a dataframe error - matrix", {
   expect_snapshot(error = TRUE, freqs(table, column_a))
 })
 #variables
-test_that("Runs on variables, not integers", {
-  expect_snapshot(error = TRUE, freqs(mtcars, 10))
+test_that("Integer positions select columns (tidyselect behavior)", {
+  # tidyselect supports integer positions; 10 selects the 10th column (gear)
+  result <- freqs(mtcars, 10)
+  expect_equal(unique(result$variable), "gear")
 })
 #nas
+
+# tidyselect ---------------------------------------------------------------
+
+test_that("empty ... selects all non-group, non-weight columns", {
+  df <- data.frame(a = 1:3, b = 1:3, w = c(0.9, 1, 1.1))
+  result <- freqs(df, wt = w)
+  expect_equal(sort(unique(result$variable)), c("a", "b"))
+})
+
+test_that("starts_with() selects matching columns", {
+  df <- data.frame(q1 = 1:3, q2 = 1:3, other = 1:3)
+  result <- freqs(df, starts_with("q"))
+  expect_equal(sort(unique(result$variable)), c("q1", "q2"))
+})
+
+test_that("where() selects by predicate", {
+  df <- data.frame(a = 1:3, b = letters[1:3], c = 4:6)
+  result <- freqs(df, where(is.numeric))
+  expect_equal(sort(unique(result$variable)), c("a", "c"))
+})
+
+test_that("range selection with :", {
+  result <- freqs(mtcars, cyl:hp)
+  expect_equal(sort(unique(result$variable)), sort(c("cyl", "disp", "hp")))
+})
+
+test_that("everything() excludes weight and group vars", {
+  df <- data.frame(a = 1:3, b = 1:3, w = c(0.9, 1, 1.1)) |>
+    dplyr::group_by(b)
+  result <- freqs(df, everything(), wt = w)
+  expect_equal(unique(result$variable), "a")
+})
+
+test_that("integer position selects correct column", {
+  result <- freqs(mtcars, 10)
+  expect_equal(unique(result$variable), "gear")
+})
+
+
+test_that("weight column excluded even when selected via everything()", {
+  df <- data.frame(x = 1:3, wt = c(0.9, 1, 1.1))
+  result <- freqs(df, everything(), wt = wt)
+  expect_false("wt" %in% unique(result$variable))
+})
+
+# -------------------------------------------------------------------------
+
 test_that("Incorrect nas argument", {
   expect_snapshot(error = TRUE, freqs(mtcars, cyl, nas = 'True'))
 })

@@ -208,20 +208,29 @@ freqs_original <- function(
     dataset <- remove_group_nas(dataset)
   }
   weight <- dplyr::enquo(wt)
-  variables <- dplyr::quos(...)
 
-  # If no variables are specified in the function call,
-  # assume the user wants to run a frequency on all columns.
-  if (!length(variables)) {
-    variables <- column_quos(dataset, wt = !!weight)
+  if (...length() == 0L) {
+    # Nothing passed: select all columns (minus weight, minus group vars)
+    col_names <- column_names(dataset, wt = !!weight)
+  } else {
+    # tidyselect resolution against the dataset column names
+    col_names <- names(
+      tidyselect::eval_select(rlang::expr(c(...)), data = dataset)
+    )
+    # Exclude weight variable if it was inadvertently included
+    if (!rlang::quo_is_null(weight)) {
+      col_names <- setdiff(col_names, rlang::as_label(weight))
+    }
+    # Exclude group vars (mirrors column_names() behaviour for empty ...)
+    col_names <- setdiff(col_names, dplyr::group_vars(dataset))
   }
 
   frequencies <- purrr::map_dfr(
-    .x = variables,
-    .f = function(variable) {
+    .x = col_names,
+    .f = function(col_name) {
       freq_var(
         dataset,
-        !!variable,
+        col_name,
         stat,
         percentile,
         nas,
@@ -706,7 +715,7 @@ group_rename <- function(dataset) {
 
 freq_var <- function(
   dataset,
-  variable,
+  col_name,
   stat = 'percent',
   percentile = 50,
   nas = TRUE,
@@ -716,7 +725,8 @@ freq_var <- function(
   show_missing_levels = show_missing_levels,
   nas_group
 ) {
-  variable <- dplyr::enquo(variable)
+
+  variable <- rlang::sym(col_name)
   wt <- dplyr::enquo(wt)
 
   # check stat argument input
@@ -759,7 +769,7 @@ freq_var <- function(
   return(freq_result)
 }
 
-column_quos <- function(dataset, wt) {
+column_names <- function(dataset, wt) {
   col_names <- dataset |> colnames()
   if (dplyr::is.grouped_df(dataset)) {
     # Exclude grouping variables since they cannot be counted independent of groups.
@@ -769,11 +779,7 @@ column_quos <- function(dataset, wt) {
   # Exclude weighting variable from freqs in select
   weight_name <- rlang::enquo(wt) |> rlang::as_label()
   col_names <- setdiff(col_names, weight_name)
-
-  col_syms <- col_names |> dplyr::syms()
-  col_quos <- purrr::map(col_syms, dplyr::quo)
-  class(col_quos) <- append(class(col_quos), "quosures", after = 0)
-  return(col_quos)
+  return(col_names)
 }
 
 ns <- function(

@@ -3,32 +3,16 @@
     Code
       freqs(df, a)
     Condition
-      Error in `map()`:
-      i In index: 1.
-      Caused by error in `UseMethod()`:
-      ! no applicable method for 'pull' applied to an object of class "character"
+      Error in `freqs_original()`:
+      ! Can't select within an unnamed vector.
 
 # Not a dataframe error - matrix
 
     Code
       freqs(table, column_a)
     Condition
-      Error in `map()`:
-      i In index: 1.
-      Caused by error in `UseMethod()`:
-      ! no applicable method for 'pull' applied to an object of class "c('matrix', 'array', 'double', 'numeric')"
-
-# Runs on variables, not integers
-
-    Code
-      freqs(mtcars, 10)
-    Condition
-      Error in `map()`:
-      i In index: 1.
-      Caused by error in `dplyr::rename()`:
-      ! Can't rename columns that don't exist.
-      i Location 10 doesn't exist.
-      i There are only 2 columns.
+      Error in `freqs_original()`:
+      ! Can't select within an unnamed vector.
 
 # Incorrect nas argument
 
