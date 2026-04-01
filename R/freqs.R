@@ -382,6 +382,7 @@ validate_inputs <- function(
 
   # 2) can't take mean of categorical variable
   check_class <- dataset |>
+    dplyr::ungroup() |>
     dplyr::select(!!variable) |>
     labelled::remove_labels() |>
     dplyr::pull() |>
@@ -791,7 +792,7 @@ ns <- function(
   nas_group
 ) {
   is_labelled <- sum(
-    class(dataset |> dplyr::pull(!!variable)) %in%
+    class(dataset |> dplyr::ungroup() |> dplyr::pull(!!variable)) %in%
       c('labelled', 'haven_labelled', 'haven_labelled_spss')
   )
   counts <- if (is_labelled >= 1) {
@@ -809,9 +810,13 @@ ns <- function(
     unlabelled_ns(dataset, variable, weight, prompt)
   }
   # Reorder because Scotty is OCD
+  # Explicitly include group vars so dplyr doesn't emit
+  # "Adding missing grouping variables" when dataset is grouped.
+  group_vars <- dplyr::group_vars(dataset)
   if (prompt) {
     counts |>
       dplyr::select(
+        tidyselect::all_of(group_vars),
         'variable',
         'prompt',
         'value',
@@ -821,6 +826,7 @@ ns <- function(
   } else {
     counts |>
       dplyr::select(
+        tidyselect::all_of(group_vars),
         'variable',
         'value',
         'label',
@@ -870,6 +876,7 @@ labelled_ns <- function(
 
   if (show_missing_levels == TRUE) {
     all_levels <- dataset |>
+      dplyr::ungroup() |>
       dplyr::pull(!!variable) |>
       attributes() |>
       purrr::pluck('labels')
@@ -925,7 +932,7 @@ labelled_ns <- function(
 }
 
 unlabelled_ns <- function(dataset, variable, weight, prompt) {
-  if (class(dataset |> dplyr::pull(!!variable))[1] == 'factor') {
+  if (class(dataset |> dplyr::ungroup() |> dplyr::pull(!!variable))[1] == 'factor') {
     counts <- base_ns(dataset, variable, weight) |>
       dplyr::mutate(
         label = forcats::as_factor(.data$value) |> as.character(),
@@ -950,9 +957,14 @@ unlabelled_ns <- function(dataset, variable, weight, prompt) {
 }
 
 base_ns <- function(dataset, variable, weight) {
+  # Explicitly include grouping variables in count() so dplyr doesn't emit
+  # "Adding missing grouping variables" messages when dataset is grouped.
+  group_vars <- dplyr::group_vars(dataset)
+  group_syms <- rlang::syms(group_vars)
+
   dataset |>
     # When wt is NULL, it runs unweighted counts
-    dplyr::count(!!variable, wt = !!weight, .drop = FALSE) |>
+    dplyr::count(!!!group_syms, !!variable, wt = !!weight, .drop = FALSE) |>
     dplyr::rename(value = !!variable) |>
     dplyr::mutate(
       variable = dplyr::quo_name(variable)
