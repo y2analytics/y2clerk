@@ -13,7 +13,7 @@
 #' @param digits Integer, number of significant digits for rounding (default: 2).
 #' @param nas_group Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: TRUE).
 #' @param factor_group Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)
-#' @param unweighted_ns Boolean, whether the 'n' column in the freqs table should be UNweighted while results ARE weighted. This argument can only be used if a wt variable is used. If no weight variable is used, the 'n' column will always be unweighted (default: FALSE).
+#' @param unweighted_ns Boolean, whether the 'n' column in the freqs table should be Unweighted while results ARE weighted. This argument can only be used if a wt variable is used. If no weight variable is used, the 'n' column will always be unweighted (default: FALSE).
 #' @param show_missing_levels Boolean, whether to keep response levels with no data (default: TRUE)
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations.
@@ -22,11 +22,14 @@
 #' df <- data.frame(
 #'   a = c(1, 2, 2, 3, 4, 2, NA),
 #'   b = c(1, 2, 2, 3, 4, 1, NA),
+#'   c = c("Red", "Red", "Blue", NA, NA, NA, "Yellow"),
 #'   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
 #' )
 #'
 #' freqs(df, a, b)
 #' freqs(df, a, b, wt = weights)
+#' freq(df, a:b)
+#' freq(df, starts_with('a'), wt = weights)
 #' freq(df, stat = 'mean', nas = FALSE)
 #' freq(df, stat = 'mean', nas = FALSE, wt = weights)
 #' df |>
@@ -266,7 +269,6 @@ calculate_result_for_cont_var <- function(
   if (stat == 'mean') {
     # 1) wt = NULL
     if (rlang::quo_is_null(wt)) {
-      # 2) wt exists in dataset
       out_df <- dataset |>
         # always filter nas because the function previously checked
         # to ensure nas = FALSE is set if necessary
@@ -276,6 +278,7 @@ calculate_result_for_cont_var <- function(
           result = base::mean(!!variable)
         )
     } else {
+      # 2) wt exists in dataset
       out_df <- dataset |>
         dplyr::filter(!is.na(!!variable)) |>
         dplyr::summarise(
@@ -967,14 +970,9 @@ unlabelled_ns <- function(dataset, variable, weight, prompt) {
 }
 
 base_ns <- function(dataset, variable, weight) {
-  # Explicitly include grouping variables in count() so dplyr doesn't emit
-  # "Adding missing grouping variables" messages when dataset is grouped.
-  group_vars <- dplyr::group_vars(dataset)
-  group_syms <- rlang::syms(group_vars)
-
   dataset |>
     # When wt is NULL, it runs unweighted counts
-    dplyr::count(!!!group_syms, !!variable, wt = !!weight, .drop = FALSE) |>
+    dplyr::count(!!variable, wt = !!weight, .drop = FALSE) |>
     dplyr::rename(value = !!variable) |>
     dplyr::mutate(
       variable = dplyr::quo_name(variable)
