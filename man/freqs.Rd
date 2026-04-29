@@ -8,6 +8,7 @@
 freqs(
   dataset,
   ...,
+  .by = NULL,
   stat = c("percent", "mean", "median", "min", "max", "quantile", "summary"),
   percentile = NULL,
   nas = TRUE,
@@ -23,6 +24,7 @@ freqs(
 freq(
   dataset,
   ...,
+  .by = NULL,
   stat = c("percent", "mean", "median", "min", "max", "quantile", "summary"),
   percentile = NULL,
   nas = TRUE,
@@ -41,6 +43,8 @@ freq(
 \item{...}{<tidy-select> One or more unquoted expressions separated by commas. Variable names can be used as if they were positions in the data frame, so expressions like x:y can be used to select a range of variables. If nothing
 is specified, the function runs a frequency on every column in given dataset.}
 
+\item{.by}{<tidy-select> Variables to group by for this operation only. Cannot be used when the dataset is already a grouped data frame.}
+
 \item{stat}{Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').}
 
 \item{percentile}{Double, for use when stat = 'quantile.' Input should be a real number x such that 0 <= x <= 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)}
@@ -57,7 +61,7 @@ is specified, the function runs a frequency on every column in given dataset.}
 
 \item{factor_group}{Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)}
 
-\item{unweighted_ns}{Boolean, whether the 'n' column in the freqs table should be UNweighted while results ARE weighted. This argument can only be used if a wt variable is used. If no weight variable is used, the 'n' column will always be unweighted (default: FALSE).}
+\item{unweighted_ns}{Boolean, whether the 'n' column in the freqs table should be Unweighted while results ARE weighted. This argument can only be used if a wt variable is used. If no weight variable is used, the 'n' column will always be unweighted (default: FALSE).}
 
 \item{show_missing_levels}{Boolean, whether to keep response levels with no data (default: TRUE)}
 }
@@ -72,16 +76,20 @@ Run frequencies for multiple variables
 df <- data.frame(
   a = c(1, 2, 2, 3, 4, 2, NA),
   b = c(1, 2, 2, 3, 4, 1, NA),
+  c = c("Red", "Red", "Blue", NA, NA, NA, "Yellow"),
   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
 )
 
 freqs(df, a, b)
 freqs(df, a, b, wt = weights)
+freq(df, a:b)
+freq(df, starts_with('a'), wt = weights)
 freq(df, stat = 'mean', nas = FALSE)
 freq(df, stat = 'mean', nas = FALSE, wt = weights)
 df |>
   dplyr::group_by(a) |>
   freqs(b, nas = FALSE, wt = weights)
+freqs(df, b, .by = a)
 
 # Note that percentile = 60 will return an estimate
 # of the real number such that 60\% of values

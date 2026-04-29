@@ -14,6 +14,7 @@
 #' @param nas_group Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: TRUE).
 #' @param factor_group Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)
 #' @param unweighted_ns Boolean, whether the 'n' column in the freqs table should be Unweighted while results ARE weighted. This argument can only be used if a wt variable is used. If no weight variable is used, the 'n' column will always be unweighted (default: FALSE).
+#' @param .by <tidy-select> Variables to group by for this operation only. Cannot be used when the dataset is already a grouped data frame.
 #' @param show_missing_levels Boolean, whether to keep response levels with no data (default: TRUE)
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations.
@@ -35,6 +36,7 @@
 #' df |>
 #'   dplyr::group_by(a) |>
 #'   freqs(b, nas = FALSE, wt = weights)
+#' freqs(df, b, .by = a)
 #'
 #' # Note that percentile = 60 will return an estimate
 #' # of the real number such that 60% of values
@@ -51,6 +53,7 @@
 freqs <- function(
   dataset,
   ...,
+  .by = NULL,
   stat = c("percent", "mean", "median", "min", "max", "quantile", "summary"),
   percentile = NULL,
   nas = TRUE,
@@ -64,6 +67,22 @@ freqs <- function(
 ) {
   # options(warn = -1)
   stat <- rlang::arg_match(stat)
+
+  # .by grouping: resolve tidy-selection and apply as grouping
+  by_sel <- tidyselect::eval_select(rlang::enquo(.by), data = dataset)
+  if (length(by_sel) > 0) {
+    if (dplyr::is.grouped_df(dataset)) {
+      cli::cli_abort(
+        c(
+          "Cannot use {.arg .by} on an already-grouped data frame.",
+          "i" = "Use {.code dplyr::group_by()} or {.arg .by}, not both.",
+          "i" = "The dataset is currently grouped by: {.val {dplyr::group_vars(dataset)}}."
+        )
+      )
+    }
+    by_vars <- names(by_sel)
+    dataset <- dplyr::group_by(dataset, dplyr::across(tidyselect::all_of(by_vars)))
+  }
 
   # Create logical for if there are weights
   weight_null <- dplyr::enquo(wt)
@@ -112,6 +131,9 @@ freqs <- function(
     }
 
     p <- p[p != ""]
+  }
+  if (length(by_sel) > 0) {
+    frequencies <- dplyr::ungroup(frequencies)
   }
   return(as_freq_y2(frequencies, p))
 }
