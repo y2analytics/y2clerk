@@ -3,7 +3,7 @@
     Code
       freqs(df, a)
     Condition
-      Error in `freqs_original()`:
+      Error in `freqs()`:
       ! Can't select within an unnamed vector.
 
 # Not a dataframe error - matrix
@@ -11,7 +11,7 @@
     Code
       freqs(table, column_a)
     Condition
-      Error in `freqs_original()`:
+      Error in `freqs()`:
       ! Can't select within an unnamed vector.
 
 # Incorrect nas argument
