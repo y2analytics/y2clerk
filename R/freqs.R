@@ -81,7 +81,10 @@ freqs <- function(
       )
     }
     by_vars <- names(by_sel)
-    dataset <- dplyr::group_by(dataset, dplyr::across(tidyselect::all_of(by_vars)))
+    dataset <- dplyr::group_by(
+      dataset,
+      dplyr::across(tidyselect::all_of(by_vars))
+    )
   }
 
   # Create logical for if there are weights
