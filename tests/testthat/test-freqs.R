@@ -58,6 +58,11 @@ test_that("integer position selects correct column", {
   expect_equal(unique(result$variable), "gear")
 })
 
+test_that("named argument (alias = col) resolves to actual column name", {
+  result <- freqs(mtcars, flarb = hp)
+  expect_equal(unique(result$variable), "hp")
+})
+
 
 test_that("weight column excluded even when selected via everything()", {
   df <- data.frame(x = 1:3, wt = c(0.9, 1, 1.1))
