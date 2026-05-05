@@ -31,8 +31,8 @@
 #' freqs(df, a, b, wt = weights)
 #' freq(df, a:b)
 #' freq(df, starts_with('a'), wt = weights)
-#' freq(df, stat = 'mean', nas = FALSE)
-#' freq(df, stat = 'mean', nas = FALSE, wt = weights)
+#' freq(df, nas = FALSE)
+#' freq(df, where(is.numeric), stat = 'mean', nas = FALSE, wt = weights)
 #' df |>
 #'   dplyr::group_by(a) |>
 #'   freqs(b, nas = FALSE, wt = weights)
