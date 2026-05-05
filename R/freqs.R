@@ -241,10 +241,11 @@ freqs_original <- function(
     # Nothing passed: select all columns (minus weight, minus group vars)
     col_names <- column_names(dataset, wt = !!weight)
   } else {
-    # tidyselect resolution against the dataset column names
-    col_names <- names(
-      tidyselect::eval_select(rlang::expr(c(...)), data = dataset)
-    )
+    # tidyselect resolution against the dataset column names.
+    # Use column positions (not names) so named args like `flarb = hp`
+    # resolve to the actual column name ("hp"), not the alias ("flarb").
+    sel <- tidyselect::eval_select(rlang::expr(c(...)), data = dataset)
+    col_names <- colnames(dataset)[sel]
     # Exclude weight variable if it was inadvertently included
     if (!rlang::quo_is_null(weight)) {
       col_names <- setdiff(col_names, rlang::as_label(weight))
