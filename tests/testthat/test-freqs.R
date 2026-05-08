@@ -7,12 +7,14 @@ test_that("Not a dataframe error - vectors", {
   a <- c(1, 1, 2, 3, 1)
   expect_snapshot(error = TRUE, freqs(df, a))
 })
+
 test_that("Not a dataframe error - matrix", {
   column_a <- c(1, 1, 1, 1, 2, 2, 3)
   column_b <- c(0.5, 1.2, 0.8, 0.5, 0.2, 0.1, 1)
   table <- rbind(column_a, column_b)
   expect_snapshot(error = TRUE, freqs(table, column_a))
 })
+
 #variables
 test_that("Integer positions select columns (tidyselect behavior)", {
   # tidyselect supports integer positions; 10 selects the 10th column (gear)
@@ -191,7 +193,7 @@ test_that("nas - group", {
 ###Digits
 test_that("Digits", {
   df <- data.frame(
-    a = c(.1, .2, .3)
+    a = c(0.1, 0.2, 0.3)
   )
 
   dig1 <- freqs(df, a, digits = 1)

@@ -30,9 +30,9 @@
 #' freqs(df, a, b)
 #' freqs(df, a, b, wt = weights)
 #' freq(df, a:b)
-#' freq(df, starts_with('a'), wt = weights)
+#' freq(df, tidyselect::starts_with('a'), wt = weights)
 #' freq(df, nas = FALSE)
-#' freq(df, where(is.numeric), stat = 'mean', nas = FALSE, wt = weights)
+#' freq(df, tidyselect::where(is.numeric), stat = 'mean', nas = FALSE, wt = weights)
 #' df |>
 #'   dplyr::group_by(a) |>
 #'   freqs(b, nas = FALSE, wt = weights)
@@ -128,7 +128,7 @@ freqs <- function(
   weight_exists <- !rlang::quo_is_null(weight_quo)
 
   if (weight_exists) {
-    numeric_names <- dataset |> dplyr::select(where(is.numeric)) |> colnames()
+    numeric_names <- dataset |> dplyr::select(tidyselect::where(is.numeric)) |> colnames()
     check_col(
       "wt",
       rlang::as_label(weight_quo),
@@ -138,14 +138,14 @@ freqs <- function(
     )
   }
 
-  if (unweighted_ns == TRUE & weight_exists == FALSE) {
+  if (unweighted_ns == TRUE && weight_exists == FALSE) {
     cli::cli_abort(
       c(
         "{.arg unweighted_ns} is {.val TRUE} but no weight variable was provided.",
         "i" = "Supply a weighting column via {.arg wt}, or set {.code unweighted_ns = FALSE}."
       )
     )
-  } else if (unweighted_ns == TRUE & weight_exists == TRUE) {
+  } else if (unweighted_ns == TRUE && weight_exists == TRUE) {
     frequencies <- freqs_wuw(
       dataset,
       ...,
@@ -296,7 +296,7 @@ freqs_original <- function(
     # Nothing passed: select all columns (minus weight, minus group vars)
     col_names <- column_names(dataset, wt = !!weight)
   } else {
-    # tidyselect resolution — catch "column doesn't exist" and rethrow cleanly
+    # tidyselect resolution - catch "column doesn't exist" and rethrow cleanly
     col_names <- tryCatch(
       colnames(dataset)[tidyselect::eval_select(
         rlang::expr(c(...)),
@@ -489,11 +489,11 @@ validate_inputs <- function(
     violations[["not_numeric"]] <- cli::format_inline(
       "{.var {col_name}} has class {.cls {check_class}}"
     )
-    # If non-numeric, remaining checks are meaningless — return early.
+    # If non-numeric, remaining checks are meaningless - return early.
     return(violations)
   }
 
-  # 2) value labels present — numeric summary would be misleading
+  # 2) value labels present - numeric summary would be misleading
   val_labs <- dataset |>
     dplyr::ungroup() |>
     dplyr::pull(!!variable) |>
@@ -522,7 +522,7 @@ validate_inputs <- function(
         "{.var {col_name}}: {.arg percentile} must be between {.val 0} and {.val 100}; you supplied {.val {percentile}}"
       )
     }
-    # 3c) subtle scale gotcha — inform immediately (not an error)
+    # 3c) subtle scale gotcha - inform immediately (not an error)
     if (percentile < 1) {
       cli::cli_inform(c(
         "i" = "{.arg percentile} uses a 0-100 scale, not 0-1.",
@@ -531,7 +531,7 @@ validate_inputs <- function(
     }
   }
 
-  # 3d) percentile supplied but ignored — inform immediately (not an error)
+  # 3d) percentile supplied but ignored - inform immediately (not an error)
   if (!(stat %in% c('quantile', 'summary')) && !is.null(percentile)) {
     cli::cli_inform(c(
       "i" = "{.arg percentile} only affects output when {.code stat = 'quantile'}.",
@@ -597,7 +597,7 @@ validate_inputs_all <- function(
       hint = "Convert the variable to numeric first with {.code as.numeric()}, or use {.code stat = 'percent'}."
     ),
     has_labels = list(
-      label = "Value labels detected in {n_vars} variable{?s} — numeric summaries may be misleading:",
+      label = "Value labels detected in {n_vars} variable{?s} - numeric summaries may be misleading:",
       hint = "Strip labels with {.fn labelled::remove_labels}, {.fn haven::as_factor}, or use {.code stat = 'percent'}."
     ),
     has_nas = list(
@@ -609,7 +609,7 @@ validate_inputs_all <- function(
       hint = "Add {.code percentile = <value>} where value is between 0 and 100."
     ),
     percentile_range = list(
-      label = "{.arg percentile} = {.val {percentile}} is out of range — must be between 0 and 100:",
+      label = "{.arg percentile} = {.val {percentile}} is out of range - must be between 0 and 100:",
       hint = NULL
     )
   )
@@ -987,7 +987,7 @@ freq_var <- function(
 }
 
 # Returns a character vector of similar column names using fuzzy string distance.
-# keywords: optional regex pattern (e.g. "wt|weight") — any col whose name
+# keywords: optional regex pattern (e.g. "wt|weight") - any col whose name
 #   matches is included as a hint even if it's outside the fuzzy threshold.
 # Returns character(0) when nothing close enough is found.
 col_hint <- function(input_name, col_names, keywords = NULL) {

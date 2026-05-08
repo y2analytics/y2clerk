@@ -20,6 +20,8 @@ Description: Frequencies functions to speed up our workflow, freeing up time to 
 License: file LICENSE
 URL: https://github.com/y2analytics/y2clerk, https://y2analytics.github.io/y2clerk/
 BugReports: https://github.com/y2analytics/y2clerk/issues
+Depends:
+  R (>= 4.1.0)
 Imports:
     data.table,
     dplyr (>= 1.0.0),

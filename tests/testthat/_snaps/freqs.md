@@ -157,7 +157,7 @@
       freqs(dplyr::select(responses, q4), stat = "mean")
     Condition
       Error in `freqs()`:
-      ! Value labels detected in 1 variable — numeric summaries may be misleading:
+      ! Value labels detected in 1 variable - numeric summaries may be misleading:
       * `q4` has value labels: "Less than a year", "1-2 years", "3-4 years", "5-10 years", "10-20 years", "20-50 years", "50-100 years", and "More than 100 years"
       i Strip labels with `labelled::remove_labels()`, `haven::as_factor()`, or use `stat = 'percent'`.
 
@@ -167,7 +167,7 @@
       freqs(dplyr::select(responses, q4), stat = "quantile")
     Condition
       Error in `freqs()`:
-      ! Value labels detected in 1 variable — numeric summaries may be misleading:
+      ! Value labels detected in 1 variable - numeric summaries may be misleading:
       * `q4` has value labels: "Less than a year", "1-2 years", "3-4 years", "5-10 years", "10-20 years", "20-50 years", "50-100 years", and "More than 100 years"
       i Strip labels with `labelled::remove_labels()`, `haven::as_factor()`, or use `stat = 'percent'`.
 
@@ -186,7 +186,7 @@
       freqs(responses, q4, stat = "mean", nas = FALSE)
     Condition
       Error in `freqs()`:
-      ! Value labels detected in 1 variable — numeric summaries may be misleading:
+      ! Value labels detected in 1 variable - numeric summaries may be misleading:
       * `q4` has value labels: "Less than a year", "1-2 years", "3-4 years", "5-10 years", "10-20 years", "20-50 years", "50-100 years", and "More than 100 years"
       i Strip labels with `labelled::remove_labels()`, `haven::as_factor()`, or use `stat = 'percent'`.
 
