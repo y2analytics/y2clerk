@@ -92,7 +92,10 @@ freqs <- function(
           character(0)
         }
         cli::cli_abort(
-          c("{.arg .by} column {.var {col_match}} not found in {.arg dataset}.", hint_bullet),
+          c(
+            "{.arg .by} column {.var {col_match}} not found in {.arg dataset}.",
+            hint_bullet
+          ),
           call = freqs_call
         )
       } else {
@@ -126,7 +129,13 @@ freqs <- function(
 
   if (weight_exists) {
     numeric_names <- dataset |> dplyr::select(where(is.numeric)) |> colnames()
-    check_col("wt", rlang::as_label(weight_quo), dataset, hint_cols = numeric_names, keywords = "wt|weight")
+    check_col(
+      "wt",
+      rlang::as_label(weight_quo),
+      dataset,
+      hint_cols = numeric_names,
+      keywords = "wt|weight"
+    )
   }
 
   if (unweighted_ns == TRUE & weight_exists == FALSE) {
@@ -289,7 +298,10 @@ freqs_original <- function(
   } else {
     # tidyselect resolution — catch "column doesn't exist" and rethrow cleanly
     col_names <- tryCatch(
-      colnames(dataset)[tidyselect::eval_select(rlang::expr(c(...)), data = dataset)],
+      colnames(dataset)[tidyselect::eval_select(
+        rlang::expr(c(...)),
+        data = dataset
+      )],
       error = function(e) {
         msg <- conditionMessage(e)
         body <- if (grepl("doesn't exist", msg, fixed = TRUE)) {
@@ -558,16 +570,17 @@ validate_inputs_all <- function(
 ) {
   all_violations <- purrr::map(
     col_names,
-    \(col_name) validate_inputs(
-      dataset,
-      variable = rlang::sym(col_name),
-      stat = stat,
-      percentile = percentile,
-      nas = nas,
-      wt = wt,
-      prompt = prompt,
-      digits = digits
-    )
+    \(col_name)
+      validate_inputs(
+        dataset,
+        variable = rlang::sym(col_name),
+        stat = stat,
+        percentile = percentile,
+        nas = nas,
+        wt = wt,
+        prompt = prompt,
+        digits = digits
+      )
   ) |>
     purrr::set_names(col_names) |>
     purrr::compact()
@@ -581,23 +594,23 @@ validate_inputs_all <- function(
   violation_specs <- list(
     not_numeric = list(
       label = "Can't compute {.val {stat}} for {n_vars} non-numeric variable{?s}:",
-      hint  = "Convert the variable to numeric first with {.code as.numeric()}, or use {.code stat = 'percent'}."
+      hint = "Convert the variable to numeric first with {.code as.numeric()}, or use {.code stat = 'percent'}."
     ),
     has_labels = list(
       label = "Value labels detected in {n_vars} variable{?s} — numeric summaries may be misleading:",
-      hint  = "Strip labels with {.fn labelled::remove_labels}, {.fn haven::as_factor}, or use {.code stat = 'percent'}."
+      hint = "Strip labels with {.fn labelled::remove_labels}, {.fn haven::as_factor}, or use {.code stat = 'percent'}."
     ),
     has_nas = list(
       label = "NAs present in {n_vars} variable{?s}:",
-      hint  = "Exclude NAs from the {.val {stat}} calculation with {.code nas = FALSE}."
+      hint = "Exclude NAs from the {.val {stat}} calculation with {.code nas = FALSE}."
     ),
     no_percentile = list(
       label = "{.arg percentile} is required when {.code stat = 'quantile'} but was not supplied ({n_vars} variable{?s} affected):",
-      hint  = "Add {.code percentile = <value>} where value is between 0 and 100."
+      hint = "Add {.code percentile = <value>} where value is between 0 and 100."
     ),
     percentile_range = list(
       label = "{.arg percentile} = {.val {percentile}} is out of range — must be between 0 and 100:",
-      hint  = NULL
+      hint = NULL
     )
   )
 
@@ -985,7 +998,8 @@ col_hint <- function(input_name, col_names, keywords = NULL) {
 
   # Allow edits up to ~35% of the typed name length.
   # For short names (<= 3 chars) cap at 1 to avoid spurious matches.
-  threshold <- if (nchar(input_name) <= 3L) 1L else max(2L, floor(nchar(input_name) * 0.35))
+  threshold <- if (nchar(input_name) <= 3L) 1L else
+    max(2L, floor(nchar(input_name) * 0.35))
   fuzzy_hits <- col_names[distances <= threshold]
 
   if (length(fuzzy_hits) > 0L) {
@@ -1008,7 +1022,14 @@ col_hint <- function(input_name, col_names, keywords = NULL) {
 # hint_cols: the candidate column names to search for suggestions (defaults
 #   to all columns; pass a filtered set, e.g. numeric-only, for wt).
 # keywords: forwarded to col_hint for keyword-based hint matches.
-check_col <- function(arg_label, col_name, dataset, hint_cols = colnames(dataset), keywords = NULL, call = rlang::caller_env()) {
+check_col <- function(
+  arg_label,
+  col_name,
+  dataset,
+  hint_cols = colnames(dataset),
+  keywords = NULL,
+  call = rlang::caller_env()
+) {
   if (col_name %in% colnames(dataset)) return(invisible(NULL))
 
   hints <- col_hint(col_name, hint_cols, keywords = keywords)

@@ -4,7 +4,7 @@
 #dataframes
 test_that("Not a dataframe error - vectors", {
   df <- c('This', 'is', 'not', 'a', 'dataframe')
-  a = c(1, 1, 2, 3, 1)
+  a <- c(1, 1, 2, 3, 1)
   expect_snapshot(error = TRUE, freqs(df, a))
 })
 test_that("Not a dataframe error - matrix", {
@@ -71,29 +71,27 @@ test_that("weight column excluded even when selected via everything()", {
 })
 
 
-test_that(".by works",{
-result <- freqs(penguins, species, .by = island)
+test_that(".by works", {
+  result <- freqs(penguins, species, .by = island)
 
   expect_s3_class(result, 'freq_y2')
   expect_false(inherits(result, 'grouped_df'))
-}
-)
+})
 
 test_that(".by errors when grouping variale is not present in the data", {
   expect_snapshot(
     error = TRUE,
-    penguins |> 
+    penguins |>
       freq(species, .by = ideology)
   )
 })
 
-test_that(
-  ".by errors when data is already grouped", {
+test_that(".by errors when data is already grouped", {
   expect_snapshot(
     error = TRUE,
     penguins |> group_by(sex) |> freq(species, .by = island)
-  )}
-)
+  )
+})
 
 
 # -------------------------------------------------------------------------
@@ -141,7 +139,7 @@ test_that("Weights", {
   )
 
   freqs_weighted <- freqs(df, a, wt = weights)
-  expect_equal(freqs_weighted$n[1], .9)
+  expect_equal(freqs_weighted$n[1], 0.9)
 })
 
 
@@ -184,8 +182,8 @@ test_that("nas - group", {
 
   expect_equal(nrow(yes_nas), 7)
   expect_equal(nrow(no_nas), 6)
-  expect_equal(is.factor(group_factors$group_var), TRUE)
-  expect_equal(is.factor(no_nas$group_var), FALSE)
+  expect_true(is.factor(group_factors$group_var))
+  expect_false(is.factor(no_nas$group_var))
   expect_equal(names(yes_nas)[1], 'group_var')
 })
 
@@ -200,9 +198,9 @@ test_that("Digits", {
   dig2 <- freqs(df, a)
   dig3 <- freqs(df, a, digits = 3)
 
-  expect_equal(dig1$result[1], .3)
-  expect_equal(dig2$result[1], .33)
-  expect_equal(dig3$result[1], .333)
+  expect_equal(dig1$result[1], 0.3)
+  expect_equal(dig2$result[1], 0.33)
+  expect_equal(dig3$result[1], 0.333)
 })
 
 
@@ -213,7 +211,7 @@ test_that("character vars", {
     a = c('Character', '1', 'test')
   )
   frequencies <- freqs(df, a)
-  expect_equal(is.data.frame(frequencies), TRUE)
+  expect_true(is.data.frame(frequencies))
 })
 #numeric column freq
 test_that("numeric vars", {
@@ -221,7 +219,7 @@ test_that("numeric vars", {
     a = c(1, 2, 3)
   )
   frequencies <- freqs(df, a)
-  expect_equal(is.data.frame(frequencies), TRUE)
+  expect_true(is.data.frame(frequencies))
 })
 #factored/labelled column freq
 test_that("factor vars with missing values", {
@@ -1002,5 +1000,5 @@ test_that("stat = 'mean' works when GROUPED", {
     dplyr::group_by(q2) |>
     freqs(q1, stat = "mean", nas = FALSE, wt = q0)
 
-  expect_equal(length(test$group_var), 4)
+  expect_length(test$group_var, 4)
 })
