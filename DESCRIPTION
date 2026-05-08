@@ -31,7 +31,7 @@ Imports:
     magrittr,
     officer,
     purrr,
-    rlang,
+    rlang (>= 1.2.0),
     stringr,
     survey,
     tibble,

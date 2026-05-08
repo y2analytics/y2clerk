@@ -67,9 +67,42 @@ freqs <- function(
 ) {
   # options(warn = -1)
   stat <- rlang::arg_match(stat)
+  rlang::check_data_frame(dataset)
+  rlang::check_bool(nas)
+  rlang::check_bool(prompt)
+  rlang::check_bool(nas_group)
+  rlang::check_bool(factor_group)
+  rlang::check_bool(unweighted_ns)
+  rlang::check_bool(show_missing_levels)
+  rlang::check_number_whole(digits, min = 0)
 
   # .by grouping: resolve tidy-selection and apply as grouping
-  by_sel <- tidyselect::eval_select(rlang::enquo(.by), data = dataset)
+  freqs_call <- rlang::current_env()
+  by_quo <- rlang::enquo(.by)
+  by_sel <- tryCatch(
+    tidyselect::eval_select(by_quo, data = dataset),
+    error = function(e) {
+      msg <- conditionMessage(e)
+      if (grepl("doesn't exist", msg, fixed = TRUE)) {
+        col_match <- gsub("`", "", regmatches(msg, regexpr("`[^`]+`", msg)))
+        hints <- col_hint(col_match, colnames(dataset))
+        hint_bullet <- if (length(hints) > 0L) {
+          c("i" = cli::format_inline("Did you mean: {.val {hints}}?"))
+        } else {
+          character(0)
+        }
+        cli::cli_abort(
+          c("{.arg .by} column {.var {col_match}} not found in {.arg dataset}.", hint_bullet),
+          call = freqs_call
+        )
+      } else {
+        cli::cli_abort(
+          c("Invalid {.arg .by} selection.", "x" = msg),
+          call = freqs_call
+        )
+      }
+    }
+  )
   if (length(by_sel) > 0) {
     if (dplyr::is.grouped_df(dataset)) {
       cli::cli_abort(
@@ -88,11 +121,21 @@ freqs <- function(
   }
 
   # Create logical for if there are weights
-  weight_null <- dplyr::enquo(wt)
-  weight_exists <- !rlang::quo_is_null(weight_null)
+  weight_quo <- dplyr::enquo(wt)
+  weight_exists <- !rlang::quo_is_null(weight_quo)
+
+  if (weight_exists) {
+    numeric_names <- dataset |> dplyr::select(where(is.numeric)) |> colnames()
+    check_col("wt", rlang::as_label(weight_quo), dataset, hint_cols = numeric_names, keywords = "wt|weight")
+  }
 
   if (unweighted_ns == TRUE & weight_exists == FALSE) {
-    stop("If you use unweighted_ns = TRUE, you must specify a wt variable")
+    cli::cli_abort(
+      c(
+        "{.arg unweighted_ns} is {.val TRUE} but no weight variable was provided.",
+        "i" = "Supply a weighting column via {.arg wt}, or set {.code unweighted_ns = FALSE}."
+      )
+    )
   } else if (unweighted_ns == TRUE & weight_exists == TRUE) {
     frequencies <- freqs_wuw(
       dataset,
@@ -237,21 +280,51 @@ freqs_original <- function(
   }
   weight <- dplyr::enquo(wt)
 
+  # Capture the user-facing call (freqs/freq) for clean error attribution.
+  user_call <- rlang::caller_env()
+
   if (...length() == 0L) {
     # Nothing passed: select all columns (minus weight, minus group vars)
     col_names <- column_names(dataset, wt = !!weight)
   } else {
-    # tidyselect resolution against the dataset column names.
-    # Use column positions (not names) so named args like `flarb = hp`
-    # resolve to the actual column name ("hp"), not the alias ("flarb").
-    sel <- tidyselect::eval_select(rlang::expr(c(...)), data = dataset)
-    col_names <- colnames(dataset)[sel]
+    # tidyselect resolution — catch "column doesn't exist" and rethrow cleanly
+    col_names <- tryCatch(
+      colnames(dataset)[tidyselect::eval_select(rlang::expr(c(...)), data = dataset)],
+      error = function(e) {
+        msg <- conditionMessage(e)
+        body <- if (grepl("doesn't exist", msg, fixed = TRUE)) {
+          lines <- strsplit(msg, "\n", fixed = TRUE)[[1]]
+          found <- trimws(lines[grepl("doesn't exist", lines, fixed = TRUE)])
+          purrr::set_names(found, rep("x", length(found)))
+        } else {
+          c("x" = msg)
+        }
+        cli::cli_abort(
+          c("One or more columns not found in {.arg dataset}.", body),
+          call = user_call
+        )
+      }
+    )
     # Exclude weight variable if it was inadvertently included
     if (!rlang::quo_is_null(weight)) {
       col_names <- setdiff(col_names, rlang::as_label(weight))
     }
     # Exclude group vars (mirrors column_names() behaviour for empty ...)
     col_names <- setdiff(col_names, dplyr::group_vars(dataset))
+  }
+
+  if (stat != 'percent') {
+    validate_inputs_all(
+      dataset,
+      col_names,
+      stat = stat,
+      percentile = percentile,
+      nas = nas,
+      wt = weight,
+      prompt = prompt,
+      digits = digits,
+      call = user_call
+    )
   }
 
   frequencies <- purrr::map_dfr(
@@ -372,6 +445,11 @@ calculate_result_for_cont_var <- function(
   return(out_df)
 }
 
+# Checks a single column and returns a named list of violation strings, or
+# NULL if the column is clean. Violations are keyed by type so that
+# validate_inputs_all() can group related problems across columns.
+# Inform-only conditions (percentile scale, ignored percentile) are emitted
+# immediately since they are not errors and need no aggregation.
 validate_inputs <- function(
   dataset,
   variable,
@@ -382,74 +460,171 @@ validate_inputs <- function(
   prompt,
   digits
 ) {
-  # "failing fast"
+  col_name <- rlang::as_label(variable)
 
-  # 0) validate percentile rank
-  if (stat == 'quantile' & is.null(percentile)) {
-    stop("No input given for percentile (percentile rank)")
-  }
+  violations <- list()
 
-  if (stat == 'quantile' & !is.null(percentile)) {
-    if (percentile < 0 | percentile > 100) {
-      stop('Percentile rank should be between 0 and 100, inclusive')
-    }
-  }
-
-  if (stat == 'quantile' & !is.null(percentile)) {
-    if (percentile < 1) {
-      rlang::inform(
-        'Remember that percentile ranges between 0 and 100. percentile = 0.5 returns the bottom half percentile, whereas percentile = 50 returns the median.'
-      )
-    }
-  }
-
-  # 1) if there are NAs in the data, you should use nas = FALSE
-  if (nas) {
-    count_nas <- dataset |>
-      dplyr::filter(is.na(!!variable)) |>
-      base::nrow()
-    if (count_nas != 0) {
-      stop('NAs present in variable(s); to proceed, set nas = F')
-    }
-  }
-
-  # 2) can't take mean of categorical variable
+  # 1) can't take mean/quantile of a categorical variable
   check_class <- dataset |>
     dplyr::ungroup() |>
     dplyr::select(!!variable) |>
     labelled::remove_labels() |>
     dplyr::pull() |>
-    base::class()
+    base::class() |>
+    stringr::str_c(collapse = " ")
 
-  # make length = 1: collapse c("ordered", "factor") ==> c("ordered factor") as necessary
-  check_class <- stringr::str_c(check_class, collapse = " ")
-
-  # if not one of these types, stop
   if (!(check_class %in% c("numeric", "integer"))) {
-    stop("Can't take mean of non-numeric variable")
-  }
-
-  # 3) stop if value labels exist
-  check_labels <- dataset |>
-    dplyr::ungroup() |>
-    dplyr::select(!!variable) |>
-    labelled::val_labels() |>
-    tibble::deframe() |>
-    base::is.null()
-  if (!check_labels) {
-    stop(
-      "Value labels exist; consider converting values to labels or using stat = 'percent'"
+    violations[["not_numeric"]] <- cli::format_inline(
+      "{.var {col_name}} has class {.cls {check_class}}"
     )
+    # If non-numeric, remaining checks are meaningless — return early.
+    return(violations)
   }
 
-  # 4) give reminder if percentile input given when stat is not set to 'quantile'
-  if (!(stat %in% c('quantile', 'summary'))) {
-    if (!is.null(percentile)) {
-      rlang::inform(
-        "Remember that the percentile rank argument impacts output only when stat = 'quantile'"
+  # 2) value labels present — numeric summary would be misleading
+  val_labs <- dataset |>
+    dplyr::ungroup() |>
+    dplyr::pull(!!variable) |>
+    labelled::val_labels()
+
+  if (!is.null(val_labs)) {
+    lab_names <- names(val_labs)
+    violations[["has_labels"]] <- cli::format_inline(
+      "{.var {col_name}} has value labels: {.val {lab_names}}"
+    )
+    return(violations)
+  }
+
+  # 3a) percentile required when stat = 'quantile'
+  if (stat == 'quantile' && is.null(percentile)) {
+    violations[["no_percentile"]] <- cli::format_inline(
+      "{.var {col_name}}: {.arg percentile} must be supplied when {.code stat = 'quantile'}"
+    )
+    return(violations)
+  }
+
+  # 3b) percentile out of range
+  if (stat == 'quantile' && !is.null(percentile)) {
+    if (percentile < 0 || percentile > 100) {
+      violations[["percentile_range"]] <- cli::format_inline(
+        "{.var {col_name}}: {.arg percentile} must be between {.val 0} and {.val 100}; you supplied {.val {percentile}}"
+      )
+    }
+    # 3c) subtle scale gotcha — inform immediately (not an error)
+    if (percentile < 1) {
+      cli::cli_inform(c(
+        "i" = "{.arg percentile} uses a 0-100 scale, not 0-1.",
+        "i" = "{.code percentile = {percentile}} returns the bottom {percentile}% percentile. Did you mean {.code percentile = {percentile * 100}}?"
+      ))
+    }
+  }
+
+  # 3d) percentile supplied but ignored — inform immediately (not an error)
+  if (!(stat %in% c('quantile', 'summary')) && !is.null(percentile)) {
+    cli::cli_inform(c(
+      "i" = "{.arg percentile} only affects output when {.code stat = 'quantile'}.",
+      "i" = "Current {.arg stat} is {.val {stat}}, so {.arg percentile} ({.val {percentile}}) is ignored."
+    ))
+  }
+
+  # 4) NAs present
+  if (nas) {
+    count_nas <- dataset |>
+      dplyr::filter(is.na(!!variable)) |>
+      base::nrow()
+    if (count_nas > 0L) {
+      violations[["has_nas"]] <- cli::format_inline(
+        "{.var {col_name}} contains {count_nas} NA value{?s}"
       )
     }
   }
+
+  if (length(violations) == 0L) NULL else violations
+}
+
+# Runs validate_inputs() over every column, collects all violations, then
+# emits a single combined cli_abort() grouping related problems together.
+# This ensures the user sees every problem at once rather than one at a time.
+validate_inputs_all <- function(
+  dataset,
+  col_names,
+  stat,
+  percentile,
+  nas,
+  wt,
+  prompt,
+  digits,
+  call = rlang::caller_env()
+) {
+  all_violations <- purrr::map(
+    col_names,
+    \(col_name) validate_inputs(
+      dataset,
+      variable = rlang::sym(col_name),
+      stat = stat,
+      percentile = percentile,
+      nas = nas,
+      wt = wt,
+      prompt = prompt,
+      digits = digits
+    )
+  ) |>
+    purrr::set_names(col_names) |>
+    purrr::compact()
+
+  if (length(all_violations) == 0L) {
+    return(invisible(NULL))
+  }
+
+  # Each entry: label (cli template, can reference n_vars/stat/percentile) +
+  # optional hint shown after the per-column bullets for that violation type.
+  violation_specs <- list(
+    not_numeric = list(
+      label = "Can't compute {.val {stat}} for {n_vars} non-numeric variable{?s}:",
+      hint  = "Convert the variable to numeric first with {.code as.numeric()}, or use {.code stat = 'percent'}."
+    ),
+    has_labels = list(
+      label = "Value labels detected in {n_vars} variable{?s} — numeric summaries may be misleading:",
+      hint  = "Strip labels with {.fn labelled::remove_labels}, {.fn haven::as_factor}, or use {.code stat = 'percent'}."
+    ),
+    has_nas = list(
+      label = "NAs present in {n_vars} variable{?s}:",
+      hint  = "Exclude NAs from the {.val {stat}} calculation with {.code nas = FALSE}."
+    ),
+    no_percentile = list(
+      label = "{.arg percentile} is required when {.code stat = 'quantile'} but was not supplied ({n_vars} variable{?s} affected):",
+      hint  = "Add {.code percentile = <value>} where value is between 0 and 100."
+    ),
+    percentile_range = list(
+      label = "{.arg percentile} = {.val {percentile}} is out of range — must be between 0 and 100:",
+      hint  = NULL
+    )
+  )
+
+  bullets <- purrr::imap(
+    violation_specs,
+    \(spec, type) {
+      cols_with_type <- purrr::keep(all_violations, \(v) type %in% names(v))
+      if (length(cols_with_type) == 0L) return(NULL)
+
+      n_vars <- length(cols_with_type)
+
+      detail_bullets <- purrr::map_chr(cols_with_type, \(v) v[[type]]) |>
+        purrr::set_names(rep("*", n_vars))
+
+      hint_bullet <- if (!is.null(spec$hint)) {
+        c("i" = cli::format_inline(spec$hint))
+      } else {
+        character(0)
+      }
+
+      c("!" = cli::format_inline(spec$label), detail_bullets, hint_bullet)
+    }
+  ) |>
+    purrr::compact() |>
+    purrr::reduce(c)
+
+  cli::cli_abort(bullets, call = call)
 }
 
 get_output_for_cont_var <- function(
@@ -462,9 +637,6 @@ get_output_for_cont_var <- function(
   prompt,
   digits
 ) {
-  # validation & checks
-  validate_inputs(dataset, variable, stat, percentile, nas, wt, prompt, digits)
-
   # get mean or quantile
   out_df <- calculate_result_for_cont_var(
     dataset,
@@ -590,11 +762,14 @@ get_summary_output_for_cont_var <- function(
   prompt,
   digits
 ) {
-  # add redundant reminder because  subsequent code overrides user inputs for stat & percentile
-  # [for other cases, this reminder is also present in validate_inputs()]
+  # Remind user that percentile is ignored for stat = 'summary' (subsequent
+  # code hard-codes the six summary quantiles).
   if (!is.null(percentile)) {
-    rlang::inform(
-      "Remember that the percentile rank argument impacts output only when stat = 'quantile'"
+    cli::cli_inform(
+      c(
+        "i" = "{.arg percentile} only affects output when {.code stat = 'quantile'}.",
+        "i" = "Current {.arg stat} is {.val summary}, so {.arg percentile} ({.val {percentile}}) is ignored."
+      )
     )
   }
 
@@ -761,20 +936,11 @@ freq_var <- function(
   prompt = FALSE,
   digits = 2,
   show_missing_levels = show_missing_levels,
-  nas_group
+  nas_group,
+  call = rlang::caller_env()
 ) {
   variable <- rlang::sym(col_name)
   wt <- dplyr::enquo(wt)
-
-  # check stat argument input
-  if (
-    !(stat %in%
-      c('percent', 'mean', 'quantile', 'summary', 'min', 'max', 'median'))
-  ) {
-    stop(
-      '"stat" argument must receive a value from c("percent", "mean", "quantile", "summary", "min", "median", "max")'
-    )
-  }
 
   if (stat == 'percent') {
     base <- ns(dataset, variable, wt, prompt, show_missing_levels, nas_group)
@@ -805,6 +971,60 @@ freq_var <- function(
   }
 
   return(freq_result)
+}
+
+# Returns a character vector of similar column names using fuzzy string distance.
+# keywords: optional regex pattern (e.g. "wt|weight") — any col whose name
+#   matches is included as a hint even if it's outside the fuzzy threshold.
+# Returns character(0) when nothing close enough is found.
+col_hint <- function(input_name, col_names, keywords = NULL) {
+  if (length(col_names) == 0L) return(character(0))
+
+  distances <- utils::adist(input_name, col_names, ignore.case = TRUE)[1, ]
+  names(distances) <- col_names
+
+  # Allow edits up to ~35% of the typed name length.
+  # For short names (<= 3 chars) cap at 1 to avoid spurious matches.
+  threshold <- if (nchar(input_name) <= 3L) 1L else max(2L, floor(nchar(input_name) * 0.35))
+  fuzzy_hits <- col_names[distances <= threshold]
+
+  if (length(fuzzy_hits) > 0L) {
+    fuzzy_hits <- fuzzy_hits[order(distances[fuzzy_hits], -nchar(fuzzy_hits))]
+  }
+
+  keyword_only <- if (!is.null(keywords)) {
+    kw_hits <- col_names[grepl(keywords, col_names, ignore.case = TRUE)]
+    kw_only <- setdiff(kw_hits, fuzzy_hits)
+    if (length(kw_only) > 0L) kw_only[order(-nchar(kw_only))] else character(0)
+  } else {
+    character(0)
+  }
+
+  c(fuzzy_hits, keyword_only)
+}
+
+# Checks that col_name exists in dataset, aborting with a hint if not.
+# arg_label: the argument name shown to the user (e.g. "wt", ".by").
+# hint_cols: the candidate column names to search for suggestions (defaults
+#   to all columns; pass a filtered set, e.g. numeric-only, for wt).
+# keywords: forwarded to col_hint for keyword-based hint matches.
+check_col <- function(arg_label, col_name, dataset, hint_cols = colnames(dataset), keywords = NULL, call = rlang::caller_env()) {
+  if (col_name %in% colnames(dataset)) return(invisible(NULL))
+
+  hints <- col_hint(col_name, hint_cols, keywords = keywords)
+  hint_bullet <- if (length(hints) > 0L) {
+    c("i" = cli::format_inline("Did you mean: {.val {hints}}?"))
+  } else {
+    character(0)
+  }
+
+  cli::cli_abort(
+    c(
+      "{.arg {arg_label}} column {.var {col_name}} not found in {.arg dataset}.",
+      hint_bullet
+    ),
+    call = call
+  )
 }
 
 column_names <- function(dataset, wt) {

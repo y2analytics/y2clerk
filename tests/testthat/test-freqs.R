@@ -70,6 +70,32 @@ test_that("weight column excluded even when selected via everything()", {
   expect_false("wt" %in% unique(result$variable))
 })
 
+
+test_that(".by works",{
+result <- freqs(penguins, species, .by = island)
+
+  expect_s3_class(result, 'freq_y2')
+  expect_false(inherits(result, 'grouped_df'))
+}
+)
+
+test_that(".by errors when grouping variale is not present in the data", {
+  expect_snapshot(
+    error = TRUE,
+    penguins |> 
+      freq(species, .by = ideology)
+  )
+})
+
+test_that(
+  ".by errors when data is already grouped", {
+  expect_snapshot(
+    error = TRUE,
+    penguins |> group_by(sex) |> freq(species, .by = island)
+  )}
+)
+
+
 # -------------------------------------------------------------------------
 
 test_that("Incorrect nas argument", {
@@ -293,7 +319,7 @@ test_that("NAs not present, nas = F: n & result are correct", {
   )
 })
 
-test_that("NAs present, nas = T: throws error", {
+test_that("NAs present: throws error", {
   expect_snapshot(
     error = TRUE,
     responses |>
@@ -302,7 +328,7 @@ test_that("NAs present, nas = T: throws error", {
   )
 })
 
-test_that("NAs present, nas = F: n & result are correct", {
+test_that("NAs present, nas = FALSE: n & result are correct", {
   expect_equal(
     responses |>
       dplyr::select(q1) |>
@@ -792,6 +818,14 @@ test_that("character variable input: throws error", {
   )
 })
 
+test_that("invalid input: groups errors together", {
+  expect_snapshot(
+    error = TRUE,
+    responses |>
+      dplyr::select(q2, q3) |>
+      freqs(stat = 'quantile')
+  )
+})
 
 test_that("column with value labels input: throws error", {
   expect_snapshot(
