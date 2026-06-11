@@ -8,7 +8,7 @@
 #' @param append_to (default: label). The variable to which you wish to add (n = ...)
 #' @param by_group_var (default: FALSE). If FALSE, takes ns by row. If TRUE, takes group ns by group_var levels. Set to TRUE if making a stacked bar chart
 #' @param newline (default: FALSE). If FALSE, (n = ...) comes after a space " ". If TRUE, it comes after a hard return
-#' @importFrom data.table :=
+#' @importFrom rlang :=
 #' @examples
 #'
 #' # by_group_var = FALSE
