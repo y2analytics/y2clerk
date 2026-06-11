@@ -4,12 +4,12 @@
 \alias{stem}
 \title{Select columns by stem prefix followed by a numeric suffix}
 \usage{
-stem(stem, .separator = c("", "_", "r"), ignore.case = FALSE)
+stem(stem, separator = c("_", "r"), ignore.case = FALSE)
 }
 \arguments{
 \item{stem}{A string giving the variable stem to match.}
 
-\item{.separator}{A character vector of separator strings allowed between
+\item{separator}{A character vector of separator strings allowed between
 the stem and the numeric suffix. Defaults to `c("_", "r")`. Use `""`
 to allow no separator (bare digits); in that case the column name must
 end with the digits (e.g. `Q11`, `Q12`).}
@@ -40,6 +40,6 @@ df <- data.frame(
 dplyr::select(df, stem("Q1"))
 
 # Underscore only
-dplyr::select(df, stem("Q1", .separator = "_"))
+dplyr::select(df, stem("Q1", separator = "_"))
 
 }

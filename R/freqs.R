@@ -128,7 +128,9 @@ freqs <- function(
   weight_exists <- !rlang::quo_is_null(weight_quo)
 
   if (weight_exists) {
-    numeric_names <- dataset |> dplyr::select(tidyselect::where(is.numeric)) |> colnames()
+    numeric_names <- dataset |>
+      dplyr::select(tidyselect::where(is.numeric)) |>
+      colnames()
     check_col(
       "wt",
       rlang::as_label(weight_quo),
