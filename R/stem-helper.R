@@ -12,7 +12,7 @@
 #' This is intentional. If you need those columns as well, use a plain `tidyselect::starts_with()`.
 #' This function differs from `dplyr::select(tidyselect::starts_with('QuestionStem'), -ends_with('Text'))`
 #' in the fact that it does not select columns names who start with the question stem, contain other information, then end with a digit.
-#' 
+#'
 #' @param stem A string giving the variable stem to match.
 #' @param separator A character vector of separator strings allowed between
 #'   the stem and the numeric suffix. Defaults to `c("_", "r")`. Use `""`
@@ -73,11 +73,14 @@ stem <- function(stem, separator = c("_", "r"), ignore.case = FALSE) {
   rlang::try_fetch(
     tidyselect::matches(pattern, ignore.case = ignore.case),
     error = function(cnd) {
-      cli::cli_abort(c(
-        "{.fn stem} must be used within a *selecting* function.",
-        "i" = "See {.url https://tidyselect.r-lib.org/reference/faq-selection-context.html} for mroe details."
-      ), call = rlang::caller_env(),
-      parent = NA)
+      cli::cli_abort(
+        c(
+          "{.fn stem} must be used within a *selecting* function.",
+          "i" = "See {.url https://tidyselect.r-lib.org/reference/faq-selection-context.html} for mroe details."
+        ),
+        call = rlang::caller_env(),
+        parent = NA
+      )
     }
   )
 }

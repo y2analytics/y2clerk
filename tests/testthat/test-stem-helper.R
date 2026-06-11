@@ -85,8 +85,10 @@ test_that("stem() - no matches returns empty selection", {
 })
 
 test_that("stem() - separator must be a character vector", {
-  expect_snapshot(error = TRUE,
-    dplyr::select(df_stem, stem("Q1", separator = 3)))
+  expect_snapshot(
+    error = TRUE,
+    dplyr::select(df_stem, stem("Q1", separator = 3))
+  )
 })
 test_that("stem() - errors when stem is missing", {
   expect_snapshot(error = TRUE, dplyr::select(df_stem, stem(separator = 'a')))
@@ -95,9 +97,7 @@ test_that("stem() - errors when stem is missing", {
 test_that("stem() - stem errors correctly when not used in a selecting function", {
   expect_no_error(dplyr::select(df_stem, stem("Q1")))
   expect_no_error(freq(df_stem, stem("Q1")))
-  
   expect_snapshot(error = TRUE, stem("Q1", separator = 'a'))
-  
 })
 
 test_that("stem() - works inside dplyr::across", {
