@@ -5,6 +5,7 @@
 #' @param dataset A dataframe.
 #' @param ... <tidy-select> One or more unquoted expressions separated by commas. Variable names can be used as if they were positions in the data frame, so expressions like x:y can be used to select a range of variables. If nothing
 #' is specified, the function runs a frequency on every column in given dataset.
+#' @param .by <tidy-select> Variables to group by for this operation only. Cannot be used when the dataset is already a grouped data frame.
 #' @param stat Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').
 #' @param percentile Double, for use when stat = 'quantile.' Input should be a real number x such that 0 <= x <= 100. Stands for percentile rank, which is a quantile relative to a 100-point scale. (default:NULL)
 #' @param nas Boolean, whether or not to include NAs in the tabulation (default: TRUE).
@@ -14,7 +15,6 @@
 #' @param nas_group Boolean, whether or not to include NA values for the grouping variable in the tabulation (default: TRUE).
 #' @param factor_group Boolean, whether or not to convert the grouping variable to a factor and use its labels instead of its underlying numeric values (default: FALSE)
 #' @param unweighted_ns Boolean, whether the 'n' column in the freqs table should be Unweighted while results ARE weighted. This argument can only be used if a wt variable is used. If no weight variable is used, the 'n' column will always be unweighted (default: FALSE).
-#' @param .by <tidy-select> Variables to group by for this operation only. Cannot be used when the dataset is already a grouped data frame.
 #' @param show_missing_levels Boolean, whether to keep response levels with no data (default: TRUE)
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations.
