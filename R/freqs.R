@@ -67,7 +67,7 @@ freqs <- function(
 ) {
   # options(warn = -1)
   stat <- rlang::arg_match(stat)
-  rlang::check_data_frame(dataset)
+  check_data_frame2(dataset)
   rlang::check_bool(nas)
   rlang::check_bool(prompt)
   rlang::check_bool(nas_group)
@@ -572,7 +572,7 @@ validate_inputs_all <- function(
 ) {
   all_violations <- purrr::map(
     col_names,
-    \(col_name)
+    \(col_name) {
       validate_inputs(
         dataset,
         variable = rlang::sym(col_name),
@@ -583,6 +583,7 @@ validate_inputs_all <- function(
         prompt = prompt,
         digits = digits
       )
+    }
   ) |>
     purrr::set_names(col_names) |>
     purrr::compact()
@@ -620,7 +621,9 @@ validate_inputs_all <- function(
     violation_specs,
     \(spec, type) {
       cols_with_type <- purrr::keep(all_violations, \(v) type %in% names(v))
-      if (length(cols_with_type) == 0L) return(NULL)
+      if (length(cols_with_type) == 0L) {
+        return(NULL)
+      }
 
       n_vars <- length(cols_with_type)
 
@@ -993,15 +996,20 @@ freq_var <- function(
 #   matches is included as a hint even if it's outside the fuzzy threshold.
 # Returns character(0) when nothing close enough is found.
 col_hint <- function(input_name, col_names, keywords = NULL) {
-  if (length(col_names) == 0L) return(character(0))
+  if (length(col_names) == 0L) {
+    return(character(0))
+  }
 
   distances <- utils::adist(input_name, col_names, ignore.case = TRUE)[1, ]
   names(distances) <- col_names
 
   # Allow edits up to ~35% of the typed name length.
   # For short names (<= 3 chars) cap at 1 to avoid spurious matches.
-  threshold <- if (nchar(input_name) <= 3L) 1L else
+  threshold <- if (nchar(input_name) <= 3L) {
+    1L
+  } else {
     max(2L, floor(nchar(input_name) * 0.35))
+  }
   fuzzy_hits <- col_names[distances <= threshold]
 
   if (length(fuzzy_hits) > 0L) {
@@ -1032,7 +1040,9 @@ check_col <- function(
   keywords = NULL,
   call = rlang::caller_env()
 ) {
-  if (col_name %in% colnames(dataset)) return(invisible(NULL))
+  if (col_name %in% colnames(dataset)) {
+    return(invisible(NULL))
+  }
 
   hints <- col_hint(col_name, hint_cols, keywords = keywords)
   hint_bullet <- if (length(hints) > 0L) {
@@ -1246,4 +1256,46 @@ base_ns <- function(dataset, variable, weight) {
     dplyr::mutate(
       variable = dplyr::quo_name(variable)
     )
+}
+
+check_data_frame2 <- function(dataset) {
+  env <- rlang::caller_env()
+  caller_call <- rlang::caller_call()
+
+  tryCatch(
+    rlang::check_data_frame(dataset, call = env),
+    error = function(e) {
+      if (grepl("must be used within a", conditionMessage(e), fixed = TRUE)) {
+        cli::cli_abort(
+          c(
+            "x" = "dataset must not be NULL.",
+            "i" = "Did you forget to supply a dataset?",
+            make_missing_df_hint(caller_call)
+          ),
+          call = env
+        )
+      } else {
+        stop(e)
+      }
+    }
+  )
+}
+
+make_missing_df_hint <- function(caller_call) {
+  if (is.null(caller_call)) {
+    return(NULL)
+  }
+
+  hint_call <- as.call(c(
+    caller_call[[1]],
+    as.symbol("DATASET_NAME"),
+    as.list(caller_call[-1])
+  ))
+
+  hint_str <- paste(deparse(hint_call), collapse = " ")
+  if (nchar(hint_str) > 80L) {
+    return(NULL)
+  }
+
+  c("i" = paste0("Try: {.code ", hint_str, "}"))
 }
