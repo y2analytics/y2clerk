@@ -10,12 +10,29 @@ test_that("pivot_freqs works with Column names", {
 
 
 test_that("pivot_freqs works with Column names with two group vars", {
+  expect_snapshot(
+    forcats::gss_cat |>
+      dplyr::group_by(year) |>
+      freqs(race) |>
+      pivot_freqs()
+  )
+})
 
-expect_snapshot(forcats::gss_cat |>
-    dplyr::group_by(year) |>
-    freqs(race) |>
-    pivot_freqs()
-)
+
+test_that("pivot_freqs works on haven labelled data", {
+  expect_no_error(
+    forcats::gss_cat |>
+      mutate(rincome = to_haven_y2(rincome)) |>
+      freq(rincome, .by = marital) |>
+      pivot_freqs()
+  )
+
+  expect_no_error(
+    forcats::gss_cat |>
+      mutate(rincome = to_haven_y2(rincome)) |>
+      freq(marital, .by = rincome) |>
+      pivot_freqs()
+  )
 })
 
 ### Group_var levels
@@ -51,14 +68,14 @@ test_that("pivot_freqs can pivot on group_var", {
 test_that("pivot_freqs errors on blank label column", {
   expect_snapshot(
     error = TRUE,
-     forcats::gss_cat |>
+    forcats::gss_cat |>
       freqs(age, stat = 'mean', nas = FALSE) |>
       pivot_freqs()
   )
 })
 
 test_that("pivot_freqs errors on missing group_var", {
-  expect_error(
+  expect_snapshot(
     error = TRUE,
     forcats::gss_cat |>
       freqs(marital) |>
@@ -67,9 +84,44 @@ test_that("pivot_freqs errors on missing group_var", {
 })
 
 test_that("pivot_freqs errors on missing label or result column", {
-  expect_error(
+  expect_snapshot(
     error = TRUE,
     forcats::gss_cat |>
       pivot_freqs()
   )
 })
+
+### Multi-variable freqs -------------------------------------------------------
+
+test_that("pivot_freqs: colliding labels produces variable_label column names", {
+  result <- multi_collide_freqs() |> pivot_freqs()
+
+  expect_true(all(c("q_festivals_Yes", "q_festivals_No", "q_parades_Yes", "q_parades_No") %in% names(result)))
+  # bare label values must not leak through as column names
+  expect_false(any(c("Yes", "No") %in% names(result)))
+})
+
+test_that("pivot_freqs: colliding labels pivot group_var keeps variable as id column", {
+  result <- multi_collide_freqs() |> pivot_freqs(group_var)
+
+  expect_true("variable" %in% names(result))
+  expect_true("label" %in% names(result))
+  expect_false("group_var" %in% names(result))
+})
+
+test_that("pivot_freqs: unique labels uses label directly as column names", {
+  result <- multi_unique_freqs() |> pivot_freqs()
+
+  expect_true(all(c("Festivals", "No to Festivals", "Parades", "No to Parades") %in% names(result)))
+  # no variable prefix should be added when labels are already distinct
+  expect_false(any(grepl("^q_", names(result))))
+})
+
+test_that("pivot_freqs: unique labels pivot group_var excludes variable id column", {
+  result <- multi_unique_freqs() |> pivot_freqs(group_var)
+
+  expect_false("variable" %in% names(result))
+  expect_true("label" %in% names(result))
+    expect_false("group_var" %in% names(result))
+})
+
