@@ -91,7 +91,7 @@ test_that(".by errors when grouping variale is not present in the data", {
 test_that(".by errors when data is already grouped", {
   expect_snapshot(
     error = TRUE,
-    penguins |> group_by(sex) |> freq(species, .by = island)
+    penguins |> dplyr::group_by(sex) |> freq(species, .by = island)
   )
 })
 
@@ -354,7 +354,7 @@ test_that("factor variable input: throws error", {
   expect_snapshot(
     error = TRUE,
     responses |>
-      select(q2) |>
+      dplyr::select(q2) |>
       freqs(stat = 'mean')
   )
 })
