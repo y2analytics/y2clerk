@@ -20,12 +20,11 @@ pivot_freqs <- function(
   dataset,
   columns_var = label
 ) {
-  label <- NULL
   pivot_errors(dataset)
 
   dataset |>
     dplyr::mutate(
-      {{ columns_var }} := ifelse(
+      {{ columns_var }} := dplyr::if_else(
         {{ columns_var }} == '',
         NA,
         {{ columns_var }}
@@ -45,13 +44,27 @@ pivot_freqs <- function(
 
 # Private functions -------------------------------------------------------
 
-pivot_errors <- function(dataset) {
-  if (
-    !'label' %in% names(dataset) |
-      !'result' %in% names(dataset)
-  ) {
-    stop(
-      'Input data must contain a "label" column and a "result" column. Ensure you are passing the output from a freqs() call.'
+pivot_errors <- function(dataset, call = rlang::caller_env()) {
+  rlang::check_data_frame(dataset, call = call)
+
+  col_names <- names(dataset)
+
+  if (!'label' %in% col_names) {
+    cli::cli_abort(
+      c(
+        "x" = "Input data must contain a {.arg label} column.",
+        "i" = "Ensure you are passing the output from a (.fn freqs} call."
+      ),
+      call = call
+    )
+  }
+  if (!'result' %in% col_names) {
+    cli::cli_abort(
+      c(
+        "x" = "Input data must contain a {.arg result} column.",
+        "i" = "Ensure you are passing the output from a (.fn freqs} call."
+      ),
+      call = call
     )
   }
 
@@ -59,14 +72,20 @@ pivot_errors <- function(dataset) {
     unique(dataset$label)[1] == '' &
       length(unique(dataset$label)) == 1
   ) {
-    stop(
-      'Your frequencies label column is blank. Please provide labels on which to pivot.'
+    cli::cli_abort(
+      c(
+        "x" = "Your frequencies label column is blank. Please provide unique labels on which to pivot."
+      ),
+      call = call
     )
   }
 
-  if (sum(names(dataset) == 'group_var') != 1) {
-    stop(
-      'Your frequencies does not contain a group_var. It must have a group_var to pivot correctly.'
+  if (!('group_var' %in% col_names)) {
+    cli::cli_abort(
+      c(
+        "x" = 'Your frequencies does not contain a {.arg group_var}.",
+      "i" = "Supply a {.arg group_var} to pivot correctly.'
+      )
     )
   }
 }
