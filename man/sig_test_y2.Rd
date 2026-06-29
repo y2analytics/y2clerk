@@ -9,7 +9,8 @@ sig_test_y2(
   dataset,
   banner_var,
   wt = NULL,
-  layout = c("tall", "wide")
+  layout = c("tall", "wide"),
+  correction = getOption("y2clerk.mcc_correction", default = "fdr")
 )
 }
 \arguments{
@@ -22,6 +23,10 @@ sig_test_y2(
 \item{wt}{The weight variable used in the frequencies function, if applicable}
 
 \item{layout}{(default: 'tall') 'tall' formats the output to look like a basic grouped freqs table. 'wide' formats the output to look like the result from Q-formatted cross tabs}
+
+\item{corection}{(default: the value of option('y2clerk.mcc_correction') - 'fdr'). An algorithm to be used for Multiple Comparison Correction. One of the valid algorithms supported by [stats::p.adjust()]: 
+```{r} p.adjust.methods 
+```}
 }
 \value{
 A table that matches the output of cross tabs, showing significance differences between different groups for any input variables
