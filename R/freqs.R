@@ -18,6 +18,7 @@
 #' @param show_missing_levels Boolean, whether to keep response levels with no data (default: TRUE)
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations.
+#' @seealso [y2clerk-options] for setting `y2clerk.quantile_algorithm` globally.
 #' @importFrom rlang .data
 #' @examples
 #' df <- data.frame(

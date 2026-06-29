@@ -97,3 +97,6 @@ tested_freqs <- df |>
               layout = 'wide')
 
 }
+\seealso{
+[y2clerk-options] for setting `y2clerk.mcc_correction` globally.
+}
