@@ -3,16 +3,15 @@
 
 # y2clerk
 
-<!-- badges: start -->
+[![R-CMD-check](https://github.com/y2analytics/y2clerk/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/y2analytics/y2clerk/actions/workflows/R-CMD-check.yaml)
 
-<!-- badges: end -->
 
 ## Overview
 
 y2clerk exists to quickly create formatted frequencies tables. It
 leverages the tidyverse, allowing the user to `|>` in data frames,
 `select()` down to lists of variables, `group_by()` others, and include
-weights for the frequencies. There are two main functions in y2clerk:
+weights for the frequencies. There are three main functions in y2clerk:
 
   - `freqs()` - creates a frequency table including both ns and
     percentages for each level of a variable or list of variables.
@@ -23,29 +22,21 @@ weights for the frequencies. There are two main functions in y2clerk:
     table with all responses given.
   - `cross_freqs()` - creates a frequency table similar to cross tabs.
     Each group\_var given in the function acts as its own unique banner
-    for every variable listed in the freqs. Whereas *group\_by %\>%
-    freqs* produces a set of frequencies grouped by a single variable,
-    *cross\_freqs* is designed to produce a set of frequencies grouped
+    for every variable listed in the freqs. Whereas `group_by() |>
+    freqs()` produces a set of frequencies grouped by a single variable,
+    `cross_freqs()` is designed to produce a set of frequencies grouped
     by multiple different grouping variables one after another and then
     combines these results into a single
 dataframe.
 
 ## Installation
 
-<!-- You can install the released version of y2clerk from [CRAN](https://CRAN.R-project.org) with: -->
-
-<!-- ``` r -->
-
-<!-- install.packages("y2clerk") -->
-
-<!-- ``` -->
-
 You can install the most updated package version from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("y2analytics/y2clerk")
+# install.packages("pak")
+pak::pak("y2analytics/y2clerk")
 ```
 
 ## Examples
@@ -57,13 +48,6 @@ get a frequencies table with `freqs()`:
 library(y2clerk)
 library(dplyr)
 #> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
 df <- data.frame(
   a = c(1, 2, 2, 3, 4, 2, NA),
   b = c(1, 2, 2, 3, 4, 1, NA),
@@ -107,9 +91,7 @@ freqs(df, stat = 'mean', nas = FALSE, wt = weights)
 #>   <chr>    <chr> <chr> <dbl> <chr>            <dbl>
 #> 1 a        ""    ""        6 mean - weighted   2.37
 #> 2 b        ""    ""        6 mean - weighted   2.2
-df |> group_by(a) |> freqs(b, stat = 'mean', nas = FALSE, wt = weights)
-#> Adding missing grouping variables: `a`
-#> Adding missing grouping variables: `a`
+df |> freqs(b, stat = 'mean', .by = a, nas = FALSE, wt = weights)
 #> # A tibble: 4 x 7
 #>   group_var variable value label     n stat            result
 #>       <dbl> <chr>    <chr> <chr> <dbl> <chr>            <dbl>
