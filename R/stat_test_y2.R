@@ -9,6 +9,7 @@
 #' @param banner_var This will be the banner variables for cross tabs. Must be the same as the grouping variable from the freqs() function.
 #' @param wt The weight variable used in the frequencies function, if applicable
 #' @param layout (default: 'tall') 'tall' formats the output to look like a basic grouped freqs table. 'wide' formats the output to look like the result from Q-formatted cross tabs
+#' ```
 #' @return A table that matches the output of cross tabs, showing significance differences between different groups for any input variables
 #' stats, cross tabs. Column comparison symbols: a, b, c... (p <= 0.05), A, B, C... (p <= 0.001); No symbol: not significant at at least (p <= 0.05)
 #' @examples
@@ -84,7 +85,7 @@ sig_test_y2 <- function(
   dataset,
   banner_var,
   wt = NULL,
-  layout = c('tall', 'wide')
+  correction = getOption('y2clerk.mcc_correction', default = 'fdr')
 ) {
   ## Error for missing dataset argument
   if (missing(dataset)) {
@@ -117,7 +118,7 @@ sig_test_y2 <- function(
 
   ## Test matching arguments
   layout <- rlang::arg_match(layout)
-
+    cli::cli_abort(c("x" = "{.arg correction} correction algorithm not found",
   ## Getting iterables
   # Define variable name for responses reference
   var_names <- frequencies |>
@@ -395,7 +396,7 @@ sig_test_y2 <- function(
               # FDR correction (default; used in Q crosstabs)
               p_value <- stats::p.adjust(
                 p_value,
-                method = 'fdr',
+                method = correction,
                 n = choose(length(group_levels), 2)
               )
 
