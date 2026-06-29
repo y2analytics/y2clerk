@@ -8,11 +8,12 @@
 #' @param dataset The original data frame that the frequencies table came from
 #' @param banner_var This will be the banner variables for cross tabs. Must be the same as the grouping variable from the freqs() function.
 #' @param wt The weight variable used in the frequencies function, if applicable
-#' @param layout (default: 'tall') 'tall' formats the output to look like a basic grouped freqs table. 'wide' formats the output to look like the result from Q-formatted cross tabs
-#' @param corection (default: the value of option('y2clerk.mcc_correction') - 'fdr'). An algorithm to be used for Multiple Comparison Correction. One of the valid algorithms supported by [stats::p.adjust()]: 
-#' ```{r} p.adjust.methods 
-#' ```
-#' 
+#' @param layout default: 'tall': 'tall' formats the output to look like a basic grouped freqs table. 'wide' formats the output to look like the result from Q-formatted cross tabs
+#' @param correction (default: the value of `getOption('y2clerk.mcc_correction')`,
+#'   `'fdr'`). An algorithm for Multiple Comparison Correction. One of the valid
+#'   algorithms supported by [stats::p.adjust()]:
+#'   `r paste(stats::p.adjust.methods, collapse = ", ")`.
+
 #' @return A table that matches the output of cross tabs, showing significance differences between different groups for any input variables
 #' stats, cross tabs. Column comparison symbols: a, b, c... (p <= 0.05), A, B, C... (p <= 0.001); No symbol: not significant at at least (p <= 0.05)
 #' @examples
