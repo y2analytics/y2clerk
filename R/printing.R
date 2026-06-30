@@ -1,9 +1,8 @@
-# Silence CRAN check over missing global binding (because we make it when the user prints a frequency tibble
-if (getRversion() >= "2.15.1") utils::globalVariables(c(".print_buffer"))
+# Package-level print buffer
+.print_buffer <- new.env(parent = emptyenv())
 
 #' @exportS3Method
 print.freq_y2 <- function(x, n, ...) {
-  create_env_in_global()
   NextMethod()
 }
 
@@ -158,12 +157,4 @@ get_question_wordings <- function(x, setup) {
 }
 
 
-#' Create print buffer environment if it does not exist
-create_env_in_global <- function() {
-  if (!exists(".print_buffer", envir = .GlobalEnv)) {
-    eval(
-      quote(.GlobalEnv$.print_buffer <- new.env(parent = emptyenv())),
-      envir = .GlobalEnv
-    )
-  }
-}
+
