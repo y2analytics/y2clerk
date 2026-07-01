@@ -64,7 +64,8 @@ test_that("to_haven_y2 works on haven_labelled vars", {
   expect_snapshot(
     responses4 |>
       dplyr::mutate(
-        q4_haven = to_haven_y2(q4)
+        q4_haven = to_haven_y2(q4),
+        q5_haven = to_haven_y2(q5)
       )
   )
 })
