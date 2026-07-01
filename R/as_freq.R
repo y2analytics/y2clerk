@@ -16,12 +16,12 @@ as_freq_y2 <- function(df, p = NULL) {
   if (!is.null(p)) {
     #that p is a named character vector
     if (!is.character(p)) {
-      stop("p must be a character vector")
+      cli::cli_abort("p must be a character vector, not a {{class(p)}}.")
     }
 
     #Make sure that p is named for every element of p
     if (any(is.null(names(p))) | any(names(p) == "")) {
-      stop("Every element of p must be named")
+      cli::cli_abort("Every element of p must be named")
     }
 
     attr(df, "prompts") <- p
