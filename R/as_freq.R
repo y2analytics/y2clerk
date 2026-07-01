@@ -5,11 +5,11 @@
 #'
 #' @returns A freq_y2 class (Subclass of a tibble)
 as_freq_y2 <- function(df, p = NULL) {
-  if ('freq_y2' %in% class(df)) {
+  if (inherits(df, 'freq_y2')) {
     return(df)
   }
 
-  if (!('tbl_df' %in% class(df))) {
+  if (!inherits(df, 'tbl_df')) {
     df <- tibble::as_tibble(df)
   }
 
