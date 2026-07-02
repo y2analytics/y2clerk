@@ -22,14 +22,14 @@ test_that("pivot_freqs works with Column names with two group vars", {
 test_that("pivot_freqs works on haven labelled data", {
   expect_no_error(
     forcats::gss_cat |>
-      mutate(rincome = to_haven_y2(rincome)) |>
+      dplyr::mutate(rincome = to_haven_y2(rincome)) |>
       freq(rincome, .by = marital) |>
       pivot_freqs()
   )
 
   expect_no_error(
     forcats::gss_cat |>
-      mutate(rincome = to_haven_y2(rincome)) |>
+      dplyr::mutate(rincome = to_haven_y2(rincome)) |>
       freq(marital, .by = rincome) |>
       pivot_freqs()
   )
@@ -53,7 +53,6 @@ test_that("pivot_freqs returns a row for each group_var level", {
 })
 
 
-### columns_var - pivot other way
 test_that("pivot_freqs can pivot on group_var", {
   expect_snapshot(
     forcats::gss_cat |>
@@ -91,37 +90,43 @@ test_that("pivot_freqs errors on missing label or result column", {
   )
 })
 
-### Multi-variable freqs -------------------------------------------------------
+### Multi-select ("select all that apply") questions ---------------------------
 
-test_that("pivot_freqs: colliding labels produces variable_label column names", {
-  result <- multi_collide_freqs() |> pivot_freqs()
+# responses2's m_activity_* columns are a genuine multi-select ("select all
+# that apply") stem, each item carrying its own distinct value label
+# (Basketball, Football, ...), so multi_freqs() naturally produces labels
+# that are unique across variables.
+test_that("pivot_freqs: multi-select stem with unique labels pivots on label", {
+  frequencies <- responses2 |>
+    dplyr::group_by(gender) |>
+    multi_freqs(m_activity_1)
 
-  expect_true(all(c("q_festivals_Yes", "q_festivals_No", "q_parades_Yes", "q_parades_No") %in% names(result)))
-  # bare label values must not leak through as column names
-  expect_false(any(c("Yes", "No") %in% names(result)))
+  expect_snapshot(frequencies |> pivot_freqs())
 })
 
-test_that("pivot_freqs: colliding labels pivot group_var keeps variable as id column", {
-  result <- multi_collide_freqs() |> pivot_freqs(group_var)
+test_that("pivot_freqs: multi-select stem with unique labels pivots on group_var", {
+  frequencies <- responses2 |>
+    dplyr::group_by(gender) |>
+    multi_freqs(m_activity_1)
 
-  expect_true("variable" %in% names(result))
-  expect_true("label" %in% names(result))
-  expect_false("group_var" %in% names(result))
+  expect_snapshot(frequencies |> pivot_freqs(group_var))
 })
 
-test_that("pivot_freqs: unique labels uses label directly as column names", {
-  result <- multi_unique_freqs() |> pivot_freqs()
+# responses_multi_select has two multi-select stems (q_festivals, q_parades)
+# whose items all share the same 'Yes'/'No' value labels, so multi_freqs()
+# produces a `label` column that collides across `variable`s.
+test_that("pivot_freqs: multi-select stems with colliding labels get variable-prefixed column names", {
+  frequencies <- responses_multi_select |>
+    dplyr::group_by(group_var) |>
+    multi_freqs(q_festivals_1, q_parades_1)
 
-  expect_true(all(c("Festivals", "No to Festivals", "Parades", "No to Parades") %in% names(result)))
-  # no variable prefix should be added when labels are already distinct
-  expect_false(any(grepl("^q_", names(result))))
+  expect_snapshot(frequencies |> pivot_freqs())
 })
 
-test_that("pivot_freqs: unique labels pivot group_var excludes variable id column", {
-  result <- multi_unique_freqs() |> pivot_freqs(group_var)
+test_that("pivot_freqs: multi-select stems with colliding labels keep variable as id column on group_var pivot", {
+  frequencies <- responses_multi_select |>
+    dplyr::group_by(group_var) |>
+    multi_freqs(q_festivals_1, q_parades_1)
 
-  expect_false("variable" %in% names(result))
-  expect_true("label" %in% names(result))
-    expect_false("group_var" %in% names(result))
+  expect_snapshot(frequencies |> pivot_freqs(group_var))
 })
-

@@ -100,7 +100,7 @@ pivot_errors <- function(dataset, call = rlang::caller_env()) {
     cli::cli_abort(
       c(
         "x" = "Input data must contain a {.arg label} column.",
-        "i" = "Ensure you are passing the output from a (.fn freqs} call."
+        "i" = "Ensure you are passing the output from a {.fn freqs} call."
       ),
       call = call
     )
@@ -109,7 +109,7 @@ pivot_errors <- function(dataset, call = rlang::caller_env()) {
     cli::cli_abort(
       c(
         "x" = "Input data must contain a {.arg result} column.",
-        "i" = "Ensure you are passing the output from a (.fn freqs} call."
+        "i" = "Ensure you are passing the output from a {.fn freqs} call."
       ),
       call = call
     )
@@ -130,8 +130,8 @@ pivot_errors <- function(dataset, call = rlang::caller_env()) {
   if (!('group_var' %in% col_names)) {
     cli::cli_abort(
       c(
-        "x" = 'Your frequencies does not contain a {.arg group_var}.",
-      "i" = "Supply a {.arg group_var} to pivot correctly.'
+        "x" = 'Your frequencies does not contain a {.arg group_var}.',
+        "i" = 'Supply a {.arg group_var} to pivot correctly.'
       )
     )
   }

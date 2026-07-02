@@ -63,7 +63,8 @@
       pivot_freqs(freqs(forcats::gss_cat, marital))
     Condition
       Error in `pivot_errors()`:
-      x Your frequencies does not contain a `group_var`.", "i" = "Supply a `group_var` to pivot correctly.
+      x Your frequencies does not contain a `group_var`.
+      i Supply a `group_var` to pivot correctly.
 
 # pivot_freqs errors on missing label or result column
 
@@ -72,5 +73,66 @@
     Condition
       Error in `pivot_freqs()`:
       x Input data must contain a `label` column.
-      i Ensure you are passing the output from a (.fn freqs} call.
+      i Ensure you are passing the output from a `freqs()` call.
+
+# pivot_freqs: multi-select stem with unique labels pivots on label
+
+    Code
+      pivot_freqs(frequencies)
+    Output
+      # A tibble: 4 x 7
+      # Groups:   group_var [4]
+        group_var Basketball Football Volleyball Baseball `Underwater Basket Weaving`
+        <chr>          <dbl>    <dbl>      <dbl>    <dbl>                       <dbl>
+      1 male            0.14     0.43       0.14     0.71                        0.86
+      2 female          0        0.55       0.27     0.27                        1   
+      3 other           0        0          0        0.75                        1   
+      4 <NA>            0        0          0        0                           1   
+      # i 1 more variable: `An unchosen activity` <dbl>
+
+# pivot_freqs: multi-select stem with unique labels pivots on group_var
+
+    Code
+      pivot_freqs(frequencies, group_var)
+    Output
+      # A tibble: 6 x 5
+        label                      male female other  `NA`
+        <chr>                     <dbl>  <dbl> <dbl> <dbl>
+      1 Basketball                 0.14   0     0        0
+      2 Football                   0.43   0.55  0        0
+      3 Volleyball                 0.14   0.27  0        0
+      4 Baseball                   0.71   0.27  0.75     0
+      5 Underwater Basket Weaving  0.86   1     1        1
+      6 An unchosen activity       0      0     0        0
+
+# pivot_freqs: multi-select stems with colliding labels get variable-prefixed column names
+
+    Code
+      pivot_freqs(frequencies)
+    Output
+      # A tibble: 2 x 9
+      # Groups:   group_var [2]
+        group_var q_festivals_1_No q_festivals_1_Yes q_festivals_2_No
+        <chr>                <dbl>             <dbl>            <dbl>
+      1 Group 1                0.5               0.5             0.67
+      2 Group 2                0.5               0.5             0.33
+      # i 5 more variables: q_festivals_2_Yes <dbl>, q_parades_1_No <dbl>,
+      #   q_parades_1_Yes <dbl>, q_parades_2_No <dbl>, q_parades_2_Yes <dbl>
+
+# pivot_freqs: multi-select stems with colliding labels keep variable as id column on group_var pivot
+
+    Code
+      pivot_freqs(frequencies, group_var)
+    Output
+      # A tibble: 8 x 4
+        variable      label `Group 1` `Group 2`
+        <chr>         <chr>     <dbl>     <dbl>
+      1 q_festivals_1 No         0.5       0.5 
+      2 q_festivals_1 Yes        0.5       0.5 
+      3 q_festivals_2 No         0.67      0.33
+      4 q_festivals_2 Yes        0.33      0.67
+      5 q_parades_1   No         0.33      0.5 
+      6 q_parades_1   Yes        0.67      0.5 
+      7 q_parades_2   No         0.5       0.33
+      8 q_parades_2   Yes        0.5       0.67
 
