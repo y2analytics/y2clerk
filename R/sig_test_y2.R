@@ -16,6 +16,7 @@
 
 #' @return A table that matches the output of cross tabs, showing significance differences between different groups for any input variables
 #' stats, cross tabs. Column comparison symbols: a, b, c... (p <= 0.05), A, B, C... (p <= 0.001); No symbol: not significant at at least (p <= 0.05)
+#' @seealso [y2clerk-options] for setting `y2clerk.mcc_correction` globally.
 #' @examples
 #'
 #' # Example Data
