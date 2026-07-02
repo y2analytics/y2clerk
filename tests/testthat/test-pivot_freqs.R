@@ -1,55 +1,47 @@
 ### Column names
-test_that("Column names", {
-  frequencies_base <- forcats::gss_cat |>
-    dplyr::group_by(year) |>
-    freqs(marital)
-  frequencies_base
-
-  frequencies_pivoted <- frequencies_base |> pivot_freqs()
-  frequencies_pivoted
-
-  names_actual <- frequencies_pivoted |> names()
-  names_expected <- c(
-    'group_var',
-    'No answer',
-    'Never married',
-    'Separated',
-    'Divorced',
-    'Widowed',
-    'Married'
+test_that("pivot_freqs works with Column names", {
+  expect_snapshot(
+    forcats::gss_cat |>
+      dplyr::group_by(year) |>
+      freqs(marital) |>
+      pivot_freqs()
   )
-  expect_equal(names_actual, names_expected)
 })
 
 
-test_that("Column names with two group vars", {
-  frequencies_pivoted <- forcats::gss_cat |>
-    dplyr::group_by(year) |>
-    freqs(race) |>
-    pivot_freqs()
-
-  frequencies_pivoted
-  nrows <- nrow(frequencies_pivoted)
-  names_cols <- names(frequencies_pivoted)
-
-  names_actual <- frequencies_pivoted |> names()
-  names_expected <- c(
-    'group_var',
-    'Other',
-    'Black',
-    'White',
-    'Not applicable'
+test_that("pivot_freqs works with Column names with two group vars", {
+  expect_snapshot(
+    forcats::gss_cat |>
+      dplyr::group_by(year) |>
+      freqs(race) |>
+      pivot_freqs()
   )
-  expect_equal(names_actual, names_expected)
+})
+
+
+test_that("pivot_freqs works on haven labelled data", {
+  expect_no_error(
+    forcats::gss_cat |>
+      dplyr::mutate(rincome = to_haven_y2(rincome)) |>
+      freq(rincome, .by = marital) |>
+      pivot_freqs()
+  )
+
+  expect_no_error(
+    forcats::gss_cat |>
+      dplyr::mutate(rincome = to_haven_y2(rincome)) |>
+      freq(marital, .by = rincome) |>
+      pivot_freqs()
+  )
 })
 
 ### Group_var levels
-test_that("Each row is a group_var level", {
+test_that("pivot_freqs returns a row for each group_var level", {
   frequencies_pivoted <- forcats::gss_cat |>
     dplyr::group_by(year) |>
     freqs(marital) |>
     pivot_freqs()
-  frequencies_pivoted
+
   nrows <- length(frequencies_pivoted$group_var)
   names_rows <- as.character(frequencies_pivoted$group_var)
 
@@ -61,50 +53,80 @@ test_that("Each row is a group_var level", {
 })
 
 
-### columns_var - pivot other way
-test_that("Pivot on group_var", {
-  frequencies_pivoted <- forcats::gss_cat |>
-    dplyr::group_by(year) |>
-    freqs(marital) |>
-    pivot_freqs(group_var)
-  frequencies_pivoted
-  nrows <- nrow(frequencies_pivoted)
-  names_cols <- names(frequencies_pivoted)
-
-  expect_equal(nrows, 6)
-  expect_equal(
-    names_cols,
-    c('label', '2000', '2002', '2004', '2006', '2008', '2010', '2012', '2014')
+test_that("pivot_freqs can pivot on group_var", {
+  expect_snapshot(
+    forcats::gss_cat |>
+      dplyr::group_by(year) |>
+      freqs(marital) |>
+      pivot_freqs(group_var)
   )
 })
 
 
 ### Errors
-test_that("pivot_freqs error testing - blank label column", {
-  expect_error(
-    frequencies <- forcats::gss_cat |>
+test_that("pivot_freqs errors on blank label column", {
+  expect_snapshot(
+    error = TRUE,
+    forcats::gss_cat |>
       freqs(age, stat = 'mean', nas = FALSE) |>
-      pivot_freqs(),
-    'Your frequencies label column is blank. Please provide labels on which to pivot.',
-    fixed = TRUE
+      pivot_freqs()
   )
 })
 
-test_that("pivot_freqs error testing - missing group_var", {
-  expect_error(
-    frequencies <- forcats::gss_cat |>
+test_that("pivot_freqs errors on missing group_var", {
+  expect_snapshot(
+    error = TRUE,
+    forcats::gss_cat |>
       freqs(marital) |>
-      pivot_freqs(),
-    'Your frequencies does not contain a group_var. It must have a group_var to pivot correctly.',
-    fixed = TRUE
+      pivot_freqs()
   )
 })
 
-test_that("pivot_freqs error testing - missing label or result column", {
-  expect_error(
-    frequencies <- forcats::gss_cat |>
-      pivot_freqs(),
-    'Input data must contain a "label" column and a "result" column. Ensure you are passing the output from a freqs() call.',
-    fixed = TRUE
+test_that("pivot_freqs errors on missing label or result column", {
+  expect_snapshot(
+    error = TRUE,
+    forcats::gss_cat |>
+      pivot_freqs()
   )
+})
+
+### Multi-select ("select all that apply") questions ---------------------------
+
+# responses2's m_activity_* columns are a genuine multi-select ("select all
+# that apply") stem, each item carrying its own distinct value label
+# (Basketball, Football, ...), so multi_freqs() naturally produces labels
+# that are unique across variables.
+test_that("pivot_freqs: multi-select stem with unique labels pivots on label", {
+  frequencies <- responses2 |>
+    dplyr::group_by(gender) |>
+    multi_freqs(m_activity_1)
+
+  expect_snapshot(frequencies |> pivot_freqs())
+})
+
+test_that("pivot_freqs: multi-select stem with unique labels pivots on group_var", {
+  frequencies <- responses2 |>
+    dplyr::group_by(gender) |>
+    multi_freqs(m_activity_1)
+
+  expect_snapshot(frequencies |> pivot_freqs(group_var))
+})
+
+# responses_multi_select has two multi-select stems (q_festivals, q_parades)
+# whose items all share the same 'Yes'/'No' value labels, so multi_freqs()
+# produces a `label` column that collides across `variable`s.
+test_that("pivot_freqs: multi-select stems with colliding labels get variable-prefixed column names", {
+  frequencies <- responses_multi_select |>
+    dplyr::group_by(group_var) |>
+    multi_freqs(q_festivals_1, q_parades_1)
+
+  expect_snapshot(frequencies |> pivot_freqs())
+})
+
+test_that("pivot_freqs: multi-select stems with colliding labels keep variable as id column on group_var pivot", {
+  frequencies <- responses_multi_select |>
+    dplyr::group_by(group_var) |>
+    multi_freqs(q_festivals_1, q_parades_1)
+
+  expect_snapshot(frequencies |> pivot_freqs(group_var))
 })
