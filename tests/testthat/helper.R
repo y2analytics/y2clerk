@@ -188,6 +188,28 @@ responses2 <- data.frame(
   dplyr::as_tibble()
 
 
+# Small hand-built "select all that apply" style dataset: two question
+# stems (q_festivals, q_parades), each with two checkbox items. Every item
+# shares the same 'Yes'/'No' value labels, so running multi_freqs() across
+# both stems produces a `label` column that collides across `variable`s --
+# used to test pivot_freqs()'s variable+label "compound name" disambiguation
+# on genuine multi-select data.
+responses_multi_select <- data.frame(
+  group_var = rep(c('Group 1', 'Group 2'), each = 6),
+  q_festivals_1 = c(1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0),
+  q_festivals_2 = c(0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0),
+  q_parades_1 = c(1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1),
+  q_parades_2 = c(0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1)
+) %>%
+  labelled::set_value_labels(
+    q_festivals_1 = c('No' = 0, 'Yes' = 1),
+    q_festivals_2 = c('No' = 0, 'Yes' = 1),
+    q_parades_1 = c('No' = 0, 'Yes' = 1),
+    q_parades_2 = c('No' = 0, 'Yes' = 1)
+  ) %>%
+  dplyr::as_tibble()
+
+
 set.seed(1)
 
 responses3 <- data.frame(

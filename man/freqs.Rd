@@ -40,10 +40,10 @@ freq(
 \arguments{
 \item{dataset}{A dataframe.}
 
-\item{...}{<tidy-select> One or more unquoted expressions separated by commas. Variable names can be used as if they were positions in the data frame, so expressions like x:y can be used to select a range of variables. If nothing
+\item{...}{\if{html}{\out{<tidy-select>}} One or more unquoted expressions separated by commas. Variable names can be used as if they were positions in the data frame, so expressions like x:y can be used to select a range of variables. If nothing
 is specified, the function runs a frequency on every column in given dataset.}
 
-\item{.by}{<tidy-select> Variables to group by for this operation only. Cannot be used when the dataset is already a grouped data frame.}
+\item{.by}{\if{html}{\out{<tidy-select>}} Variables to group by for this operation only. Cannot be used when the dataset is already a grouped data frame.}
 
 \item{stat}{Character, stat to run. Currently accepts 'percent,' 'mean,' 'median,' 'min,' 'max,' 'quantile,' and 'summary' (default: 'percent').}
 
@@ -101,4 +101,7 @@ freqs(df, a, stat = 'min', nas = FALSE)
 freqs(df, a, stat = 'median', nas = FALSE)
 freqs(df, a, stat = 'quantile', percentile = 95, nas = FALSE)
 freqs(df, a, stat = 'summary', nas = FALSE, wt = weights)
+}
+\seealso{
+[y2clerk-options] for setting `y2clerk.quantile_algorithm` globally.
 }

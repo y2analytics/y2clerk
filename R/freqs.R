@@ -18,6 +18,7 @@
 #' @param show_missing_levels Boolean, whether to keep response levels with no data (default: TRUE)
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations.
+#' @seealso [y2clerk-options] for setting `y2clerk.quantile_algorithm` globally.
 #' @importFrom rlang .data
 #' @examples
 #' df <- data.frame(
@@ -670,16 +671,6 @@ get_output_for_cont_var <- function(
     grouping_vars <- dplyr::group_vars(dataset)
   }
 
-  # produce dataframe to output
-
-  # make copy of "stat". the stat variable in the output data frame and the
-  # stat function argument don't play well together here.
-  statistic <- stat
-  rm(stat)
-  # this is not a great fix imo but it's been a pretty resilient problem.
-  # if possible, i would rename either the column or the argument, but
-  # on the other hand, either of those would presumably be breaking changes
-
   # for convenience:
   if (is.null(percentile)) {
     percentile <- -99
@@ -692,17 +683,17 @@ get_output_for_cont_var <- function(
       label = '',
       # different labels depending on input
       stat = dplyr::case_when(
-        statistic == 'mean' ~ 'mean',
-        statistic == 'min' ~ 'min',
-        statistic == 'median' ~ 'median',
-        statistic == 'max' ~ 'max',
-        statistic == 'quantile' &
+        .env$stat == 'mean' ~ 'mean',
+        .env$stat == 'min' ~ 'min',
+        .env$stat == 'median' ~ 'median',
+        .env$stat == 'max' ~ 'max',
+        .env$stat == 'quantile' &
           !(percentile %in% c(0, 50, 100)) ~
           stringr::str_c('q', percentile),
-        statistic == 'quantile' & percentile == 0 ~ 'min',
-        statistic == 'quantile' & percentile == 50 ~ 'median',
-        statistic == 'quantile' & percentile == 100 ~ 'max',
-        TRUE ~ 'error'
+        .env$stat == 'quantile' & percentile == 0 ~ 'min',
+        .env$stat == 'quantile' & percentile == 50 ~ 'median',
+        .env$stat == 'quantile' & percentile == 100 ~ 'max',
+        .unmatched = 'error'
       ),
       n = base::round(.data$n, digits),
       result = base::round(.data$result, digits)
@@ -730,10 +721,7 @@ get_output_for_cont_var <- function(
       labelled::var_label() |>
       tibble::deframe()
 
-    # when prompt = TRUE but there is no variable label, output ""
-    if (is.null(prompt_text)) {
-      prompt_text <- ""
-    }
+    promp_text <- prompt_text %||% ""
 
     # final column ordering
     out_df <- out_df |>

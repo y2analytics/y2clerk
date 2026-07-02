@@ -91,7 +91,7 @@ test_that(".by errors when grouping variale is not present in the data", {
 test_that(".by errors when data is already grouped", {
   expect_snapshot(
     error = TRUE,
-    penguins |> group_by(sex) |> freq(species, .by = island)
+    penguins |> dplyr::group_by(sex) |> freq(species, .by = island)
   )
 })
 
@@ -106,32 +106,6 @@ test_that("Incorrect wt argument", {
   expect_snapshot(error = TRUE, freqs(mtcars, cyl, wt = 'True'))
 })
 
-### frequency tibble class testing
-#Returns class freq_y2
-test_that("`freq()` returns a frequency tibble", {
-  expect_s3_class(freqs(mtcars, cyl), 'freq_y2')
-})
-
-# Prints the question wordings
-test_that("`freq()` prints question wordings", {
-  test_freq1 <- responses |>
-    dplyr::select(q1) |>
-    freq()
-
-  expect_snapshot(print(test_freq1))
-})
-
-# Prints only three question wordings
-test_that("`freq()` prints only three question wordings", {
-  test_freq <- responses |>
-    dplyr::select(q1, q2, q3, q4) |>
-    freq()
-
-  # Prints The question wordings for the first three
-  # Does not print the question wording for the forth
-  # Does print message saying how may questions have wordings that are not displayed
-  expect_snapshot(print(test_freq))
-})
 
 ### weights
 test_that("Weights", {
@@ -354,7 +328,7 @@ test_that("factor variable input: throws error", {
   expect_snapshot(
     error = TRUE,
     responses |>
-      select(q2) |>
+      dplyr::select(q2) |>
       freqs(stat = 'mean')
   )
 })

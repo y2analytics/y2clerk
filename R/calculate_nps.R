@@ -16,7 +16,7 @@
 #' @param prompt_rm_pre DEFAULT = ".+\\,.+recommend "; String pattern in the specified `prompt` column before which everything in the column is scrubbed to obtain the "brand"
 #' @param prompt_rm_post DEFAULT = " to a .+\\? \\-.+"; String pattern in the specified `prompt` column after which everything in the column is scrubbed to obtain the "brand"
 #' @param arrange_nps DEFAULT = TRUE; Boolean, whether to arrange the final output by the NPS results, with previous frequencies arrangements/orderings still intact
-#' @param append_nps_to_brand DEFAULT = FALSE; Boolean, whether to append the NPS values to the "brand" column, having the format "["brand"] (NPS = [NPS])"
+#' @param append_nps_to_brand DEFAULT = FALSE; Boolean, whether to append the NPS values to the "brand" column, having the format "\["brand"\] (NPS = \[NPS\])"
 #' @param brand_factor DEFAULT = TRUE; Boolean, whether to convert the "brand" variable (with appended NPS values) to a factor for ease of data visualization (argument specification only applied if `append_nps_to_brand` is set to TRUE)
 #' @return An updated frequencies object with the new NPS column (and other specified columns) attached, formatted as specified
 #' @examples
@@ -107,33 +107,43 @@ calculate_nps <- function(
 
   input_type <- rlang::arg_match(input_type)
 
+  rlang::check_bool(by_variable)
+  rlang::check_bool(add_group)
+  rlang::check_bool(get_brand)
+  rlang::check_bool(arrange_nps)
+  rlang::check_bool(append_nps_to_brand)
+  rlang::check_bool(brand_factor)
+
+  rlang::check_data_frame(frequencies)
+
   ## Input freqs checks
   # Result
-  result_exists <- deparse(substitute(result)) %in% colnames(frequencies)
-  if (!result_exists) {
-    stop(
-      '`result` variable not provided: please provide a result variable in input frequencies'
+  result_str <- deparse(substitute(result))
+
+  if (!result_str %in%  colnames(frequencies)){
+    cli::cli_abort(
+      "{.arg result} variable '{{result_str}}' is not a variable in the input frequencies"
     )
   }
 
   # Label
-  label_exists <- deparse(substitute(label)) %in% colnames(frequencies)
-  if (!label_exists) {
-    stop(
-      '`label` variable not provided: please provide a label variable in input frequencies'
+  label_str <- deparse(substitute(label))
+  if (!(label_str %in% colnames(frequencies))) {
+    cli::cli_abort(
+      "{.arg label} variable '{{label_str}}' is not a variable in the input frequencies"
     )
   }
 
   # Prompt
   prompt_exists <- deparse(substitute(prompt)) %in% colnames(frequencies)
-  if (!prompt_exists & get_brand) {
+  if (!prompt_exists && get_brand) {
     stop(
       '`prompt` variable not provided: either specify a prompt variable or set `get_brand` to FALSE'
     )
   }
 
   # Warning about `by_variable` if freqs are not grouped but appear to need grouping
-  if ((by_variable == FALSE) & (nrow(frequencies) > 3)) {
+  if ((isFALSE(by_variable)) && (nrow(frequencies) > 3)) {
     warning(
       'Input frequencies appear to be grouped by brand/variable. Did you mean to set `by_variable` to `TRUE`?'
     )
@@ -146,8 +156,8 @@ calculate_nps <- function(
       dplyr::pull(!!label_flag)
 
     if (
-      !('Detractor' %in% label_vals) |
-        !('Passive' %in% label_vals) |
+      !('Detractor' %in% label_vals) ||
+        !('Passive' %in% label_vals) ||
         !('Promoter' %in% label_vals)
     ) {
       stop(
@@ -178,7 +188,7 @@ calculate_nps <- function(
       dplyr::mutate(
         dplyr::across(
           .cols = c(.data$n, .data$result),
-          .fns = ~ sum(.x)
+          .fns = \(x) sum(x)
         )
       ) |>
       dplyr::distinct(
@@ -191,7 +201,7 @@ calculate_nps <- function(
 
   ## New columns
   # Grouping by specified var
-  if (by_variable == TRUE) {
+  if (isTRUE(by_variable)) {
     frequencies <- frequencies |>
       dplyr::group_by(
         !!variable_flag,
@@ -241,9 +251,11 @@ calculate_nps <- function(
   # Append NPS to brand
   if (append_nps_to_brand) {
     if (!get_brand) {
-      stop(
-        'Cannot append NPS to brand if `get_brand` is set to FALSE. Please set `get_brand` to TRUE'
+      cli::cli_abort(
+        c("x" = "Cannot append NPS to brand if {.arg get_brand} is set to {.val FALSE}.",
+        "i" = "Please set `get_brand` to {.val TRUE}"
       )
+    )
     }
 
     frequencies <- frequencies |>
