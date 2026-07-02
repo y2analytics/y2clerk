@@ -1183,9 +1183,8 @@ labelled_ns <- function(
         )
       if (nas_group == FALSE) {
         counts <- counts |>
-          dplyr::filter_at(
-            .vars = 1,
-            ~ !is.na(.)
+          dplyr::filter(
+            dplyr::if_all(1, \(x) !is.na(x))
           )
       }
     } else {

@@ -533,7 +533,9 @@ sig_test_y2 <- function(
           ']'
         )
       ) |>
-      dplyr::mutate_all(~ replace(., is.na(.), 0))
+      dplyr::mutate(dplyr::across(dplyr::everything(), \(x) {
+        replace(x, is.na(x), 0)
+      }))
 
     # Get wide sig codes
     xtab_codes <- tested_freqs |>

@@ -109,12 +109,10 @@ verbatims_y2_single <- function(
     dplyr::select(
       !!freq_flag
     ) |>
-    dplyr::mutate_all(
-      list(
-        ~ dplyr::case_when(
-          is.na(.) ~ labelled::var_label(.),
-          TRUE ~ labelled::var_label(.)
-        )
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::everything(),
+        \(x) labelled::var_label(x)
       )
     ) |>
     dplyr::mutate(variable = freq_var_char) |>
