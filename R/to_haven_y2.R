@@ -5,6 +5,7 @@
 #' Convert a character or factor vector into a labelled (haven labelled) vector. Useful for when you need to either extract labels or attach underlying numbers to each label.
 #'
 #' @param variable The vector you wish to convert to haven labelled
+#' @param ... Reserved for future expansion. Must be empty.
 #' @examples
 #'
 #' test <- tibble::tibble(
@@ -21,6 +22,7 @@
 #' @export
 
 to_haven_y2 <- function(variable, ...) {
+  rlang::check_dots_empty()
   UseMethod("to_haven_y2")
 }
 

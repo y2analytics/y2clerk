@@ -137,8 +137,7 @@ pivot_labels_unique <- function(dataset) {
     dplyr::distinct(.data$variable, .data$label) |>
     dplyr::count(.data$label) |>
     dplyr::pull(n) |>
-    max() ==
-    1
+    max() == 1
 }
 
 pivot_errors <- function(dataset, call = rlang::caller_env()) {

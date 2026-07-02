@@ -18,36 +18,35 @@ A wide tibble of frequencies with one row for each group (by default)
 \description{
 Given a grouped frequencies table, pivot_freqs will create new columns for each label level in the frequencies
 }
-\details{
-# Working with multiple variables and multi-select questions
-
-`freqs()` and `multi_freqs()` can both return frequencies for more than one
-`variable` in a single (optionally grouped) table -- for example, running
-`freqs()` on several columns at once, or running `multi_freqs()` on a
+\section{Working with multiple variables and multi-select questions}{
+\code{freqs()} and \code{multi_freqs()} can both return frequencies for more than one
+\code{variable} in a single (optionally grouped) table -- for example, running
+\code{freqs()} on several columns at once, or running \code{multi_freqs()} on a
 "select all that apply" question stem made up of several checkbox columns.
-`pivot_freqs()` detects this automatically by checking for a `variable`
+\code{pivot_freqs()} detects this automatically by checking for a \code{variable}
 column and handles it as follows:
-
-- **Unique labels across variables** (the common multi-select case, where
-  each checkbox item has its own distinct label, e.g. "Basketball",
-  "Football", ...): `label` is used directly as the pivoted column name,
-  exactly as with a single variable. The `variable` column is dropped
-  since it adds no information beyond what `label` already conveys.
-
-- **Colliding labels across variables** (e.g. several yes/no questions that
-  all share the labels "Yes"/"No", or several Likert-scale questions that
-  all share the same scale labels): using `label` alone as the column name
-  would cause different questions' values to overwrite each other in the
-  pivot. `pivot_freqs()` detects this by checking whether any `label`
-  value appears under more than one `variable`, and if so builds compound
-  column names of the form `variable_label` (e.g. `q_festivals_1_Yes`,
-  `q_parades_1_Yes`) instead. When pivoting on `group_var` in this case,
-  `variable` is kept as an additional id column (alongside `label`) so
-  that rows for different questions remain distinguishable.
-
-Label collision is only checked when more than one `variable` is present;
-single-variable frequencies tables always pivot on the bare `label` values.
+\itemize{
+\item \strong{Unique labels across variables} (the common multi-select case, where
+each checkbox item has its own distinct label, e.g. "Basketball",
+"Football", ...): \code{label} is used directly as the pivoted column name,
+exactly as with a single variable. The \code{variable} column is dropped
+since it adds no information beyond what \code{label} already conveys.
+\item \strong{Colliding labels across variables} (e.g. several yes/no questions that
+all share the labels "Yes"/"No", or several Likert-scale questions that
+all share the same scale labels): using \code{label} alone as the column name
+would cause different questions' values to overwrite each other in the
+pivot. \code{pivot_freqs()} detects this by checking whether any \code{label}
+value appears under more than one \code{variable}, and if so builds compound
+column names of the form \code{variable_label} (e.g. \code{q_festivals_1_Yes},
+\code{q_parades_1_Yes}) instead. When pivoting on \code{group_var} in this case,
+\code{variable} is kept as an additional id column (alongside \code{label}) so
+that rows for different questions remain distinguishable.
 }
+
+Label collision is only checked when more than one \code{variable} is present;
+single-variable frequencies tables always pivot on the bare \code{label} values.
+}
+
 \examples{
   frequencies <- forcats::gss_cat |>
     dplyr::group_by(year) |>

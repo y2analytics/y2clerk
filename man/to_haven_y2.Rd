@@ -8,6 +8,8 @@ to_haven_y2(variable, ...)
 }
 \arguments{
 \item{variable}{The vector you wish to convert to haven labelled}
+
+\item{...}{Reserved for future expansion. Must be empty.}
 }
 \description{
 Convert a character or factor vector into a labelled (haven labelled) vector. Useful for when you need to either extract labels or attach underlying numbers to each label.

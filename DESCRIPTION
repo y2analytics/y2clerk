@@ -39,7 +39,8 @@ Imports:
     tidyr,
     tidyselect,
     cli,
-    stats
+    stats,
+    pkgconfig
 Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

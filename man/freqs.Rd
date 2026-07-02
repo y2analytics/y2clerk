@@ -103,5 +103,5 @@ freqs(df, a, stat = 'quantile', percentile = 95, nas = FALSE)
 freqs(df, a, stat = 'summary', nas = FALSE, wt = weights)
 }
 \seealso{
-[y2clerk-options] for setting `y2clerk.quantile_algorithm` globally.
+\link{y2clerk-options} for setting \code{y2clerk.quantile_algorithm} globally.
 }

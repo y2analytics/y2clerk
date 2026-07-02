@@ -104,5 +104,5 @@ tested_freqs <- df |>
 
 }
 \seealso{
-[y2clerk-options] for setting `y2clerk.mcc_correction` globally.
+\link{y2clerk-options} for setting \code{y2clerk.mcc_correction} globally.
 }
