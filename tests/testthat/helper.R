@@ -374,3 +374,28 @@ responses4 <- {
     ) %>%
     dplyr::as_tibble()
 }
+
+
+multi_collide_freqs <- function() {
+  tibble::tribble(
+    ~segment , ~q_festivals , ~q_parades ,
+    "A"      , "Yes"        , "Yes"      ,
+    "A"      , "No"         , "Yes"      ,
+    "B"      , "Yes"        , "No"       ,
+    "B"      , "Yes"        , "Yes"
+  ) |>
+    dplyr::group_by(segment) |>
+    freqs(q_festivals, q_parades)
+}
+
+multi_unique_freqs <- function() {
+  tibble::tribble(
+    ~segment , ~q_festivals      , ~q_parades      ,
+    "A"      , "Festivals"       , "Parades"       ,
+    "A"      , "No to Festivals" , "Parades"       ,
+    "B"      , "Festivals"       , "No to Parades" ,
+    "B"      , "Festivals"       , "Parades"
+  ) |>
+    dplyr::group_by(segment) |>
+    freqs(q_festivals, q_parades)
+}
