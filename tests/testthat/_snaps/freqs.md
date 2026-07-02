@@ -25,10 +25,12 @@
 # .by errors when data is already grouped
 
     Code
-      freq(group_by(penguins, sex), species, .by = island)
+      freq(dplyr::group_by(penguins, sex), species, .by = island)
     Condition
-      Error in `group_by()`:
-      ! could not find function "group_by"
+      Error in `freq()`:
+      ! Cannot use `.by` on an already-grouped data frame.
+      i Use `dplyr::group_by()` or `.by`, not both.
+      i The dataset is currently grouped by: "sex".
 
 # Incorrect nas argument
 
@@ -60,10 +62,12 @@
 # factor variable input: throws error
 
     Code
-      freqs(select(responses, q2), stat = "mean")
+      freqs(dplyr::select(responses, q2), stat = "mean")
     Condition
-      Error in `select()`:
-      ! could not find function "select"
+      Error in `freqs()`:
+      ! Can't compute "mean" for 1 non-numeric variable:
+      * `q2` has class <ordered factor>
+      i Convert the variable to numeric first with `as.numeric()`, or use `stat = 'percent'`.
 
 ---
 

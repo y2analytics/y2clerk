@@ -120,7 +120,7 @@ calculate_nps <- function(
   # Result
   result_str <- deparse(substitute(result))
 
-  if (!result_str %in%  colnames(frequencies)){
+  if (!result_str %in% colnames(frequencies)) {
     cli::cli_abort(
       "{.arg result} variable '{{result_str}}' is not a variable in the input frequencies"
     )
@@ -252,10 +252,11 @@ calculate_nps <- function(
   if (append_nps_to_brand) {
     if (!get_brand) {
       cli::cli_abort(
-        c("x" = "Cannot append NPS to brand if {.arg get_brand} is set to {.val FALSE}.",
-        "i" = "Please set `get_brand` to {.val TRUE}"
+        c(
+          "x" = "Cannot append NPS to brand if {.arg get_brand} is set to {.val FALSE}.",
+          "i" = "Please set `get_brand` to {.val TRUE}"
+        )
       )
-    )
     }
 
     frequencies <- frequencies |>

@@ -13,7 +13,7 @@
 #' )
 #'
 #' test$color <- to_haven_y2(test$color_factor)
-#' 
+#'
 #' test <- test |>
 #'   dplyr::mutate(
 #'     color = to_haven_y2(color_vec)
@@ -28,7 +28,9 @@ to_haven_y2 <- function(variable, ...) {
 to_haven_y2.default <- function(variable, ...) {
   variable_char <- deparse(match.call()[[2]])
   cli::cli_abort(
-    c("x" = "{.fn to_haven_y2} cannot be used on {.cls {class(variable)[1]}} variable: {variable_char}"),
+    c(
+      "x" = "{.fn to_haven_y2} cannot be used on {.cls {class(variable)[1]}} variable: {variable_char}"
+    ),
     call = rlang::call2("to_haven_y2")
   )
 }

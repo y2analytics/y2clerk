@@ -52,7 +52,7 @@ qnr_converter <- function(
   # create new survey -------------------------------------------------------
   print("Creating new survey")
 
-  response = httr::POST(
+  response <- httr::POST(
     baseUrl,
     body = request_body_json,
     encode = "raw",
@@ -367,7 +367,7 @@ qnr_converter <- function(
 
       questionDef_json <- jsonlite::toJSON(questionDef, auto_unbox = TRUE)
 
-      response = httr::POST(
+      response <- httr::POST(
         getSurveyQuestionUrl,
         body = questionDef_json,
         httr::add_headers(
@@ -424,7 +424,7 @@ qnr_converter <- function(
 
       questionDef_json <- jsonlite::toJSON(questionDef, auto_unbox = TRUE)
 
-      response = httr::POST(
+      response <- httr::POST(
         getSurveyQuestionUrl,
         body = questionDef_json,
         httr::add_headers(
@@ -456,7 +456,7 @@ qnr_converter <- function(
 
       questionDef_json <- jsonlite::toJSON(questionDef, auto_unbox = TRUE)
 
-      response = httr::POST(
+      response <- httr::POST(
         getSurveyQuestionUrl,
         body = questionDef_json,
         httr::add_headers(
@@ -523,7 +523,7 @@ qnr_converter <- function(
 
       questionDef_json <- jsonlite::toJSON(questionDef, auto_unbox = TRUE)
 
-      response = httr::POST(
+      response <- httr::POST(
         getSurveyQuestionUrl,
         body = questionDef_json,
         httr::add_headers(

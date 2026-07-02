@@ -110,7 +110,8 @@ sig_test_y2 <- function(
       c(
         "x" = "Banner variable {.arg {deparse(substitute(banner_var))}} is a haven labelled vector.",
         "i" = "Set {.arg factor_group = TRUE} in {.fun freqs} for this variable."
-      ))
+      )
+    )
   }
 
   ## Create logical for if there are weights
@@ -121,9 +122,11 @@ sig_test_y2 <- function(
   layout <- rlang::arg_match(layout)
 
   ## Test correction
-  if(!(correction %in% p.adjust.methods)) {
-    cli::cli_abort(c("x" = "{.arg correction} correction algorithm not found",
-    "i" = "Available correction algorithms: {.val {p.adjust.methods}}."))
+  if (!(correction %in% p.adjust.methods)) {
+    cli::cli_abort(c(
+      "x" = "{.arg correction} correction algorithm not found",
+      "i" = "Available correction algorithms: {.val {p.adjust.methods}}."
+    ))
   }
 
   ## Getting iterables
@@ -208,10 +211,12 @@ sig_test_y2 <- function(
           dplyr::mutate(
             dplyr::across(
               .cols = dplyr::matches(stringr::str_c('^', var_stem, '_[0-9]+$')),
-              .fns = \(x) dplyr::case_when(
-                is.na(x) ~ 0,
-                !is.na(x) ~ x
-              )
+              .fns = \(x) {
+                dplyr::case_when(
+                  is.na(x) ~ 0,
+                  !is.na(x) ~ x
+                )
+              }
             )
           )
       } else {
@@ -220,10 +225,12 @@ sig_test_y2 <- function(
           dplyr::mutate(
             dplyr::across(
               .cols = dplyr::matches(stringr::str_c('^', var_stem, '_[0-9]+$')),
-              .fns = \(x) dplyr::case_when(
-                is.na(x) ~ '0',
-                !is.na(x) ~ x
-              )
+              .fns = \(x) {
+                dplyr::case_when(
+                  is.na(x) ~ '0',
+                  !is.na(x) ~ x
+                )
+              }
             )
           )
       }

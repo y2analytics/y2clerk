@@ -56,7 +56,7 @@ responses <- {
     ),
     # numeric weights
     w = rnorm(25, mean = 1, sd = 0.1)
-  ) %>%
+  ) |>
     labelled::set_value_labels(
       q4 = c(
         `Less than a year` = 1,
@@ -79,7 +79,7 @@ responses <- {
         'female' = 2,
         'other' = 3
       )
-    ) %>%
+    ) |>
     labelled::set_variable_labels(
       q1 = "% of males involved in agriculture",
       q2 = "Orange tree ID",
@@ -88,7 +88,7 @@ responses <- {
       q5 = "Satisfaction",
       w = "Weights",
       gender_labelled = 'gender'
-    ) %>%
+    ) |>
     dplyr::as_tibble()
 }
 
@@ -154,7 +154,7 @@ responses2 <- data.frame(
     prob = rep(.25, 4),
     replace = TRUE
   )
-) %>%
+) |>
   labelled::set_value_labels(
     s_activity_1 = c(
       'Basketball' = 1,
@@ -174,7 +174,7 @@ responses2 <- data.frame(
       'female' = 2,
       'other' = 3
     )
-  ) %>%
+  ) |>
   labelled::set_variable_labels(
     gender_labelled = "Which of the following best describes how you think of yourself?",
     s_activity_1 = "Which of the following is your preferred activity?",
@@ -184,7 +184,7 @@ responses2 <- data.frame(
     m_activity_10 = "Which of the following activities have you done in the past month? Please select all that apply. - Baseball",
     m_activity_21 = "Which of the following activities have you done in the past month? Please select all that apply. - Underwater Basket Weaving",
     weights = "Weights"
-  ) %>%
+  ) |>
   dplyr::as_tibble()
 
 
@@ -200,13 +200,13 @@ responses_multi_select <- data.frame(
   q_festivals_2 = c(0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0),
   q_parades_1 = c(1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1),
   q_parades_2 = c(0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1)
-) %>%
+) |>
   labelled::set_value_labels(
     q_festivals_1 = c('No' = 0, 'Yes' = 1),
     q_festivals_2 = c('No' = 0, 'Yes' = 1),
     q_parades_1 = c('No' = 0, 'Yes' = 1),
     q_parades_2 = c('No' = 0, 'Yes' = 1)
-  ) %>%
+  ) |>
   dplyr::as_tibble()
 
 
@@ -256,7 +256,7 @@ responses3 <- data.frame(
   weight = c(
     rnorm(900, 1, 0.25)
   )
-) %>%
+) |>
   dplyr::mutate(
     V1 = forcats::fct_relevel(
       V1,
@@ -339,12 +339,12 @@ responses4 <- {
       25,
       prob = 1 / (1:80 * sum(1 / (1:80))),
       replace = TRUE
-    ) %>%
+    ) |>
       forcats::as_factor(),
 
     # numeric weights
     w = rnorm(25, mean = 1, sd = 0.1)
-  ) %>%
+  ) |>
     labelled::set_value_labels(
       q4 = c(
         `Less than a year` = 1,
@@ -362,7 +362,7 @@ responses4 <- {
         `Somewhat unhappy` = "c",
         `Very unhappy` = "d"
       )
-    ) %>%
+    ) |>
     labelled::set_variable_labels(
       q1 = "% of males involved in agriculture",
       q2 = "Orange tree ID",
@@ -371,31 +371,6 @@ responses4 <- {
       q5 = "Satisfaction",
       q6 = 'Preferred fruit (f)',
       w = "Weights"
-    ) %>%
+    ) |>
     dplyr::as_tibble()
-}
-
-
-multi_collide_freqs <- function() {
-  tibble::tribble(
-    ~segment , ~q_festivals , ~q_parades ,
-    "A"      , "Yes"        , "Yes"      ,
-    "A"      , "No"         , "Yes"      ,
-    "B"      , "Yes"        , "No"       ,
-    "B"      , "Yes"        , "Yes"
-  ) |>
-    dplyr::group_by(segment) |>
-    freqs(q_festivals, q_parades)
-}
-
-multi_unique_freqs <- function() {
-  tibble::tribble(
-    ~segment , ~q_festivals      , ~q_parades      ,
-    "A"      , "Festivals"       , "Parades"       ,
-    "A"      , "No to Festivals" , "Parades"       ,
-    "B"      , "Festivals"       , "No to Parades" ,
-    "B"      , "Festivals"       , "Parades"
-  ) |>
-    dplyr::group_by(segment) |>
-    freqs(q_festivals, q_parades)
 }
