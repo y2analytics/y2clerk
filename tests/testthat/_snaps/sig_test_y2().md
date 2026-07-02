@@ -166,7 +166,8 @@
       group)
     Condition
       Error in `sig_test_y2()`:
-      ! Banner variable "group" is a labelled double; please set "factor_group" equal to TRUE in freqs() for this variable
+      x Banner variable `group` is a haven labelled vector.
+      i Set `factor_group = TRUE` in `freqs()` for this variable.
 
 # Missing dataset
 
@@ -175,7 +176,7 @@
       banner_var = group)
     Condition
       Error in `sig_test_y2()`:
-      ! argument "dataset" is missing, with no default
+      ! `dataset` must be a data frame, not absent.
 
 # Missing banner_var
 
@@ -184,5 +185,6 @@
       dataset = responses3)
     Condition
       Error in `sig_test_y2()`:
-      ! argument "banner_var" is missing, with no default
+      x argument `banner_var` is missing
+      i Provide the same grouping variable you used in your `freqs()` call.
 

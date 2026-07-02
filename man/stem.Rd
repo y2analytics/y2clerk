@@ -10,24 +10,24 @@ stem(stem, separator = c("_", "r"), ignore.case = FALSE)
 \item{stem}{A string giving the variable stem to match.}
 
 \item{separator}{A character vector of separator strings allowed between
-the stem and the numeric suffix. Defaults to `c("_", "r")`. Use `""`
+the stem and the numeric suffix. Defaults to \code{c("_", "r")}. Use \code{""}
 to allow no separator (bare digits); in that case the column name must
-end with the digits (e.g. `Q11`, `Q12`).}
+end with the digits (e.g. \code{Q11}, \code{Q12}).}
 }
 \value{
-A tidyselect selection, suitable for use inside `dplyr::select()`,
-  `dplyr::across()`, `y2clerk::freqs()`, etc.
+A tidyselect selection, suitable for use inside \code{dplyr::select()},
+\code{dplyr::across()}, \code{y2clerk::freqs()}, etc.
 }
 \description{
 A tidyselect helper that matches columns whose names consist of a stem
 immediately followed by one of the allowed separators and then a digit.
-Useful for selecting multi-select variable sets (e.g. `Q1_1`, `Q1_2`, ...)
+Useful for selecting multi-select variable sets (e.g. \code{Q1_1}, \code{Q1_2}, ...)
 without also grabbing unrelated columns that merely start with the same stem.
 }
 \details{
-`stem()` by default does not select column names who start with the question stem and end with text (QuestionStem_oe or QuestionStem_TEXT).
-This is intentional. If you need those columns as well, use a plain `tidyselect::starts_with()`.
-This function differs from `dplyr::select(tidyselect::starts_with('QuestionStem'), -ends_with('Text'))`
+\code{stem()} by default does not select column names who start with the question stem and end with text (QuestionStem_oe or QuestionStem_TEXT).
+This is intentional. If you need those columns as well, use a plain \code{tidyselect::starts_with()}.
+This function differs from \code{dplyr::select(tidyselect::starts_with('QuestionStem'), -ends_with('Text'))}
 in the fact that it does not select columns names who start with the question stem, contain other information, then end with a digit.
 }
 \examples{
