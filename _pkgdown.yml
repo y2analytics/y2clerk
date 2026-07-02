@@ -1,9 +1,3 @@
 url: https://y2analytics.github.io/y2clerk/
 template:
   bootstrap: 5
-
-reference:
-  - title: "Package options"
-    contents:
-      - y2clerk-options
-
