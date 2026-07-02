@@ -38,7 +38,6 @@ Imports:
     tibble,
     tidyr,
     tidyselect,
-    pillar,
     cli
 Suggests:
     testthat (>= 3.0.0)
