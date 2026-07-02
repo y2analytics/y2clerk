@@ -1262,6 +1262,14 @@ check_data_frame2 <- function(dataset) {
           ),
           call = env
         )
+      } else if (grepl("not found", conditionMessage(e), fixed = TRUE)) {
+        cli::cli_abort(
+          c(
+            "x" = "dataset {.val {dataset}} not found",
+            "i" = "Please supply a valid dataset"
+          ),
+          call = env
+        )
       } else {
         stop(e)
       }
