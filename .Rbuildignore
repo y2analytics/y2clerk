@@ -8,3 +8,4 @@
 ^pkgdown$
 ^[.]?jarl[.]toml$
 ^\.claude$
+^LICENSE\.md$
