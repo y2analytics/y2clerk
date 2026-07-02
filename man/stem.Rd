@@ -13,6 +13,8 @@ stem(stem, separator = c("_", "r"), ignore.case = FALSE)
 the stem and the numeric suffix. Defaults to \code{c("_", "r")}. Use \code{""}
 to allow no separator (bare digits); in that case the column name must
 end with the digits (e.g. \code{Q11}, \code{Q12}).}
+
+\item{ignore.case}{default: FALSE. Boolean indicating whether to ignore the case for the stem.}
 }
 \value{
 A tidyselect selection, suitable for use inside \code{dplyr::select()},

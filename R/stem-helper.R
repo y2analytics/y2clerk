@@ -18,7 +18,8 @@
 #'   the stem and the numeric suffix. Defaults to `c("_", "r")`. Use `""`
 #'   to allow no separator (bare digits); in that case the column name must
 #'   end with the digits (e.g. `Q11`, `Q12`).
-#'
+#' @param ignore.case default: FALSE. Boolean indicating whether to ignore the case for the stem.
+#' 
 #' @return A tidyselect selection, suitable for use inside `dplyr::select()`,
 #'   `dplyr::across()`, `y2clerk::freqs()`, etc.
 #'

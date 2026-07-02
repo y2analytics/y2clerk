@@ -5,35 +5,35 @@
 \title{y2clerk package options}
 \description{
 y2clerk's behavior can be controlled with the following global options,
-set via [base::options()]. Each option has a built-in default that is used
+set via \code{\link[base:options]{base::options()}}. Each option has a built-in default that is used
 when the option is unset.
-
-# Options
-
-## `y2clerk.mcc_correction`
-
-**Default:** `"fdr"`
-
-The multiple comparison correction algorithm passed to [stats::p.adjust()]
-in [sig_test_y2()]. Must be one of:
-`r paste(stats::p.adjust.methods, collapse = ", ")`.
-
-```r
-# Use Bonferroni correction instead of the default FDR
-options(y2clerk.mcc_correction = "bonferroni")
-```
-
-## `y2clerk.quantile_algorithm`
-
-**Default:** `"hf8"`
-
-The quantile algorithm (`qrule`) passed to [survey::svyquantile()] when
-`freqs()` is called with `stat = "quantile"` and a weight variable.
-See [survey::svyquantile()] for the full list of supported rules (e.g.
-`"hf1"` through `"hf9"`, `"math"`, `"school"`).
-
-```r
-# Use the "school" quantile rule
-options(y2clerk.quantile_algorithm = "school")
-```
 }
+\section{Options}{
+\subsection{\code{y2clerk.mcc_correction}}{
+
+\strong{Default:} \code{"fdr"}
+
+The multiple comparison correction algorithm passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}
+in \code{\link[=sig_test_y2]{sig_test_y2()}}. Must be one of:
+holm, hochberg, hommel, bonferroni, BH, BY, fdr, none.
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{# Use Bonferroni correction instead of the default FDR
+options(y2clerk.mcc_correction = "bonferroni")
+}\if{html}{\out{</div>}}
+}
+
+\subsection{\code{y2clerk.quantile_algorithm}}{
+
+\strong{Default:} \code{"hf8"}
+
+The quantile algorithm (\code{qrule}) passed to \code{\link[survey:svyquantile]{survey::svyquantile()}} when
+\code{freqs()} is called with \code{stat = "quantile"} and a weight variable.
+See \code{\link[survey:svyquantile]{survey::svyquantile()}} for the full list of supported rules (e.g.
+\code{"hf1"} through \code{"hf9"}, \code{"math"}, \code{"school"}).
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{# Use the "school" quantile rule
+options(y2clerk.quantile_algorithm = "school")
+}\if{html}{\out{</div>}}
+}
+}
+
