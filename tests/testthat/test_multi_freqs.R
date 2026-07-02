@@ -180,7 +180,7 @@ test_that("multi_freqs - nas_group argument", {
 
   # NAs showing up on the unchosen activity
 
-  expect_equal(length(unique(test$group_var)), 3)
+  expect_length(unique(test$group_var), 3)
 })
 
 
@@ -198,10 +198,9 @@ test_that("multi_freqs - factor_group argument", {
       factor_group = FALSE
     )
 
-  expect_equal(stringr::str_detect(test_factor_true$group_var, 'male')[1], TRUE)
-  expect_equal(
-    stringr::str_detect(test_factor_false$group_var, 'male')[1],
-    FALSE
+  expect_true(stringr::str_detect(test_factor_true$group_var, 'male')[1])
+  expect_false(
+    stringr::str_detect(test_factor_false$group_var, 'male')[1]
   )
 })
 

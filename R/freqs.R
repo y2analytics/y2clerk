@@ -141,14 +141,15 @@ freqs <- function(
     )
   }
 
-  if (unweighted_ns == TRUE && weight_exists == FALSE) {
-    cli::cli_abort(
-      c(
-        "{.arg unweighted_ns} is {.val TRUE} but no weight variable was provided.",
-        "i" = "Supply a weighting column via {.arg wt}, or set {.code unweighted_ns = FALSE}."
+  if (isTRUE(unweighted_ns)) {
+    if (!weight_exists) {
+      cli::cli_abort(
+        c(
+          "{.arg unweighted_ns} is {.val TRUE} but no weight variable was provided.",
+          "i" = "Supply a weighting column via {.arg wt}, or set {.code unweighted_ns = FALSE}."
+        )
       )
-    )
-  } else if (unweighted_ns == TRUE && weight_exists == TRUE) {
+    }
     frequencies <- freqs_wuw(
       dataset,
       ...,
@@ -284,10 +285,10 @@ freqs_original <- function(
   factor_group = factor_group,
   show_missing_levels = show_missing_levels
 ) {
-  if (factor_group == TRUE) {
+  if (isTRUE(factor_group)) {
     dataset <- group_factor(dataset)
   }
-  if (nas_group == FALSE) {
+  if (isFALSE(nas_group)) {
     dataset <- remove_group_nas(dataset)
   }
   weight <- dplyr::enquo(wt)
@@ -914,7 +915,7 @@ group_rename <- function(dataset) {
 
   if (length(grouping_vars) > 0) {
     # 1 or more grouping vars
-    for (i in 1:length(grouping_vars)) {
+    for (i in seq_along(grouping_vars)) {
       if (i == 1) {
         dataset <- dataset |>
           dplyr::rename(group_var = grouping_vars[i])
@@ -1152,7 +1153,7 @@ labelled_ns <- function(
       value = .data$value |> as.character()
     )
 
-  if (show_missing_levels == TRUE) {
+  if (show_missing_levels) {
     all_levels <- dataset |>
       dplyr::ungroup() |>
       dplyr::pull(!!variable) |>
@@ -1179,9 +1180,9 @@ labelled_ns <- function(
           by = c(grouping_vars, 'label', 'value', 'variable')
         ) |>
         dplyr::mutate(
-          n = ifelse(is.na(.data$n), 0, .data$n)
+          n = dplyr::if_else(is.na(.data$n), 0, .data$n)
         )
-      if (nas_group == FALSE) {
+      if (isFALSE(nas_group)) {
         counts <- counts |>
           dplyr::filter(
             dplyr::if_all(1, \(x) !is.na(x))
@@ -1195,13 +1196,13 @@ labelled_ns <- function(
           by = c('label', 'value', 'variable')
         ) |>
         dplyr::mutate(
-          n = ifelse(is.na(.data$n), 0, .data$n)
+          n = dplyr::if_else(is.na(.data$n), 0, .data$n)
         )
     }
     counts <- counts |> dplyr::arrange(.data$value)
   }
 
-  if (prompt == TRUE) {
+  if (isTRUE(prompt)) {
     counts$prompt <- prompt_text
   }
 

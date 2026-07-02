@@ -28,6 +28,7 @@ Imports:
     haven,
     httr,
     jsonlite,
+    lifecycle,
     labelled (>= 2.4.0),
     magrittr,
     officer,

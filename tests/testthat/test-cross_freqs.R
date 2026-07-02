@@ -72,7 +72,7 @@ test_that("wide = TRUE", {
 
   expect_equal(class(frequencies$results), "list") # is nested
   expect_equal(grouping_vars, GROUP_VARS2) # id columns contain all group_vars
-  expect_equal(length(table1$variable), 3) # only am or vs
+  expect_length(table1$variable, 3) # only am or vs
 })
 
 
@@ -179,7 +179,7 @@ test_that("include_overall", {
     dplyr::mutate(sums = sum(n)) |>
     dplyr::distinct(group_var_name, .keep_all = TRUE)
   expect_equal(grouping_vars, c("Overall", "am", "vs"))
-  expect_equal(length(grouping_vars), 3)
+  expect_length(grouping_vars, 3)
   expect_equal(
     group_sums$sums[1],
     group_sums$sums[2]

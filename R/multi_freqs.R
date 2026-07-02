@@ -76,7 +76,7 @@ multi_freqs <- function(
     unique()
 
   # If no variables are specified, assume user wants to run function on entire dataset
-  if (length(pattern) == 0 & dplyr::is_grouped_df(dataset) == FALSE) {
+  if (length(pattern) == 0 && !dplyr::is_grouped_df(dataset)) {
     pattern <- dataset |>
       dplyr::select(-{{ wt }}) |>
       names() |>
@@ -90,7 +90,7 @@ multi_freqs <- function(
   }
 
   # Same as above for grouped, length == 0 dataset
-  if (length(pattern) == 0 & dplyr::is_grouped_df(dataset) == TRUE) {
+  if (length(pattern) == 0 && dplyr::is_grouped_df(dataset)) {
     pattern <- dataset |>
       dplyr::ungroup() |>
       dplyr::select(
@@ -144,11 +144,7 @@ multi_freqs <- function(
         ns = rowSums(
           dplyr::across(
             .cols = dplyr::matches(stringr::str_c('^', i, '_[0-9]')),
-            .fns = ~ ifelse(
-              is.na(.x),
-              FALSE,
-              TRUE
-            )
+            .fns = \(x) !is.na(x)
           )
         )
       ) |>
@@ -170,7 +166,7 @@ multi_freqs <- function(
         show_missing_levels = show_missing_levels
       )
 
-    if (remove_nas == TRUE) {
+    if (isTRUE(remove_nas)) {
       data <- data |>
         dplyr::filter(
           !is.na(.data$value)

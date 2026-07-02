@@ -89,6 +89,7 @@ stem <- function(stem, separator = c("_", "r"), ignore.case = FALSE) {
 
 # extract_stem (Used for old multi-freqs interface)
 
+# jarl-ignore unused_function: To be used in the near future
 extract_stem <- function(nms) {
   nms |>
     stringr::str_remove("_[0-9]+_TEXT$") |>

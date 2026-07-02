@@ -40,11 +40,11 @@ append_ns <-
   ) {
     label <- NULL
     character_split <- ' '
-    if (newline == TRUE) {
+    if (isTRUE(newline)) {
       character_split <- '\n'
     }
 
-    if (by_group_var == FALSE) {
+    if (isFALSE(by_group_var)) {
       dataset |>
         dplyr::mutate(
           '{{append_to}}' := stringr::str_c(

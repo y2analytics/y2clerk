@@ -148,7 +148,7 @@ sig_test_y2 <- function(
   # Letter references
   sig_codes <- data.frame(
     group_levels = group_levels,
-    reference = letters[1:length(group_levels)]
+    reference = letters[seq_along(group_levels)]
   )
 
   # New column for test results
@@ -534,7 +534,7 @@ sig_test_y2 <- function(
         )
       ) |>
       dplyr::mutate(dplyr::across(dplyr::everything(), \(x) {
-        replace(x, is.na(x), 0)
+        as.character(replace(x, is.na(x), 0))
       }))
 
     # Get wide sig codes
@@ -572,7 +572,7 @@ sig_test_y2 <- function(
     xtab <- data.frame()
 
     for (i in seq_len(nrow(xtab_results))) {
-      xtab <- rbind(
+      xtab <- dplyr::bind_rows(
         xtab,
         xtab_results[i, ],
         xtab_codes[i, ]

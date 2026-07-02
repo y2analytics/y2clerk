@@ -11,7 +11,7 @@ responses <- {
     q1 = sample(
       x = c(datasets::swiss$Agriculture, NA),
       size = 25,
-      prob = c(rep(.8 / 47, 47), 0.2),
+      prob = c(rep(0.8 / 47, 47), 0.2),
       replace = TRUE
     ),
     # factor (numbers), no value labels
@@ -51,7 +51,7 @@ responses <- {
     group_var1 = sample(
       c('group 1', 'group 2', NA_character_),
       25,
-      prob = c(.8, .15, .05),
+      prob = c(0.8, 0.15, 0.05),
       replace = TRUE
     ),
     # numeric weights
@@ -112,46 +112,46 @@ responses2 <- data.frame(
   s_activity_1 = sample(
     1:5,
     25,
-    prob = c(.4, .3, .2, .0, .1),
+    prob = c(0.4, 0.3, 0.2, 0.0, 0.1),
     replace = TRUE
   ),
   # multiple select
   m_activity_1 = sample(
     c(NA_real_, 1),
     25,
-    prob = c(.9, .1),
+    prob = c(0.9, 0.1),
     replace = TRUE
   ),
   m_activity_2 = sample(
     c(NA_real_, 1),
     25,
-    prob = c(.6, .4),
+    prob = c(0.6, 0.4),
     replace = TRUE
   ),
   m_activity_3 = sample(
     c(NA_real_, 1),
     25,
-    prob = c(.8, .2),
+    prob = c(0.8, 0.2),
     replace = TRUE
   ),
   m_activity_10 = sample(
     c(NA_real_, 1),
     25,
-    prob = c(.5, .5),
+    prob = c(0.5, 0.5),
     replace = TRUE
   ),
   m_activity_21 = sample(
     c(NA_real_, 1),
     25,
-    prob = c(.1, .9),
+    prob = c(0.1, 0.9),
     replace = TRUE
   ),
   m_activity_22 = NA_real_,
   # numeric weights
   weights = sample(
-    c(.5, 1, 2, 4),
+    c(0.5, 1, 2, 4),
     25,
-    prob = rep(.25, 4),
+    prob = rep(0.25, 4),
     replace = TRUE
   )
 ) |>
@@ -299,7 +299,7 @@ responses4 <- {
     q1 = sample(
       x = c(datasets::swiss$Agriculture, NA),
       size = 25,
-      prob = c(rep(.8 / 47, 47), 0.2),
+      prob = c(rep(0.8 / 47, 47), 0.2),
       replace = TRUE
     ),
 

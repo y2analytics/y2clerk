@@ -20,7 +20,7 @@ as_freq_y2 <- function(df, p = NULL) {
     }
 
     #Make sure that p is named for every element of p
-    if (any(is.null(names(p))) | any(names(p) == "")) {
+    if (any(is.null(names(p))) || any(names(p) == "")) {
       cli::cli_abort("Every element of p must be named")
     }
 

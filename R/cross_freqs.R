@@ -64,13 +64,13 @@ cross_freqs <-
     stat <- rlang::arg_match(stat)
     cross_error_messages(dataset, group_vars)
 
-    if (include_overall == TRUE) {
+    if (include_overall) {
       dataset$Overall <- '1'
       group_vars <- c('Overall', group_vars)
     }
 
     # start for loop: run freqs for each level in group_vars
-    for (i in 1:length(group_vars)) {
+    for (i in seq_along(group_vars)) {
       group_symbol <- rlang::sym(group_vars[i])
       if (i == 1) {
         results_raw <-
@@ -117,25 +117,25 @@ cross_freqs <-
     } # end of for loop
 
     # exclude_groups (cut group_vars from variable if TRUE)
-    results_raw <- exclude_groups_fun(results_raw, group_vars, exclude_groups)
+    if (exclude_groups) {
+      results_raw <- results_raw |>
+        dplyr::filter_out(.data$variable %in% group_vars)
+    }
 
     # Run long or wide
-    if (wide == FALSE) {
-      output <-
-        results_raw |>
+    if (isFALSE(wide)) {
+      output <- results_raw |>
         dplyr::select(
           'group_var_name',
           tidyselect::everything()
         ) |>
         dplyr::ungroup()
     } else {
-      output_unnamed <-
-        results_raw |>
+      output_unnamed <- results_raw |>
         pivot_nest() |>
         dplyr::ungroup()
 
-      output <-
-        output_unnamed |>
+      output <- output_unnamed |>
         dplyr::mutate(
           results = purrr::set_names(
             .data$results,
@@ -165,25 +165,10 @@ cross_error_messages <- function(dataset, group_vars) {
   )
 
   # Not a vector
-  if (is.vector(group_vars) == FALSE) {
+  if (!is.character(group_vars)) {
     stop(
       'group_vars should be a character vector of variable names. Try formatting like c("var1", "var2") instead of c(var1, var2) or quos(var1, var2)'
     )
-  }
-}
-
-
-### exclude_groups
-exclude_groups_fun <- function(results_raw, group_vars, exclude_groups) {
-  if (exclude_groups == FALSE) {
-    results_raw <- results_raw
-  } else {
-    results_raw <- results_raw |>
-      dplyr::mutate(
-        filter_out = as.numeric(.data$variable %in% group_vars) # 1 if matching
-      ) |>
-      dplyr::filter(.data$filter_out == 0) |>
-      dplyr::select(-'filter_out')
   }
 }
 

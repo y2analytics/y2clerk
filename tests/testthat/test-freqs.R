@@ -11,6 +11,7 @@ test_that("Not a dataframe error - vectors", {
 test_that("Not a dataframe error - matrix", {
   column_a <- c(1, 1, 1, 1, 2, 2, 3)
   column_b <- c(0.5, 1.2, 0.8, 0.5, 0.2, 0.1, 1)
+  # jarl-ignore undesirable_function: Using it explicitly for matrix combination
   table <- rbind(column_a, column_b)
   expect_snapshot(error = TRUE, freqs(table, column_a))
 })
