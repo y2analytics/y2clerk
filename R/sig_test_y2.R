@@ -8,7 +8,12 @@
 #' @param dataset The original data frame that the frequencies table came from
 #' @param banner_var This will be the banner variables for cross tabs. Must be the same as the grouping variable from the freqs() function.
 #' @param wt The weight variable used in the frequencies function, if applicable
-#' @param layout (default: 'tall') 'tall' formats the output to look like a basic grouped freqs table. 'wide' formats the output to look like the result from Q-formatted cross tabs
+#' @param layout default: 'tall': 'tall' formats the output to look like a basic grouped freqs table. 'wide' formats the output to look like the result from Q-formatted cross tabs
+#' @param correction (default: the value of `getOption('y2clerk.mcc_correction')`,
+#'   `'fdr'`). An algorithm for Multiple Comparison Correction. One of the valid
+#'   algorithms supported by [stats::p.adjust()]:
+#'   `r paste(stats::p.adjust.methods, collapse = ", ")`.
+
 #' @return A table that matches the output of cross tabs, showing significance differences between different groups for any input variables
 #' stats, cross tabs. Column comparison symbols: a, b, c... (p <= 0.05), A, B, C... (p <= 0.001); No symbol: not significant at at least (p <= 0.05)
 #' @examples
@@ -84,31 +89,27 @@ sig_test_y2 <- function(
   dataset,
   banner_var,
   wt = NULL,
-  layout = c('tall', 'wide')
+  layout = c('tall', 'wide'),
+  correction = getOption('y2clerk.mcc_correction', default = 'fdr')
 ) {
   ## Error for missing dataset argument
-  if (missing(dataset)) {
-    stop(
-      'argument "dataset" is missing, with no default'
-    )
-  }
+  rlang::check_data_frame(dataset)
 
   ## Error for missing banner_var argument
   if (missing(banner_var)) {
-    stop(
-      'argument "banner_var" is missing, with no default'
-    )
+    cli::cli_abort(c(
+      "x" = 'argument {.arg banner_var} is missing',
+      "i" = "Provide the same grouping variable you used in your {.fun freqs} call."
+    ))
   }
 
   ## Error for labelled double group_var
-  if (haven::is.labelled(frequencies$group_var) == TRUE) {
-    stop(
-      stringr::str_c(
-        'Banner variable "',
-        deparse(substitute(banner_var)),
-        '" is a labelled double; please set "factor_group" equal to TRUE in freqs() for this variable'
-      )
-    )
+  if (isTRUE(haven::is.labelled(frequencies$group_var))) {
+    cli::cli_abort(
+      c(
+        "x" = "Banner variable {.arg {deparse(substitute(banner_var))}} is a haven labelled vector.",
+        "i" = "Set {.arg factor_group = TRUE} in {.fun freqs} for this variable."
+      ))
   }
 
   ## Create logical for if there are weights
@@ -117,6 +118,12 @@ sig_test_y2 <- function(
 
   ## Test matching arguments
   layout <- rlang::arg_match(layout)
+
+  ## Test correction
+  if(!(correction %in% p.adjust.methods)) {
+    cli::cli_abort(c("x" = "{.arg correction} correction algorithm not found",
+    "i" = "Available correction algorithms: {.val {p.adjust.methods}}."))
+  }
 
   ## Getting iterables
   # Define variable name for responses reference
@@ -169,8 +176,8 @@ sig_test_y2 <- function(
       stringr::str_subset(stringr::str_c(var_stem, '_[0-9]+$'))
 
     if (
-      !var_stem %in% filtered_stems &
-        length(var_branches) > 1 &
+      !var_stem %in% filtered_stems &&
+        length(var_branches) > 1 &&
         length(value_levels) <= 2
     ) {
       # Filter all NA rows for each stem
@@ -179,11 +186,7 @@ sig_test_y2 <- function(
           ns = rowSums(
             dplyr::across(
               .cols = dplyr::matches(stringr::str_c('^', var_stem, '_[0-9]+$')),
-              .fns = ~ ifelse(
-                is.na(.x),
-                FALSE,
-                TRUE
-              )
+              .fns = \(x) !is.na(x)
             )
           )
         ) |>
@@ -196,7 +199,7 @@ sig_test_y2 <- function(
 
       # Set remaining NAs to zero as not to confuse test data
       if (
-        haven::is.labelled(dataset[[var_name]]) |
+        haven::is.labelled(dataset[[var_name]]) ||
           is.numeric(dataset[[var_name]])
       ) {
         # Set to numeric 0 for haven labelled or numeric vars
@@ -204,9 +207,9 @@ sig_test_y2 <- function(
           dplyr::mutate(
             dplyr::across(
               .cols = dplyr::matches(stringr::str_c('^', var_stem, '_[0-9]+$')),
-              .fns = ~ dplyr::case_when(
-                is.na(.x) ~ 0,
-                !is.na(.x) ~ .x
+              .fns = \(x) dplyr::case_when(
+                is.na(x) ~ 0,
+                !is.na(x) ~ x
               )
             )
           )
@@ -216,9 +219,9 @@ sig_test_y2 <- function(
           dplyr::mutate(
             dplyr::across(
               .cols = dplyr::matches(stringr::str_c('^', var_stem, '_[0-9]+$')),
-              .fns = ~ dplyr::case_when(
-                is.na(.x) ~ '0',
-                !is.na(.x) ~ .x
+              .fns = \(x) dplyr::case_when(
+                is.na(x) ~ '0',
+                !is.na(x) ~ x
               )
             )
           )
@@ -320,7 +323,7 @@ sig_test_y2 <- function(
             # Only where px is greater than py
             if (px > py) {
               # Unweighted
-              if (weight_exists == FALSE) {
+              if (isFALSE(weight_exists)) {
                 # Set up testing data
                 test_data <- filtered_dataset |>
                   dplyr::select(
@@ -350,7 +353,7 @@ sig_test_y2 <- function(
               }
 
               # Weighted
-              if (weight_exists == TRUE) {
+              if (isTRUE(weight_exists)) {
                 # Set up testing data
                 test_data <- filtered_dataset |>
                   dplyr::select(
@@ -395,7 +398,7 @@ sig_test_y2 <- function(
               # FDR correction (default; used in Q crosstabs)
               p_value <- stats::p.adjust(
                 p_value,
-                method = 'fdr',
+                method = correction,
                 n = choose(length(group_levels), 2)
               )
 
@@ -408,12 +411,12 @@ sig_test_y2 <- function(
 
               # Skip for any px < py
             } else {
-              code_result = ''
+              code_result <- ''
             }
 
             # Skip if j == k
           } else {
-            code_result = ''
+            code_result <- ''
           }
 
           ## Merge
@@ -421,7 +424,7 @@ sig_test_y2 <- function(
             # Onto value for haven labelled vars
             tested_freqs <- tested_freqs |>
               dplyr::mutate(
-                sig = ifelse(
+                sig = dplyr::if_else(
                   # For the group_var, varbiable, and value just tested against,
                   .data$group_var == j &
                     .data$variable == var_name &
@@ -436,7 +439,7 @@ sig_test_y2 <- function(
             # Onto label for all else
             tested_freqs <- tested_freqs |>
               dplyr::mutate(
-                sig = ifelse(
+                sig = dplyr::if_else(
                   # For the group_var, varbiable, and value just tested against,
                   .data$group_var == j &
                     .data$variable == var_name &
@@ -558,7 +561,7 @@ sig_test_y2 <- function(
     # Combine
     xtab <- data.frame()
 
-    for (i in 1:nrow(xtab_results)) {
+    for (i in seq_len(nrow(xtab_results))) {
       xtab <- rbind(
         xtab,
         xtab_results[i, ],
