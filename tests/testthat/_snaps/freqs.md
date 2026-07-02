@@ -14,10 +14,10 @@
       Error in `freqs()`:
       ! `dataset` must be a data frame, not a double matrix.
 
-# .by errors when grouping variale is not present in the data
+# .by errors when grouping variable is not present in the data
 
     Code
-      freq(penguins, species, .by = ideology)
+      freq(mtcars, mpg, .by = ideology)
     Condition
       Error in `freq()`:
       ! `.by` column `ideology` not found in `dataset`.
@@ -25,12 +25,12 @@
 # .by errors when data is already grouped
 
     Code
-      freq(dplyr::group_by(penguins, sex), species, .by = island)
+      freq(dplyr::group_by(mtcars, cyl), mpg, .by = vs)
     Condition
       Error in `freq()`:
       ! Cannot use `.by` on an already-grouped data frame.
       i Use `dplyr::group_by()` or `.by`, not both.
-      i The dataset is currently grouped by: "sex".
+      i The dataset is currently grouped by: "cyl".
 
 # Incorrect nas argument
 

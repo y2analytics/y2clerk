@@ -30,9 +30,7 @@
 #'     by_group_var = TRUE
 #'   )
 #' @export
-
-append_ns <-
-  function(
+append_ns <- function(
     dataset,
     append_to = label,
     by_group_var = FALSE,

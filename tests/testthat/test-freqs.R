@@ -75,24 +75,24 @@ test_that("weight column excluded even when selected via everything()", {
 
 
 test_that(".by works", {
-  result <- freqs(penguins, species, .by = island)
+  result <- freqs(mtcars, mpg, .by = cyl)
 
   expect_s3_class(result, 'freq_y2')
   expect_false(inherits(result, 'grouped_df'))
 })
 
-test_that(".by errors when grouping variale is not present in the data", {
+test_that(".by errors when grouping variable is not present in the data", {
   expect_snapshot(
     error = TRUE,
-    penguins |>
-      freq(species, .by = ideology)
+    mtcars |>
+      freq(mpg, .by = ideology)
   )
 })
 
 test_that(".by errors when data is already grouped", {
   expect_snapshot(
     error = TRUE,
-    penguins |> dplyr::group_by(sex) |> freq(species, .by = island)
+    mtcars |> dplyr::group_by(cyl) |> freq(mpg, .by = vs)
   )
 })
 
