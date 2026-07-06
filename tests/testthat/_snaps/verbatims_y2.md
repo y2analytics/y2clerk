@@ -63,15 +63,48 @@
 
 # Large data frame
 
-    Code
-      frequencies
-    Output
-      # A tibble: 3 x 4
-        variable prompt    label                                               base_ns
-        <chr>    <chr>     <chr>                                                 <int>
-      1 var1     My prompt "line \n  breaks "                                        3
-      2 var1     My prompt "!@#$%^&*()_+\".,"                                        3
-      3 var1     My prompt "😀😁😂😃😄😅😆😇😈😉😊😋😌😍😎😏😐😑😒😓😔😕😖😗😘😙😚😛😜😝😞😟😠😡😢😣😤😥😦😧😨😩😪😫😬😭😮😯😰~       3
+    {
+      "type": "list",
+      "attributes": {
+        "names": {
+          "type": "character",
+          "attributes": {},
+          "value": ["variable", "prompt", "label", "base_ns"]
+        },
+        "row.names": {
+          "type": "integer",
+          "attributes": {},
+          "value": [1, 2, 3]
+        },
+        "class": {
+          "type": "character",
+          "attributes": {},
+          "value": ["tbl_df", "tbl", "data.frame"]
+        }
+      },
+      "value": [
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["var1", "var1", "var1"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["My prompt", "My prompt", "My prompt"]
+        },
+        {
+          "type": "character",
+          "attributes": {},
+          "value": ["line \n  breaks ", "!@#$%^&*()_+\".,", "😀😁😂😃😄😅😆😇😈😉😊😋😌😍😎😏😐😑😒😓😔😕😖😗😘😙😚😛😜😝😞😟😠😡😢😣😤😥😦😧😨😩😪😫😬😭😮😯😰😱😲😳😴😵😶😷😸😹😺😻😼😽😾😿🙀🙁🙂🙃🙄🙅🙆🙇🙈🙉🙊🙋🙌🙍🙎🙏"]
+        },
+        {
+          "type": "integer",
+          "attributes": {},
+          "value": [3, 3, 3]
+        }
+      ]
+    }
 
 # multiple vars
 

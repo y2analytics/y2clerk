@@ -147,7 +147,10 @@ test_that("Large data frame", {
   frequencies <- verbatims_y2(df_special, var1)
   length_freqs <- dplyr::count(frequencies) |> as.numeric()
 
-  expect_snapshot(frequencies)
+  # Snapshot the data values (not the printed tibble) so Unicode is serialized
+  # consistently across platforms. Printing emoji as glyphs vs. escaped codes
+  # varies by console locale (e.g. UTF-8 on Mac/Linux vs. escapes on Windows CI).
+  expect_snapshot_value(frequencies, style = "json2")
   expect_equal(length_freqs, 3)
 })
 
