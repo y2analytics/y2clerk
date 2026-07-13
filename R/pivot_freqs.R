@@ -62,7 +62,7 @@
 #'
 #'   df |>
 #'     dplyr::group_by(group) |>
-#'     multi_freqs(activity_1) |>
+#'     multi_freqs(activity) |>
 #'     pivot_freqs()
 pivot_freqs <- function(
   dataset,

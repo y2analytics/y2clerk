@@ -68,6 +68,6 @@ single-variable frequencies tables always pivot on the bare \code{label} values.
 
   df |>
     dplyr::group_by(group) |>
-    multi_freqs(activity_1) |>
+    multi_freqs(activity) |>
     pivot_freqs()
 }
