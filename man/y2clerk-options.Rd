@@ -9,6 +9,20 @@ set via \code{\link[base:options]{base::options()}}. Each option has a built-in 
 when the option is unset.
 }
 \section{Options}{
+\subsection{\code{y2clerk.quiet}}{
+
+\strong{Default:} \code{FALSE}
+
+Whether to suppress y2clerk's informational messages (e.g. progress
+notes from \code{\link[=multi_freqs]{multi_freqs()}} and \code{\link[=sig_test_y2]{sig_test_y2()}}, or the hints emitted by
+\code{\link[=freqs]{freqs()}} about ignored arguments). Warnings and errors are unaffected.
+Set to \code{TRUE} to silence informational output.
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{# Silence informational messages
+options(y2clerk.quiet = TRUE)
+}\if{html}{\out{</div>}}
+}
+
 \subsection{\code{y2clerk.mcc_correction}}{
 
 \strong{Default:} \code{"fdr"}

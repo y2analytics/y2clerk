@@ -475,7 +475,7 @@ validate_inputs <- function(
 
   # 3d) percentile supplied but ignored - inform immediately (not an error)
   if (!(stat %in% c('quantile', 'summary')) && !is.null(percentile)) {
-    cli::cli_inform(c(
+    inform_quiet(c(
       "i" = "{.arg percentile} only affects output when {.code stat = 'quantile'}.",
       "i" = "Current {.arg stat} is {.val {stat}}, so {.arg percentile} ({.val {percentile}}) is ignored."
     ))
@@ -710,7 +710,7 @@ get_summary_output_for_cont_var <- function(
   # Remind user that percentile is ignored for stat = 'summary' (subsequent
   # code hard-codes the six summary quantiles).
   if (!is.null(percentile)) {
-    cli::cli_inform(
+    inform_quiet(
       c(
         "i" = "{.arg percentile} only affects output when {.code stat = 'quantile'}.",
         "i" = "Current {.arg stat} is {.val summary}, so {.arg percentile} ({.val {percentile}}) is ignored."
