@@ -60,130 +60,144 @@ multi_freqs <- function(
   unweighted_ns = FALSE,
   show_missing_levels = TRUE
 ) {
-  # Creates an empty list to be populated with frequencies data frames
-  datalist <- list()
+  wt_quo <- rlang::enquo(wt)
 
+  pattern <- resolve_pattern(dataset, ..., wt_quo = wt_quo)
+
+  datalist <- purrr::map(pattern, function(stem) {
+    warn_stem_type(dataset, stem)
+
+    data <- freq_one_stem(
+      dataset = dataset,
+      stem = stem,
+      wt_quo = wt_quo,
+      remove_nas = remove_nas,
+      prompt = prompt,
+      digits = digits,
+      nas_group = nas_group,
+      factor_group = factor_group,
+      unweighted_ns = unweighted_ns,
+      show_missing_levels = show_missing_levels
+    )
+
+    cli::cli_inform(
+      stringr::str_c('Variable stem "', stem, '" successfully freq\'d')
+    )
+
+    data
+  })
+
+  dplyr::bind_rows(datalist)
+}
+
+
+# Internal helpers ------------------------------------------------------------
+
+# Regex used to select the columns belonging to a stem (underscore + digit).
+stem_regex <- function(stem) {
+  stringr::str_c('^', stem, '_[0-9]')
+}
+
+# Resolve the vector of stems to freq. Uses the columns passed in `...`; if none
+# were passed, falls back to every column in the dataset (minus the weight and
+# any grouping variables).
+resolve_pattern <- function(dataset, ..., wt_quo) {
   pattern <- dataset |>
     dplyr::ungroup() |>
     dplyr::select(...) |>
     names() |>
-    stringr::str_remove(
-      '_[0-9]+$'
-    ) |>
-    stringr::str_remove(
-      '_[0-9]+_TEXT$'
-    ) |>
-    unique()
+    extract_stem()
 
-  # If no variables are specified, assume user wants to run function on entire dataset
-  if (length(pattern) == 0 && !dplyr::is_grouped_df(dataset)) {
-    pattern <- dataset |>
-      dplyr::select(-{{ wt }}) |>
-      names() |>
-      stringr::str_remove(
-        '_[0-9]+$'
-      ) |>
-      stringr::str_remove(
-        '_[0-9]+_TEXT$'
-      ) |>
-      unique()
+  if (length(pattern) > 0) {
+    return(pattern)
   }
 
-  # Same as above for grouped, length == 0 dataset
-  if (length(pattern) == 0 && dplyr::is_grouped_df(dataset)) {
-    pattern <- dataset |>
+  if (!dplyr::is_grouped_df(dataset)) {
+    dataset |>
+      dplyr::select(-!!wt_quo) |>
+      names() |>
+      extract_stem()
+  } else {
+    dataset |>
       dplyr::ungroup() |>
       dplyr::select(
-        -{{ wt }},
+        -!!wt_quo,
         -tidyselect::all_of(dplyr::group_vars(dataset))
       ) |>
       names() |>
-      stringr::str_remove(
-        '_[0-9]+$'
-      ) |>
-      stringr::str_remove(
-        '_[0-9]+_TEXT$'
-      ) |>
-      unique()
+      extract_stem()
   }
+}
 
-  # Creating a filtered frequencies dataframe for each stem
-  for (i in pattern) {
-    # Warning Section
-    type_check <- dataset |>
-      dplyr::ungroup() |>
-      dplyr::select(
-        dplyr::matches(stringr::str_c('^', i, '_[0-9]'))
-      )
+# Warn when a stem points at a text variable or a single-select variable.
+warn_stem_type <- function(dataset, stem) {
+  type_check <- dataset |>
+    dplyr::ungroup() |>
+    dplyr::select(dplyr::matches(stem_regex(stem)))
 
-    # Throw warning if stem is character variable
-    if (is.character(type_check[, 1])) {
-      cli::cli_warn(
-        'Text variable stem detected -- please ensure this is intentional'
-      )
-    }
-
-    # Throw warning if stem is single select variable
-    if (nrow(freqs(type_check |> dplyr::select(1), nas = FALSE)) > 1) {
-      cli::cli_warn(
-        'Single select variable stem detected -- please ensure this is intentional'
-      )
-    }
-
-    data <- dataset |>
-      # dataset selects all columns that start with the string or the ith element in the string list
-      dplyr::select(
-        dplyr::matches(stringr::str_c('^', i, '_[0-9]')),
-        # "_TEXT" question is always removed
-        -dplyr::ends_with('_TEXT'),
-        # weight is selected if specified
-        {{ wt }}
-      ) |>
-      # Following lines filter out rows where none of the questions have been answered
-      dplyr::mutate(
-        ns = rowSums(
-          dplyr::across(
-            .cols = dplyr::matches(stringr::str_c('^', i, '_[0-9]')),
-            .fns = \(x) !is.na(x)
-          )
-        )
-      ) |>
-      dplyr::filter(
-        ns > 0
-      ) |>
-      dplyr::select(
-        -ns
-      ) |>
-      # Original freqs operation
-      freqs(
-        nas = TRUE,
-        wt = {{ wt }},
-        prompt = prompt,
-        digits = digits,
-        nas_group = nas_group,
-        factor_group = factor_group,
-        unweighted_ns = unweighted_ns,
-        show_missing_levels = show_missing_levels
-      )
-
-    if (isTRUE(remove_nas)) {
-      data <- data |>
-        dplyr::filter(
-          !is.na(.data$value)
-        )
-    }
-
-    # Adds stem freqs to datalist
-    datalist[[i]] <- data
-
-    cli::cli_inform(
-      stringr::str_c(
-        'Variable stem "',
-        i,
-        '" successfully freq\'d'
-      )
+  if (is.character(type_check[, 1])) {
+    cli::cli_warn(
+      'Text variable stem detected -- please ensure this is intentional'
     )
   }
 
-  dplyr::bind_rows(datalist)
+  if (nrow(freqs(type_check |> dplyr::select(1), nas = FALSE)) > 1) {
+    cli::cli_warn(
+      'Single select variable stem detected -- please ensure this is intentional'
+    )
+  }
+}
+
+# Run freqs on a single stem: select its columns, drop rows where the respondent
+# answered none of them, then freq.
+freq_one_stem <- function(
+  dataset,
+  stem,
+  wt_quo,
+  remove_nas,
+  prompt,
+  digits,
+  nas_group,
+  factor_group,
+  unweighted_ns,
+  show_missing_levels
+) {
+  regex <- stem_regex(stem)
+
+  data <- dataset |>
+    dplyr::select(
+      dplyr::matches(regex),
+      # "_TEXT" question is always removed
+      -dplyr::ends_with('_TEXT'),
+      # weight is selected if specified
+      !!wt_quo
+    ) |>
+    # Filter out rows where none of the questions have been answered
+    dplyr::mutate(
+      ns = rowSums(
+        dplyr::across(
+          .cols = dplyr::matches(regex),
+          .fns = \(x) !is.na(x)
+        )
+      )
+    ) |>
+    dplyr::filter(ns > 0) |>
+    dplyr::select(-ns) |>
+    freqs(
+      nas = TRUE,
+      wt = !!wt_quo,
+      prompt = prompt,
+      digits = digits,
+      nas_group = nas_group,
+      factor_group = factor_group,
+      unweighted_ns = unweighted_ns,
+      show_missing_levels = show_missing_levels
+    )
+
+  if (isTRUE(remove_nas)) {
+    data <- data |>
+      dplyr::filter(!is.na(.data$value))
+  }
+
+  data
 }
