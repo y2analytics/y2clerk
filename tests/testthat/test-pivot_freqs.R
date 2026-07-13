@@ -99,7 +99,7 @@ test_that("pivot_freqs errors on missing label or result column", {
 test_that("pivot_freqs: multi-select stem with unique labels pivots on label", {
   frequencies <- responses2 |>
     dplyr::group_by(gender) |>
-    multi_freqs(m_activity_1)
+    multi_freqs(m_activity)
 
   expect_snapshot(frequencies |> pivot_freqs())
 })
@@ -107,7 +107,7 @@ test_that("pivot_freqs: multi-select stem with unique labels pivots on label", {
 test_that("pivot_freqs: multi-select stem with unique labels pivots on group_var", {
   frequencies <- responses2 |>
     dplyr::group_by(gender) |>
-    multi_freqs(m_activity_1)
+    multi_freqs(m_activity)
 
   expect_snapshot(frequencies |> pivot_freqs(group_var))
 })
@@ -118,7 +118,7 @@ test_that("pivot_freqs: multi-select stem with unique labels pivots on group_var
 test_that("pivot_freqs: multi-select stems with colliding labels get variable-prefixed column names", {
   frequencies <- responses_multi_select |>
     dplyr::group_by(group_var) |>
-    multi_freqs(q_festivals_1, q_parades_1)
+    multi_freqs(q_festivals, q_parades)
 
   expect_snapshot(frequencies |> pivot_freqs())
 })
@@ -126,7 +126,7 @@ test_that("pivot_freqs: multi-select stems with colliding labels get variable-pr
 test_that("pivot_freqs: multi-select stems with colliding labels keep variable as id column on group_var pivot", {
   frequencies <- responses_multi_select |>
     dplyr::group_by(group_var) |>
-    multi_freqs(q_festivals_1, q_parades_1)
+    multi_freqs(q_festivals, q_parades)
 
   expect_snapshot(frequencies |> pivot_freqs(group_var))
 })

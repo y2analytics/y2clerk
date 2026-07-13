@@ -1,3 +1,15 @@
+# y2clerk 1.0.0
+## Breaking changes
+* `multi_freqs()` now selects a stem's columns with the `stem()` tidyselect helper. Pass the question **stem** (e.g. `multi_freqs(df, Q1)`), not an individual column (e.g. `multi_freqs(df, Q1_1)`). Passing an actual variable now warns and returns no rows for that stem.
+
+## New features
+* `multi_freqs()` accepts stems as bare symbols, strings, or a character vector via `all_of()` / `any_of()`.
+* `multi_freqs()` gains `separator` (default `c("_", "r")`) and `ignore.case` arguments, both passed through to `stem()`.
+
+## Maintenance
+* `multi_freqs()` internals refactored into smaller helper functions.
+
+
 # y2clerk 0.7.3
 ## Display changes
 * Click to print (n = Inf) - When you run a freq(), the text at the bottom that says `print(n = ...)` is now clickable and will print the most recently displayed frequency tibble with `n = Inf`.

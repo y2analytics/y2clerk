@@ -2,7 +2,7 @@
 % Please edit documentation in R/multi_freqs.R
 \name{multi_freqs}
 \alias{multi_freqs}
-\title{Run frequencies for multiple select variables}
+\title{Run frequencies for multiple-select variables}
 \usage{
 multi_freqs(
   dataset,
@@ -14,14 +14,17 @@ multi_freqs(
   nas_group = TRUE,
   factor_group = FALSE,
   unweighted_ns = FALSE,
-  show_missing_levels = TRUE
+  show_missing_levels = TRUE,
+  separator = c("_", "r"),
+  ignore.case = FALSE
 )
 }
 \arguments{
 \item{dataset}{A dataframe.}
 
-\item{...}{The unquoted names of a set of variables in the dataset referring to variable "stems". If nothing
-is specified, the function runs a frequency on every column in given dataset.}
+\item{...}{Question stems to tabulate, given as bare symbols (\code{Q1}), strings
+(\code{"Q1"}), or a character vector wrapped in \code{all_of()} / \code{any_of()}. If
+nothing is specified, the function runs on every stem in the dataset.}
 
 \item{remove_nas}{Boolean, after freqs is run (which always includes NAs), whether or not to filter out counts of NA value (default: TRUE).}
 
@@ -38,13 +41,34 @@ is specified, the function runs a frequency on every column in given dataset.}
 \item{unweighted_ns}{Boolean, whether the 'n' column in the freqs table should be UNweighted while results ARE weighted. This argument can only be used if a wt variable is used. If no weight variable is used, the 'n' column will always be unweighted (default: FALSE).}
 
 \item{show_missing_levels}{Boolean, whether to keep response levels with no data (default: TRUE)}
+
+\item{separator}{Character vector of separators allowed between the stem and
+its numeric suffix, passed through to \code{\link[=stem]{stem()}} (default: \code{c("_", "r")}).}
+
+\item{ignore.case}{Boolean, whether to match the stem case-insensitively,
+passed through to \code{\link[=stem]{stem()}} (default: FALSE).}
 }
 \value{
 A dataframe with the variable names, prompts, values, labels, counts,
 stats, and resulting calculations.
 }
 \description{
-Filters out rows that are completely NULL values (if respondent did not answer question) then runs freqs
+\code{multi_freqs()} runs \code{\link[=freqs]{freqs()}} across one or more multiple-select ("select
+all that apply") question \emph{stems}. For each stem it selects the associated
+columns with the \code{\link[=stem]{stem()}} tidyselect helper, drops respondents who answered
+none of them, then runs \code{freqs()}.
+}
+\details{
+Pass the \emph{stem} of each question, not an individual column. For a question
+stored as \code{Q1_1}, \code{Q1_2}, \code{Q1_3}, pass \code{Q1}. Stems may be given as bare
+symbols (\code{Q1}), strings (\code{"Q1"}), or spliced in from a character vector with
+\code{\link[tidyselect:all_of]{tidyselect::all_of()}} / \code{\link[tidyselect:any_of]{tidyselect::any_of()}}. If no stems are given,
+\code{multi_freqs()} runs on every stem in the dataset.
+
+Columns are matched with \code{\link[=stem]{stem()}}, so \verb{_TEXT} / open-ended columns are
+excluded automatically. If you pass a name that is itself a column in the
+dataset (e.g. \code{Q1_1}), \code{multi_freqs()} warns: the modern interface expects
+the stem rather than an exemplar column.
 }
 \examples{
 
@@ -55,24 +79,26 @@ df <- data.frame(
   Q1_3 = c(NA, 1, 1, NA, 4, 1, NA),
   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
 ) |>
-  tidyr::as_tibble()
+  tibble::as_tibble()
 
 
-# All 3 methods below give the same output
-multi_freqs(df, Q1_1)
-df |> multi_freqs(Q1_1)
-df |>
-  dplyr::select(dplyr::starts_with("Q1")) |>
-  multi_freqs()
+# Pass the stem, not an individual column. These give the same output:
+multi_freqs(df, Q1)
+df |> multi_freqs(Q1)
+df |> multi_freqs("Q1")
 
 
-# Grouped examples with weights (both have same outputs)
+# Splice stems in from a character vector
+stems <- c("Q1")
+df |> multi_freqs(tidyselect::all_of(stems))
+
+
+# Grouped example with weights
 df |>
   dplyr::group_by(a) |>
-  multi_freqs(Q1_1, wt = weights)
-df |>
-  dplyr::group_by(a) |>
-  dplyr::select(starts_with("Q1"), weights) |>
-  multi_freqs(wt = weights)
+  multi_freqs(Q1, wt = weights)
 
+}
+\seealso{
+\code{\link[=stem]{stem()}}, \code{\link[=freqs]{freqs()}}
 }
