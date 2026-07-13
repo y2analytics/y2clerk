@@ -26,7 +26,7 @@
 #'   Q1_3 = c(NA, 1, 1, NA, 4, 1, NA),
 #'   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
 #' ) |>
-#'   tidyr::as_tibble()
+#'   tibble::as_tibble()
 #'
 #'
 #' # All 3 methods below give the same output
@@ -118,14 +118,14 @@ multi_freqs <- function(
 
     # Throw warning if stem is character variable
     if (is.character(type_check[, 1])) {
-      warning(
+      cli::cli_warn(
         'Text variable stem detected -- please ensure this is intentional'
       )
     }
 
     # Throw warning if stem is single select variable
     if (nrow(freqs(type_check |> dplyr::select(1), nas = FALSE)) > 1) {
-      warning(
+      cli::cli_warn(
         'Single select variable stem detected -- please ensure this is intentional'
       )
     }
@@ -176,7 +176,7 @@ multi_freqs <- function(
     # Adds stem freqs to datalist
     datalist[[i]] <- data
 
-    message(
+    cli::cli_inform(
       stringr::str_c(
         'Variable stem "',
         i,
@@ -185,9 +185,5 @@ multi_freqs <- function(
     )
   }
 
-  # Combine
-  frequencies <- dplyr::bind_rows(datalist)
-
-  # Returns full data frame
-  return(frequencies)
+  dplyr::bind_rows(datalist)
 }
