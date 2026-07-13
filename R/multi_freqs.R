@@ -88,10 +88,26 @@ multi_freqs <- function(
   separator = c("_", "r"),
   ignore.case = FALSE
 ) {
-  wt_quo <- rlang::enquo(wt)
+  check_data_frame2(dataset)
+  rlang::check_bool(remove_nas)
+  rlang::check_bool(prompt)
+  rlang::check_bool(nas_group)
+  rlang::check_bool(factor_group)
+  rlang::check_bool(unweighted_ns)
+  rlang::check_bool(show_missing_levels)
+  rlang::check_bool(ignore.case)
+  rlang::check_number_whole(digits, min = 0)
+  for (sep in separator) {
+    rlang::check_string(sep, arg = "separator")
+  }
 
   # .by grouping: resolve tidy-selection and apply as grouping
   dataset <- apply_by(dataset, rlang::enquo(.by))
+
+  # Validate the weighting column and the unweighted_ns combination
+  wt_quo <- rlang::enquo(wt)
+  check_wt(dataset, wt_quo)
+  check_unweighted_ns(unweighted_ns, !rlang::quo_is_null(wt_quo))
 
   stems <- resolve_dots(...)
 

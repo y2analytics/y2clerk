@@ -214,6 +214,53 @@ test_that("multi_freqs - .by errors on an unknown column", {
 })
 
 
+# Input validation --------------------------------------------------------
+
+test_that("multi_freqs - errors on a non-data-frame dataset", {
+  expect_snapshot(error = TRUE, multi_freqs(1:10, m_activity))
+})
+
+
+test_that("multi_freqs - errors on non-boolean flags", {
+  expect_snapshot(
+    error = TRUE,
+    responses2 |> multi_freqs(m_activity, remove_nas = 'yes')
+  )
+})
+
+
+test_that("multi_freqs - errors on invalid digits", {
+  expect_snapshot(
+    error = TRUE,
+    responses2 |> multi_freqs(m_activity, digits = -1)
+  )
+})
+
+
+test_that("multi_freqs - errors on invalid separator", {
+  expect_snapshot(
+    error = TRUE,
+    responses2 |> multi_freqs(m_activity, separator = 1)
+  )
+})
+
+
+test_that("multi_freqs - errors when wt column is not found", {
+  expect_snapshot(
+    error = TRUE,
+    responses2 |> multi_freqs(m_activity, wt = not_a_weight)
+  )
+})
+
+
+test_that("multi_freqs - errors when unweighted_ns is TRUE without a weight", {
+  expect_snapshot(
+    error = TRUE,
+    responses2 |> multi_freqs(m_activity, unweighted_ns = TRUE)
+  )
+})
+
+
 # Individual arguments ----------------------------------------------------
 
 test_that("multi_freqs - remove_nas argument", {

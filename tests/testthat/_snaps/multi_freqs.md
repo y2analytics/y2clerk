@@ -26,3 +26,53 @@
       Error in `multi_freqs()`:
       ! `.by` column `not_a_col` not found in `dataset`.
 
+# multi_freqs - errors on a non-data-frame dataset
+
+    Code
+      multi_freqs(1:10, m_activity)
+    Condition
+      Error in `multi_freqs()`:
+      ! `dataset` must be a data frame, not an integer vector.
+
+# multi_freqs - errors on non-boolean flags
+
+    Code
+      multi_freqs(responses2, m_activity, remove_nas = "yes")
+    Condition
+      Error in `multi_freqs()`:
+      ! `remove_nas` must be `TRUE` or `FALSE`, not the string "yes".
+
+# multi_freqs - errors on invalid digits
+
+    Code
+      multi_freqs(responses2, m_activity, digits = -1)
+    Condition
+      Error in `multi_freqs()`:
+      ! `digits` must be a whole number larger than or equal to 0, not the number -1.
+
+# multi_freqs - errors on invalid separator
+
+    Code
+      multi_freqs(responses2, m_activity, separator = 1)
+    Condition
+      Error in `multi_freqs()`:
+      ! `separator` must be a single string, not the number 1.
+
+# multi_freqs - errors when wt column is not found
+
+    Code
+      multi_freqs(responses2, m_activity, wt = not_a_weight)
+    Condition
+      Error in `multi_freqs()`:
+      ! `wt` column `not_a_weight` not found in `dataset`.
+      i Did you mean: "weights"?
+
+# multi_freqs - errors when unweighted_ns is TRUE without a weight
+
+    Code
+      multi_freqs(responses2, m_activity, unweighted_ns = TRUE)
+    Condition
+      Error in `multi_freqs()`:
+      ! `unweighted_ns` is "TRUE" but no weight variable was provided.
+      i Supply a weighting column via `wt`, or set `unweighted_ns = FALSE`.
+
