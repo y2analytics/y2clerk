@@ -1,8 +1,8 @@
 # Overall functionality --------------------------------------------------------
 
 test_that("multi_freqs - formatting", {
-  test <- responses2 |> multi_freqs(m_activity_1)
-  test_names <- responses2 |> multi_freqs(m_activity_1) |> names()
+  test <- responses2 |> multi_freqs(m_activity)
+  test_names <- responses2 |> multi_freqs(m_activity) |> names()
 
   expect_equal(class(test)[1], 'freq_y2')
   expect_equal(class(test)[2], 'tbl_df')
@@ -14,7 +14,7 @@ test_that("multi_freqs - formatting", {
 
 
 test_that("multi_freqs - pulls all vars with stem", {
-  test <- responses2 |> multi_freqs(m_activity_1)
+  test <- responses2 |> multi_freqs(m_activity)
   check_vars_pulled <- test |> dplyr::pull(variable)
 
   expect_equal(
@@ -32,7 +32,7 @@ test_that("multi_freqs - pulls all vars with stem", {
 
 
 test_that("multi_freqs - ns and percentages", {
-  test <- responses2 |> multi_freqs(m_activity_1)
+  test <- responses2 |> multi_freqs(m_activity)
 
   expected_n <- responses2 |>
     dplyr::count(m_activity_10) |>
@@ -62,7 +62,7 @@ test_that("multi_freqs - ns and percentages", {
 test_that("multi_freqs - grouped ns and percentages", {
   test <- responses2 |>
     dplyr::group_by(gender) |>
-    multi_freqs(m_activity_1)
+    multi_freqs(m_activity)
 
   expected_n <- responses2 |>
     dplyr::filter(gender == 'other') |>
@@ -91,11 +91,104 @@ test_that("multi_freqs - grouped ns and percentages", {
 })
 
 
+# Stem interface ----------------------------------------------------------
+
+test_that("multi_freqs - accepts symbol, string, all_of() and any_of()", {
+  stems <- c("m_activity")
+
+  by_symbol <- responses2 |> multi_freqs(m_activity)
+  by_string <- responses2 |> multi_freqs("m_activity")
+  by_all_of <- responses2 |> multi_freqs(tidyselect::all_of(stems))
+  by_any_of <- responses2 |> multi_freqs(tidyselect::any_of(stems))
+
+  expect_equal(by_symbol, by_string)
+  expect_equal(by_symbol, by_all_of)
+  expect_equal(by_symbol, by_any_of)
+})
+
+
+test_that("multi_freqs - runs multiple stems in one call", {
+  df <- tibble::tibble(
+    QA_1 = c(1, NA, 1),
+    QA_2 = c(NA, 1, 1),
+    QB_1 = c(1, 1, NA),
+    QB_2 = c(NA, NA, 1)
+  )
+
+  test <- df |> multi_freqs(QA, QB)
+
+  expect_setequal(
+    unique(test$variable),
+    c('QA_1', 'QA_2', 'QB_1', 'QB_2')
+  )
+})
+
+
+test_that("multi_freqs - no stems runs on every stem in the dataset", {
+  df <- tibble::tibble(
+    Q1_1 = c(1, NA, 1),
+    Q1_2 = c(NA, 1, 1)
+  )
+
+  test <- df |> multi_freqs()
+
+  expect_setequal(unique(test$variable), c('Q1_1', 'Q1_2'))
+})
+
+
+test_that("multi_freqs - ignore.case argument controls stem matching", {
+  matched <- responses2 |> multi_freqs("M_ACTIVITY", ignore.case = TRUE)
+  unmatched <- responses2 |> multi_freqs("M_ACTIVITY")
+
+  expect_true('m_activity_1' %in% matched$variable)
+  expect_equal(nrow(unmatched), 0)
+})
+
+
+test_that("multi_freqs - separator argument controls which columns match", {
+  df <- tibble::tibble(
+    Q_1 = c(1, NA),
+    Qr1 = c(1, 1),
+    Qr2 = c(1, NA)
+  )
+
+  underscore <- df |> multi_freqs(Q, separator = "_")
+  r_sep <- df |> multi_freqs(Q, separator = "r")
+
+  expect_equal(unique(underscore$variable), 'Q_1')
+  expect_setequal(unique(r_sep$variable), c('Qr1', 'Qr2'))
+})
+
+
+# Warnings ----------------------------------------------------------------
+
+test_that("multi_freqs - warns and returns nothing when passed an actual variable", {
+  expect_snapshot(x <- responses2 |> multi_freqs(m_activity_1))
+
+  expect_equal(nrow(x), 0)
+})
+
+
+test_that("multi_freqs - warns on single-select and text stems", {
+  single_warnings <- testthat::capture_warnings(
+    responses2 |> multi_freqs(s_activity)
+  )
+  expect_true(any(grepl('Single select', single_warnings)))
+
+  text_df <- tibble::tibble(
+    Q1_1 = c('a', 'b'),
+    Q1_2 = c('c', 'd')
+  )
+  text_warnings <- testthat::capture_warnings(text_df |> multi_freqs(Q1))
+  expect_true(any(grepl('Text variable', text_warnings)))
+})
+
+
 # Individual arguments ----------------------------------------------------
 
 test_that("multi_freqs - remove_nas argument", {
-  test_false <- responses2 |> multi_freqs(m_activity_1, remove_nas = FALSE)
-  test_true <- responses2 |> multi_freqs(m_activity_1, remove_nas = TRUE)
+  test_false <- responses2 |> multi_freqs(m_activity, remove_nas = FALSE)
+  test_true <- responses2 |> multi_freqs(m_activity, remove_nas = TRUE)
 
   expect_equal(nrow(test_false), 12)
   expect_equal(nrow(test_true), 6)
@@ -103,7 +196,7 @@ test_that("multi_freqs - remove_nas argument", {
 
 
 test_that("multi_freqs - wt argument", {
-  test <- responses2 |> multi_freqs(m_activity_1, wt = weights)
+  test <- responses2 |> multi_freqs(m_activity, wt = weights)
 
   expected_n <- responses2 |>
     dplyr::mutate(
@@ -136,7 +229,7 @@ test_that("multi_freqs - wt argument", {
 
 
 test_that("multi_freqs - prompt argument", {
-  test <- responses2 |> multi_freqs(m_activity_1, prompt = TRUE)
+  test <- responses2 |> multi_freqs(m_activity, prompt = TRUE)
   test_names <- test |> names()
 
   expect_equal(
@@ -152,15 +245,15 @@ test_that("multi_freqs - prompt argument", {
 
 test_that("multi_freqs - digits argument", {
   test_3 <- responses2 |>
-    multi_freqs(m_activity_1, digits = 3) |>
+    multi_freqs(m_activity, digits = 3) |>
     dplyr::filter(label == 'Baseball') |>
     dplyr::pull(result)
   test_2 <- responses2 |>
-    multi_freqs(m_activity_1) |>
+    multi_freqs(m_activity) |>
     dplyr::filter(label == 'Baseball') |>
     dplyr::pull(result)
   test_1 <- responses2 |>
-    multi_freqs(m_activity_1, digits = 1) |>
+    multi_freqs(m_activity, digits = 1) |>
     dplyr::filter(label == 'Baseball') |>
     dplyr::pull(result)
 
@@ -174,7 +267,7 @@ test_that("multi_freqs - nas_group argument", {
   test <- responses2 |>
     dplyr::group_by(gender) |>
     multi_freqs(
-      m_activity_1,
+      m_activity,
       nas_group = FALSE
     )
 
@@ -188,13 +281,13 @@ test_that("multi_freqs - factor_group argument", {
   test_factor_true <- responses2 |>
     dplyr::group_by(gender_labelled) |>
     multi_freqs(
-      m_activity_1,
+      m_activity,
       factor_group = TRUE
     )
   test_factor_false <- responses2 |>
     dplyr::group_by(gender_labelled) |>
     multi_freqs(
-      m_activity_1,
+      m_activity,
       factor_group = FALSE
     )
 
@@ -207,16 +300,16 @@ test_that("multi_freqs - factor_group argument", {
 
 test_that("multi_freqs - unweighted_ns argument", {
   test_n_standard <- responses2 |>
-    multi_freqs(m_activity_1) |>
+    multi_freqs(m_activity) |>
     dplyr::select(n)
   test_result_weighted <- responses2 |>
-    multi_freqs(m_activity_1, wt = weights) |>
+    multi_freqs(m_activity, wt = weights) |>
     dplyr::select(result)
   test_n_unweighted_ns <- responses2 |>
-    multi_freqs(m_activity_1, wt = weights, unweighted_ns = TRUE) |>
+    multi_freqs(m_activity, wt = weights, unweighted_ns = TRUE) |>
     dplyr::select(n)
   test_result_unweighted_ns <- responses2 |>
-    multi_freqs(m_activity_1, wt = weights, unweighted_ns = TRUE) |>
+    multi_freqs(m_activity, wt = weights, unweighted_ns = TRUE) |>
     dplyr::select(result)
 
   expect_equal(test_n_standard, test_n_unweighted_ns)
@@ -227,12 +320,12 @@ test_that("multi_freqs - unweighted_ns argument", {
 test_that("multi_freqs - show_missing_levels argument", {
   test_no_missing_levels <- responses2 |>
     multi_freqs(
-      m_activity_1,
+      m_activity,
       show_missing_levels = FALSE
     )
   test_yes_missing_levels <- responses2 |>
     multi_freqs(
-      m_activity_1,
+      m_activity,
       show_missing_levels = TRUE
     )
   sum_no_missing <-
@@ -257,21 +350,21 @@ test_that("multi_freqs - show_missing_levels argument, grouped", {
   no_missing <- responses2 |>
     dplyr::group_by(gender) |>
     multi_freqs(
-      m_activity_1,
+      m_activity,
       nas_group = FALSE,
       show_missing_levels = FALSE
     )
   yes_missing <- responses2 |>
     dplyr::group_by(gender) |>
     multi_freqs(
-      m_activity_1,
+      m_activity,
       nas_group = FALSE,
       show_missing_levels = TRUE
     )
   yes_missing_with_nas_group <- responses2 |>
     dplyr::group_by(gender) |>
     multi_freqs(
-      m_activity_1,
+      m_activity,
       show_missing_levels = TRUE
     )
   sum_no_missing <-
