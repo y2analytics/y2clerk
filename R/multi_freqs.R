@@ -141,7 +141,7 @@ multi_freqs <- function(
       show_missing_levels = show_missing_levels
     )
 
-    cli::cli_inform(
+    inform_quiet(
       stringr::str_c('Variable stem "', stem, '" successfully freq\'d')
     )
 

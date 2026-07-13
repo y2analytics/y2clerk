@@ -9,6 +9,20 @@
 #'
 #' # Options
 #'
+#' ## `y2clerk.quiet`
+#'
+#' **Default:** `FALSE`
+#'
+#' Whether to suppress y2clerk's informational messages (e.g. progress
+#' notes from [multi_freqs()] and [sig_test_y2()], or the hints emitted by
+#' [freqs()] about ignored arguments). Warnings and errors are unaffected.
+#' Set to `TRUE` to silence informational output.
+#'
+#' ```r
+#' # Silence informational messages
+#' options(y2clerk.quiet = TRUE)
+#' ```
+#'
 #' ## `y2clerk.mcc_correction`
 #'
 #' **Default:** `"fdr"`

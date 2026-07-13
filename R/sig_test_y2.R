@@ -246,35 +246,37 @@ sig_test_y2 <- function(
     # Iterate through each value level (comparing ACROSS groups WITHIN values)
     for (i in value_levels) {
       # Process updates
-      if (haven::is.labelled(dataset[[var_name]])) {
-        haven_val_label <- frequencies |>
-          dplyr::ungroup() |>
-          dplyr::filter(
-            .data$variable == var_name,
-            .data$value == i
-          ) |>
-          dplyr::distinct(.data$label) |>
-          dplyr::pull(.data$label)
+      if (!is_quiet()) {
+        if (haven::is.labelled(dataset[[var_name]])) {
+          haven_val_label <- frequencies |>
+            dplyr::ungroup() |>
+            dplyr::filter(
+              .data$variable == var_name,
+              .data$value == i
+            ) |>
+            dplyr::distinct(.data$label) |>
+            dplyr::pull(.data$label)
 
-        message(
-          stringr::str_c(
-            'Adding grouped pairwise significance tests for response "',
-            haven_val_label,
-            '" for group_var "',
-            deparse(substitute(banner_var)),
-            '"'
+          message(
+            stringr::str_c(
+              'Adding grouped pairwise significance tests for response "',
+              haven_val_label,
+              '" for group_var "',
+              deparse(substitute(banner_var)),
+              '"'
+            )
           )
-        )
-      } else {
-        message(
-          stringr::str_c(
-            'Adding grouped pairwise significance tests for response "',
-            i,
-            '" for group_var "',
-            deparse(substitute(banner_var)),
-            '"'
+        } else {
+          message(
+            stringr::str_c(
+              'Adding grouped pairwise significance tests for response "',
+              i,
+              '" for group_var "',
+              deparse(substitute(banner_var)),
+              '"'
+            )
           )
-        )
+        }
       }
 
       # All group_level pairwise combinations
