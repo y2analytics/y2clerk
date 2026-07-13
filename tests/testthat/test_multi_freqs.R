@@ -184,6 +184,36 @@ test_that("multi_freqs - warns on single-select and text stems", {
 })
 
 
+# .by grouping ------------------------------------------------------------
+
+test_that("multi_freqs - .by matches an equivalent group_by()", {
+  by_dot <- responses2 |> multi_freqs(m_activity, .by = gender)
+  by_group <- responses2 |>
+    dplyr::group_by(gender) |>
+    multi_freqs(m_activity)
+
+  expect_equal(by_dot, by_group)
+})
+
+
+test_that("multi_freqs - .by errors when data is already grouped", {
+  expect_snapshot(
+    error = TRUE,
+    responses2 |>
+      dplyr::group_by(gender) |>
+      multi_freqs(m_activity, .by = weights)
+  )
+})
+
+
+test_that("multi_freqs - .by errors on an unknown column", {
+  expect_snapshot(
+    error = TRUE,
+    responses2 |> multi_freqs(m_activity, .by = not_a_col)
+  )
+})
+
+
 # Individual arguments ----------------------------------------------------
 
 test_that("multi_freqs - remove_nas argument", {

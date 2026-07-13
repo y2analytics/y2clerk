@@ -5,6 +5,7 @@
 ## New features
 * `multi_freqs()` accepts stems as bare symbols, strings, or a character vector via `all_of()` / `any_of()`.
 * `multi_freqs()` gains `separator` (default `c("_", "r")`) and `ignore.case` arguments, both passed through to `stem()`.
+* `multi_freqs()` gains a `.by` argument for per-call grouping, matching `freqs()`.
 
 ## Maintenance
 * `multi_freqs()` internals refactored into smaller helper functions.
