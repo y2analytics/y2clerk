@@ -20,6 +20,8 @@
 #' the stem rather than an exemplar column.
 #'
 #' @param dataset A dataframe.
+#' @param .by <tidy-select> Variables to group by for this operation only.
+#' Cannot be used when the dataset is already a grouped data frame.
 #' @param ... Question stems to tabulate, given as bare symbols (`Q1`), strings
 #' (`"Q1"`), or a character vector wrapped in `all_of()` / `any_of()`. If
 #' nothing is specified, the function runs on every stem in the dataset.
@@ -65,11 +67,16 @@
 #'   dplyr::group_by(a) |>
 #'   multi_freqs(Q1, wt = weights)
 #'
+#'
+#' # Group for this call only with .by
+#' multi_freqs(df, Q1, .by = a)
+#'
 #' @export
 
 multi_freqs <- function(
   dataset,
   ...,
+  .by = NULL,
   remove_nas = TRUE,
   wt = NULL,
   prompt = FALSE,
@@ -82,6 +89,9 @@ multi_freqs <- function(
   ignore.case = FALSE
 ) {
   wt_quo <- rlang::enquo(wt)
+
+  # .by grouping: resolve tidy-selection and apply as grouping
+  dataset <- apply_by(dataset, rlang::enquo(.by))
 
   stems <- resolve_dots(...)
 

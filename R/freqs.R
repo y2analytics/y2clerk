@@ -78,51 +78,9 @@ freqs <- function(
   rlang::check_number_whole(digits, min = 0)
 
   # .by grouping: resolve tidy-selection and apply as grouping
-  freqs_call <- rlang::current_env()
-  by_quo <- rlang::enquo(.by)
-  by_sel <- tryCatch(
-    tidyselect::eval_select(by_quo, data = dataset),
-    error = function(e) {
-      msg <- conditionMessage(e)
-      if (grepl("doesn't exist", msg, fixed = TRUE)) {
-        col_match <- gsub("`", "", regmatches(msg, regexpr("`[^`]+`", msg)))
-        hints <- col_hint(col_match, colnames(dataset))
-        hint_bullet <- if (length(hints) > 0L) {
-          c("i" = cli::format_inline("Did you mean: {.val {hints}}?"))
-        } else {
-          character(0)
-        }
-        cli::cli_abort(
-          c(
-            "{.arg .by} column {.var {col_match}} not found in {.arg dataset}.",
-            hint_bullet
-          ),
-          call = freqs_call
-        )
-      } else {
-        cli::cli_abort(
-          c("Invalid {.arg .by} selection.", "x" = msg),
-          call = freqs_call
-        )
-      }
-    }
-  )
-  if (length(by_sel) > 0) {
-    if (dplyr::is.grouped_df(dataset)) {
-      cli::cli_abort(
-        c(
-          "Cannot use {.arg .by} on an already-grouped data frame.",
-          "i" = "Use {.code dplyr::group_by()} or {.arg .by}, not both.",
-          "i" = "The dataset is currently grouped by: {.val {dplyr::group_vars(dataset)}}."
-        )
-      )
-    }
-    by_vars <- names(by_sel)
-    dataset <- dplyr::group_by(
-      dataset,
-      dplyr::across(tidyselect::all_of(by_vars))
-    )
-  }
+  was_grouped <- dplyr::is.grouped_df(dataset)
+  dataset <- apply_by(dataset, rlang::enquo(.by))
+  by_applied <- !was_grouped && dplyr::is.grouped_df(dataset)
 
   # Create logical for if there are weights
   weight_quo <- dplyr::enquo(wt)
@@ -191,7 +149,7 @@ freqs <- function(
 
     p <- p[p != ""]
   }
-  if (length(by_sel) > 0) {
+  if (by_applied) {
     frequencies <- dplyr::ungroup(frequencies)
   }
   return(as_freq_y2(frequencies, p))

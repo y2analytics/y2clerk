@@ -7,6 +7,7 @@
 multi_freqs(
   dataset,
   ...,
+  .by = NULL,
   remove_nas = TRUE,
   wt = NULL,
   prompt = FALSE,
@@ -25,6 +26,9 @@ multi_freqs(
 \item{...}{Question stems to tabulate, given as bare symbols (\code{Q1}), strings
 (\code{"Q1"}), or a character vector wrapped in \code{all_of()} / \code{any_of()}. If
 nothing is specified, the function runs on every stem in the dataset.}
+
+\item{.by}{\if{html}{\out{<tidy-select>}} Variables to group by for this operation only.
+Cannot be used when the dataset is already a grouped data frame.}
 
 \item{remove_nas}{Boolean, after freqs is run (which always includes NAs), whether or not to filter out counts of NA value (default: TRUE).}
 
@@ -72,14 +76,13 @@ the stem rather than an exemplar column.
 }
 \examples{
 
-df <- data.frame(
+df <- tibble::tibble(
   a = c(1, 2, 3, 1, 2, 3, 1),
   Q1_1 = c(1, NA, 1, 1, NA, 1, NA),
   Q1_2 = c(1, 1, NA, 1, NA, 1, NA),
   Q1_3 = c(NA, 1, 1, NA, 4, 1, NA),
   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
-) |>
-  tibble::as_tibble()
+)
 
 
 # Pass the stem, not an individual column. These give the same output:
@@ -97,6 +100,10 @@ df |> multi_freqs(tidyselect::all_of(stems))
 df |>
   dplyr::group_by(a) |>
   multi_freqs(Q1, wt = weights)
+
+
+# Group for this call only with .by
+multi_freqs(df, Q1, .by = a)
 
 }
 \seealso{
