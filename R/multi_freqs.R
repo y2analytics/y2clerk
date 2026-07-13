@@ -265,9 +265,14 @@ freq_one_stem <- function(
   unweighted_ns,
   show_missing_levels
 ) {
+  # Select grouping variables explicitly so dplyr does not silently re-add them
+  # (and emit "Adding missing grouping variables") when they are absent from the
+  # stem columns.
+  group_cols <- dplyr::group_vars(dataset)
+
   data <- dataset |>
     dplyr::select(
-      tidyselect::all_of(cols),
+      tidyselect::all_of(c(group_cols, cols)),
       # weight is selected if specified
       !!wt_quo
     ) |>
