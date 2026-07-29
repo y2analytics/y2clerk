@@ -180,7 +180,7 @@
 # freqs returns empty if a tidyselect function is used to and does not match any columns
 
     Code
-      freq(responses, stem("A"))
+      tibble::as_tibble(freq(responses, stem("A")))
     Condition
       Warning:
       No columns matched selection.
