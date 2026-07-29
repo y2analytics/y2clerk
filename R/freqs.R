@@ -118,6 +118,7 @@ freqs <- function(
   }
 
   #Attach question wordings
+  p <- NULL
   if ('variable' %in% names(frequencies)) {
     vars <- unique(frequencies$variable)
     p <- character(length(vars))
@@ -845,6 +846,11 @@ remove_group_nas <- function(dataset) {
 
 group_rename <- function(dataset) {
   # Assumed, since non-percent calculations aren't grouped dataframes
+  if (!('variable' %in% names(dataset))) {
+    cli::cli_warn("No columns matched selection.")
+    return(dataset)
+  }
+
   grouping_vars <- dataset |>
     dplyr::select(
       -(tidyselect::all_of('variable'):dplyr::last_col())

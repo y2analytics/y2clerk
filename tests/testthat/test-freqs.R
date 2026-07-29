@@ -979,3 +979,10 @@ test_that("stat = 'mean' works when GROUPED", {
 
   expect_length(test$group_var, 4)
 })
+
+test_that("freqs returns empty if a tidyselect function is used to and does not match any columns", {
+  expect_snapshot(
+    responses |>
+      freq(stem("A"))
+  )
+})
