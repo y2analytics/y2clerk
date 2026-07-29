@@ -243,12 +243,6 @@ warn_stem_type <- function(dataset, cols) {
       'Text variable stem detected -- please ensure this is intentional'
     )
   }
-
-  if (nrow(freqs(dplyr::select(type_check, 1), nas = FALSE)) > 1) {
-    cli::cli_warn(
-      'Single select variable stem detected -- please ensure this is intentional'
-    )
-  }
 }
 
 # Run freqs on a single stem: select its columns, drop rows where the respondent
