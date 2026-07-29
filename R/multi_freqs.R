@@ -126,8 +126,6 @@ multi_freqs <- function(
       return(NULL)
     }
 
-    warn_stem_type(dataset, cols)
-
     data <- freq_one_stem(
       dataset = dataset,
       cols = cols,
@@ -232,18 +230,6 @@ stem_cols <- function(dataset, stem, separator, ignore.case) {
     names()
 }
 
-# Warn when a stem points at a text variable or a single-select variable.
-warn_stem_type <- function(dataset, cols) {
-  type_check <- dataset |>
-    dplyr::ungroup() |>
-    dplyr::select(tidyselect::all_of(cols))
-
-  if (is.character(type_check[[1]])) {
-    cli::cli_warn(
-      'Text variable stem detected -- please ensure this is intentional'
-    )
-  }
-}
 
 # Run freqs on a single stem: select its columns, drop rows where the respondent
 # answered none of them, then freq.

@@ -169,16 +169,6 @@ test_that("multi_freqs - warns and returns nothing when passed an actual variabl
 })
 
 
-test_that("multi_freqs - warns on single-select and text stems", {
-  text_df <- tibble::tibble(
-    Q1_1 = c('a', 'b'),
-    Q1_2 = c('c', 'd')
-  )
-  text_warnings <- testthat::capture_warnings(text_df |> multi_freqs(Q1))
-  expect_true(any(grepl('Text variable', text_warnings)))
-})
-
-
 # .by grouping ------------------------------------------------------------
 
 test_that("multi_freqs - .by matches an equivalent group_by()", {
