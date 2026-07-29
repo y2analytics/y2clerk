@@ -31,41 +31,41 @@
 #'   )
 #' @export
 append_ns <- function(
-    dataset,
-    append_to = label,
-    by_group_var = FALSE,
-    newline = FALSE
-  ) {
-    label <- NULL
-    character_split <- ' '
-    if (isTRUE(newline)) {
-      character_split <- '\n'
-    }
-
-    if (isFALSE(by_group_var)) {
-      dataset |>
-        dplyr::mutate(
-          '{{append_to}}' := stringr::str_c(
-            {{ append_to }},
-            character_split,
-            '(n = ',
-            as.character(.data$n),
-            ')'
-          )
-        )
-    } else {
-      # by_group_var == TRUE
-      dataset |>
-        dplyr::mutate(
-          n_group = sum(.data$n),
-          '{{append_to}}' := stringr::str_c(
-            {{ append_to }},
-            character_split,
-            '(n = ',
-            as.character(.data$n_group),
-            ')'
-          )
-        ) |>
-        dplyr::select(-'n_group')
-    }
+  dataset,
+  append_to = label,
+  by_group_var = FALSE,
+  newline = FALSE
+) {
+  label <- NULL
+  character_split <- ' '
+  if (isTRUE(newline)) {
+    character_split <- '\n'
   }
+
+  if (isFALSE(by_group_var)) {
+    dataset |>
+      dplyr::mutate(
+        '{{append_to}}' := stringr::str_c(
+          {{ append_to }},
+          character_split,
+          '(n = ',
+          as.character(.data$n),
+          ')'
+        )
+      )
+  } else {
+    # by_group_var == TRUE
+    dataset |>
+      dplyr::mutate(
+        n_group = sum(.data$n),
+        '{{append_to}}' := stringr::str_c(
+          {{ append_to }},
+          character_split,
+          '(n = ',
+          as.character(.data$n_group),
+          ')'
+        )
+      ) |>
+      dplyr::select(-'n_group')
+  }
+}

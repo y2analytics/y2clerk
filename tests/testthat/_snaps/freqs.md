@@ -177,3 +177,13 @@
       * `q3` has class <character>
       i Convert the variable to numeric first with `as.numeric()`, or use `stat = 'percent'`.
 
+# freqs returns empty if a tidyselect function is used to and does not match any columns
+
+    Code
+      freq(responses, stem("A"))
+    Condition
+      Warning:
+      No columns matched selection.
+    Output
+      # A tibble: 0 x 0
+
