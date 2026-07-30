@@ -12,8 +12,8 @@
 ---
 
     Code
-      multi_freqs(dplyr::mutate(responses2, m_activity_1_1 = m_activity_10),
-      m_activity_1)
+      tibble::as_tibble(multi_freqs(dplyr::mutate(responses2, m_activity_1_1 = m_activity_10),
+      m_activity_1))
     Condition
       Warning:
       "m_activity_1" exists in the dataset
@@ -23,10 +23,7 @@
     Message
       Variable stem "m_activity_1" successfully freq'd
     Output
-      # m_activity_1_1: Which of the following activities have you done in the past
-      #   month? Please select all that apply. - Baseball
-      # 
-      # A frequency tibble: 1 x 6
+      # A tibble: 1 x 6
         variable       value label        n stat    result
         <chr>          <chr> <chr>    <dbl> <chr>    <dbl>
       1 m_activity_1_1 1     Baseball    11 percent      1
