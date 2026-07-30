@@ -233,20 +233,22 @@ stem_cols <- function(dataset, stem, separator, ignore.case) {
 }
 
 # Warn when a stem points at a text variable or a single-select variable.
-warn_stem_type <- function(dataset, cols) {
+warn_stem_type <- function(dataset, cols, call = rlang::caller_env(4)) {
   type_check <- dataset |>
     dplyr::ungroup() |>
-    dplyr::select(tidyselect::all_of(cols))
+    dplyr::select(cols[[1]])
 
-  if (is.character(type_check[[1]])) {
-    cli::cli_warn(
-      'Text variable stem detected -- please ensure this is intentional'
-    )
-  }
+  num_rows <- freqs(type_check, nas = FALSE) |>
+    nrow()
 
-  if (nrow(freqs(dplyr::select(type_check, 1), nas = FALSE)) > 1) {
+  if (num_rows > 1) {
     cli::cli_warn(
-      'Single select variable stem detected -- please ensure this is intentional'
+      c(
+        "!" = 'Matrix question detected',
+        "i" = "Question {.val {cols[[1]]}} contains {.val {num_rows}} response options",
+        "i" = "Please make sure this is intentional"
+      ),
+      call = call
     )
   }
 }
