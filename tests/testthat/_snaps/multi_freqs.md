@@ -4,9 +4,32 @@
       x <- multi_freqs(responses2, m_activity_1)
     Condition
       Warning:
-      "m_activity_1" appears to be an actual variable in the dataset, not a stem.
-      i `multi_freqs()` now selects columns with `stem()`; pass the stem instead, e.g. `multi_freqs(data, m_activity)`.
-      ! Passed to `stem()` as-is, "m_activity_1" will match nothing.
+      "m_activity_1" exists in the dataset
+      i `multi_freqs()` now works on stems instead of an example variable
+      i Did you mean `multi_freqs(data, m_activity)`?
+      ! As-is, "m_activity_1" will match nothing.
+
+---
+
+    Code
+      multi_freqs(dplyr::mutate(responses2, m_activity_1_1 = m_activity_10),
+      m_activity_1)
+    Condition
+      Warning:
+      "m_activity_1" exists in the dataset
+      i `multi_freqs()` now works on stems instead of an example variable
+      i Did you mean `multi_freqs(data, m_activity)`?
+      ! As-is, "m_activity_1" will match: "m_activity_1_1".
+    Message
+      Variable stem "m_activity_1" successfully freq'd
+    Output
+      # m_activity_1_1: Which of the following activities have you done in the past
+      #   month? Please select all that apply. - Baseball
+      # 
+      # A frequency tibble: 1 x 6
+        variable       value label        n stat    result
+        <chr>          <chr> <chr>    <dbl> <chr>    <dbl>
+      1 m_activity_1_1 1     Baseball    11 percent      1
 
 # multi_freqs - warns on variables with multiple response options
 

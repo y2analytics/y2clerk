@@ -192,17 +192,17 @@ warn_actual_variable <- function(dataset, stems, separator, ignore.case) {
 
     match_bullet <- if (length(matched) > 0) {
       c(
-        "!" = "Passed to {.fn stem} as-is, {.val {v}} will match: {.val {matched}}."
+        "!" = "As-is, {.val {v}} will match: {.val {matched}}."
       )
     } else {
-      c("!" = "Passed to {.fn stem} as-is, {.val {v}} will match nothing.")
+      c("!" = "As-is, {.val {v}} will match nothing.")
     }
 
     cli::cli_warn(
       c(
-        "{.val {v}} appears to be an actual variable in the dataset, not a stem.",
-        "i" = "{.fn multi_freqs} now selects columns with {.fn stem}; pass the
-               stem instead, e.g. {.code multi_freqs(data, {suggested})}.",
+        "{.val {v}} exists in the dataset",
+        "i" = "{.fn multi_freqs} now works on stems instead of an example variable",
+        "i" = "Did you mean {.code multi_freqs(data, {suggested})}?",
         match_bullet
       )
     )

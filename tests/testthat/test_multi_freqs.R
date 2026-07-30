@@ -166,13 +166,19 @@ test_that("multi_freqs - warns and returns nothing when passed an actual variabl
   expect_snapshot(x <- responses2 |> multi_freqs(m_activity_1))
 
   expect_equal(nrow(x), 0)
+
+  expect_snapshot(
+    responses2 |>
+      dplyr::mutate(m_activity_1_1 = m_activity_10) |>
+      multi_freqs(m_activity_1)
+  )
 })
 
 
 test_that("multi_freqs - warns on variables with multiple response options", {
   expect_snapshot(
-    responses2 |> 
-      multi_freqs(s_activity) |> 
+    responses2 |>
+      multi_freqs(s_activity) |>
       tibble::as_tibble()
   )
 })
