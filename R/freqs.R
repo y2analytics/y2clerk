@@ -68,7 +68,7 @@ freqs <- function(
 ) {
   # options(warn = -1)
   stat <- rlang::arg_match(stat)
-  check_data_frame2(dataset)
+  check_data_frame2(dataset, rlang::caller_arg(dataset))
   rlang::check_bool(nas)
   rlang::check_bool(prompt)
   rlang::check_bool(nas_group)

@@ -137,7 +137,7 @@ column_names <- function(dataset, wt) {
 }
 
 
-check_data_frame2 <- function(dataset) {
+check_data_frame2 <- function(dataset, d_name = rlang::caller_arg(dataset)) {
   env <- rlang::caller_env()
   caller_call <- rlang::caller_call()
 
@@ -156,7 +156,7 @@ check_data_frame2 <- function(dataset) {
       } else if (grepl("not found", conditionMessage(e), fixed = TRUE)) {
         cli::cli_abort(
           c(
-            "x" = "dataset {.val {dataset}} not found",
+            "x" = "dataset {.val {d_name}} not found",
             "i" = "Please supply a valid dataset"
           ),
           call = env
