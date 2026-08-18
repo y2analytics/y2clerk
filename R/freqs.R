@@ -250,7 +250,6 @@ freqs_original <- function(
         body <- if (grepl("doesn't exist", msg, fixed = TRUE)) {
           lines <- strsplit(msg, "\n", fixed = TRUE)[[1]]
           found <- trimws(lines[grepl("doesn't exist", lines, fixed = TRUE)])
-          purrr::set_names(found, rep("x", length(found)))
         } else {
           c("x" = msg)
         }
