@@ -22,6 +22,16 @@ check_wt <- function(dataset, wt_quo, call = rlang::caller_env()) {
     keywords = "wt|weight",
     call = call
   )
+
+  wt_vec <- dataset[[rlang::as_label(wt_quo)]]
+  if (!is.numeric(wt_vec)) {
+    cli::cli_abort(
+      c(
+        "x" = "Weight column {.arg {rlang::as_label(wt_quo)}} must be numeric, not {.cls {class(wt_vec)}}"
+      ),
+      call = call
+    )
+  }
 }
 
 # check_unweighted_ns(): abort when `unweighted_ns = TRUE` but no weighting
