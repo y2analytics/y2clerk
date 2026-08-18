@@ -67,3 +67,18 @@ group_by.freq_y2 <- function(
   class(.data) <- setdiff(class(.data), "freq_y2")
   as_freq_y2(NextMethod(), p = prompts)
 }
+
+#' Print with n = Inf
+#'
+#' @description
+#' This function prints the most recently displayed frequency tibble with print(n = Inf)
+#' @export
+print_freq_inf <- function() {
+  if (!requireNamespace("y2print", quietly = TRUE)) {
+    cli::cli_abort(c(
+      "x" = "Package {.pkg y2print} is required to have the print(n=Inf) footer work automatically",
+      "i" = "Install it with: {.code pak::pak('y2analytics/y2print')}"
+    ))
+  }
+  y2print::print_freq_inf()
+}
