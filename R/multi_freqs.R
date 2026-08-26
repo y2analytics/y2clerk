@@ -1,12 +1,34 @@
 # multi_freqs() --------------------------------------------------------------------
 
-#' Run frequencies for multiple select variables
+#' Run frequencies for multiple-select variables
 #'
-#' Filters out rows that are completely NULL values (if respondent did not answer question) then runs freqs
+#' `multi_freqs()` runs [freqs()] across one or more multiple-select ("select
+#' all that apply") question *stems*. For each stem it selects the associated
+#' columns with the [stem()] tidyselect helper, drops respondents who answered
+#' none of them, then runs `freqs()`.
+#'
+#' @details
+#' Pass the *stem* of each question, not an individual column. For a question
+#' stored as `Q1_1`, `Q1_2`, `Q1_3`, pass `Q1`. Stems may be given as bare
+#' symbols (`Q1`), strings (`"Q1"`), or spliced in from a character vector with
+#' [tidyselect::all_of()] / [tidyselect::any_of()]. If no stems are given,
+#' `multi_freqs()` runs on every stem in the dataset.
+#'
+#' Columns are matched with [stem()], so `_TEXT` / open-ended columns are
+#' excluded automatically. If you pass a name that is itself a column in the
+#' dataset (e.g. `Q1_1`), `multi_freqs()` warns: the modern interface expects
+#' the stem rather than an exemplar column.
 #'
 #' @param dataset A dataframe.
-#' @param ... The unquoted names of a set of variables in the dataset referring to variable "stems". If nothing
-#' is specified, the function runs a frequency on every column in given dataset.
+#' @param .by <tidy-select> Variables to group by for this operation only.
+#' Cannot be used when the dataset is already a grouped data frame.
+#' @param ... Question stems to tabulate, given as bare symbols (`Q1`), strings
+#' (`"Q1"`), or a character vector wrapped in `all_of()` / `any_of()`. If
+#' nothing is specified, the function runs on every stem in the dataset.
+#' @param separator Character vector of separators allowed between the stem and
+#' its numeric suffix, passed through to [stem()] (default: `c("_", "r")`).
+#' @param ignore.case Boolean, whether to match the stem case-insensitively,
+#' passed through to [stem()] (default: FALSE).
 #' @param remove_nas Boolean, after freqs is run (which always includes NAs), whether or not to filter out counts of NA value (default: TRUE).
 #' @param wt The unquoted name of a weighting variable in the dataset (default: NULL).
 #' @param prompt Boolean, whether or not to include the prompt in the dataset (default: FALSE).
@@ -17,40 +39,44 @@
 #' @param show_missing_levels Boolean, whether to keep response levels with no data (default: TRUE)
 #' @return A dataframe with the variable names, prompts, values, labels, counts,
 #' stats, and resulting calculations.
+#' @seealso [stem()], [freqs()]
 #' @examples
 #'
-#' df <- data.frame(
+#' df <- tibble::tibble(
 #'   a = c(1, 2, 3, 1, 2, 3, 1),
 #'   Q1_1 = c(1, NA, 1, 1, NA, 1, NA),
 #'   Q1_2 = c(1, 1, NA, 1, NA, 1, NA),
 #'   Q1_3 = c(NA, 1, 1, NA, 4, 1, NA),
 #'   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
-#' ) |>
-#'   tidyr::as_tibble()
+#' )
 #'
 #'
-#' # All 3 methods below give the same output
-#' multi_freqs(df, Q1_1)
-#' df |> multi_freqs(Q1_1)
-#' df |>
-#'   dplyr::select(dplyr::starts_with("Q1")) |>
-#'   multi_freqs()
+#' # Pass the stem, not an individual column. These give the same output:
+#' multi_freqs(df, Q1)
+#' df |> multi_freqs(Q1)
+#' df |> multi_freqs("Q1")
 #'
 #'
-#' # Grouped examples with weights (both have same outputs)
+#' # Splice stems in from a character vector
+#' stems <- c("Q1")
+#' df |> multi_freqs(tidyselect::all_of(stems))
+#'
+#'
+#' # Grouped example with weights
 #' df |>
 #'   dplyr::group_by(a) |>
-#'   multi_freqs(Q1_1, wt = weights)
-#' df |>
-#'   dplyr::group_by(a) |>
-#'   dplyr::select(starts_with("Q1"), weights) |>
-#'   multi_freqs(wt = weights)
+#'   multi_freqs(Q1, wt = weights)
+#'
+#'
+#' # Group for this call only with .by
+#' multi_freqs(df, Q1, .by = a)
 #'
 #' @export
 
 multi_freqs <- function(
   dataset,
   ...,
+  .by = NULL,
   remove_nas = TRUE,
   wt = NULL,
   prompt = FALSE,
@@ -58,136 +84,224 @@ multi_freqs <- function(
   nas_group = TRUE,
   factor_group = FALSE,
   unweighted_ns = FALSE,
-  show_missing_levels = TRUE
+  show_missing_levels = TRUE,
+  separator = c("_", "r"),
+  ignore.case = FALSE
 ) {
-  # Creates an empty list to be populated with frequencies data frames
-  datalist <- list()
-
-  pattern <- dataset |>
-    dplyr::ungroup() |>
-    dplyr::select(...) |>
-    names() |>
-    stringr::str_remove(
-      '_[0-9]+$'
-    ) |>
-    stringr::str_remove(
-      '_[0-9]+_TEXT$'
-    ) |>
-    unique()
-
-  # If no variables are specified, assume user wants to run function on entire dataset
-  if (length(pattern) == 0 && !dplyr::is_grouped_df(dataset)) {
-    pattern <- dataset |>
-      dplyr::select(-{{ wt }}) |>
-      names() |>
-      stringr::str_remove(
-        '_[0-9]+$'
-      ) |>
-      stringr::str_remove(
-        '_[0-9]+_TEXT$'
-      ) |>
-      unique()
+  check_data_frame2(dataset)
+  rlang::check_bool(remove_nas)
+  rlang::check_bool(prompt)
+  rlang::check_bool(nas_group)
+  rlang::check_bool(factor_group)
+  rlang::check_bool(unweighted_ns)
+  rlang::check_bool(show_missing_levels)
+  rlang::check_bool(ignore.case)
+  rlang::check_number_whole(digits, min = 0)
+  for (sep in separator) {
+    rlang::check_string(sep, arg = "separator")
   }
 
-  # Same as above for grouped, length == 0 dataset
-  if (length(pattern) == 0 && dplyr::is_grouped_df(dataset)) {
-    pattern <- dataset |>
-      dplyr::ungroup() |>
-      dplyr::select(
-        -{{ wt }},
-        -tidyselect::all_of(dplyr::group_vars(dataset))
-      ) |>
-      names() |>
-      stringr::str_remove(
-        '_[0-9]+$'
-      ) |>
-      stringr::str_remove(
-        '_[0-9]+_TEXT$'
-      ) |>
-      unique()
+  # .by grouping: resolve tidy-selection and apply as grouping
+  dataset <- apply_by(dataset, rlang::enquo(.by))
+
+  # Validate the weighting column and the unweighted_ns combination
+  wt_quo <- rlang::enquo(wt)
+  check_wt(dataset, wt_quo)
+  check_unweighted_ns(unweighted_ns, !rlang::quo_is_null(wt_quo))
+
+  stems <- resolve_dots(...)
+
+  if (length(stems) > 0) {
+    warn_actual_variable(dataset, stems, separator, ignore.case)
+  } else {
+    # No stems passed: run on every stem in the dataset
+    stems <- all_stems(dataset, wt_quo)
   }
 
-  # Creating a filtered frequencies dataframe for each stem
-  for (i in pattern) {
-    # Warning Section
-    type_check <- dataset |>
-      dplyr::ungroup() |>
-      dplyr::select(
-        dplyr::matches(stringr::str_c('^', i, '_[0-9]'))
-      )
+  datalist <- purrr::map(stems, function(stem) {
+    cols <- stem_cols(dataset, stem, separator, ignore.case)
 
-    # Throw warning if stem is character variable
-    if (is.character(type_check[, 1])) {
-      warning(
-        'Text variable stem detected -- please ensure this is intentional'
-      )
+    # Nothing matched (e.g. an actual variable was passed) -- skip
+    if (length(cols) == 0) {
+      return(NULL)
     }
 
-    # Throw warning if stem is single select variable
-    if (nrow(freqs(type_check |> dplyr::select(1), nas = FALSE)) > 1) {
-      warning(
-        'Single select variable stem detected -- please ensure this is intentional'
+    warn_stem_type(dataset, cols)
+
+    data <- freq_one_stem(
+      dataset = dataset,
+      cols = cols,
+      wt_quo = wt_quo,
+      remove_nas = remove_nas,
+      prompt = prompt,
+      digits = digits,
+      nas_group = nas_group,
+      factor_group = factor_group,
+      unweighted_ns = unweighted_ns,
+      show_missing_levels = show_missing_levels
+    )
+
+    inform_quiet(
+      stringr::str_c('Variable stem "', stem, '" successfully freq\'d')
+    )
+
+    data
+  })
+
+  dplyr::bind_rows(datalist)
+}
+
+
+# Internal helpers ------------------------------------------------------------
+
+# Turn the dots into a character vector of stems. Bare symbols and string
+# literals become their name; `all_of()` / `any_of()` calls are evaluated to
+# splice in a character vector of stems.
+resolve_dots <- function(...) {
+  quos <- rlang::enquos(...)
+
+  if (length(quos) == 0) {
+    return(character(0))
+  }
+
+  stems <- purrr::map(quos, function(q) {
+    expr <- rlang::quo_get_expr(q)
+    fn <- if (rlang::is_call(expr)) rlang::call_name(expr) else NULL
+
+    if (!is.null(fn) && fn %in% c("all_of", "any_of")) {
+      rlang::eval_tidy(
+        rlang::call_args(expr)[[1]],
+        env = rlang::quo_get_env(q)
       )
+    } else {
+      rlang::as_name(q)
+    }
+  })
+
+  unlist(stems, use.names = FALSE)
+}
+
+# Warn (no fallback) when a passed "stem" is actually a column in the dataset --
+# the historic interface took an exemplar variable; the new one takes the stem.
+warn_actual_variable <- function(dataset, stems, separator, ignore.case) {
+  actual <- stems[stems %in% names(dataset)]
+
+  for (v in actual) {
+    suggested <- extract_stem(v)
+    matched <- stem_cols(dataset, v, separator, ignore.case)
+
+    match_bullet <- if (length(matched) > 0) {
+      c(
+        "!" = "Passed to {.fn stem} as-is, {.val {v}} will match: {.val {matched}}."
+      )
+    } else {
+      c("!" = "Passed to {.fn stem} as-is, {.val {v}} will match nothing.")
     }
 
-    data <- dataset |>
-      # dataset selects all columns that start with the string or the ith element in the string list
-      dplyr::select(
-        dplyr::matches(stringr::str_c('^', i, '_[0-9]')),
-        # "_TEXT" question is always removed
-        -dplyr::ends_with('_TEXT'),
-        # weight is selected if specified
-        {{ wt }}
-      ) |>
-      # Following lines filter out rows where none of the questions have been answered
-      dplyr::mutate(
-        ns = rowSums(
-          dplyr::across(
-            .cols = dplyr::matches(stringr::str_c('^', i, '_[0-9]')),
-            .fns = \(x) !is.na(x)
-          )
-        )
-      ) |>
-      dplyr::filter(
-        ns > 0
-      ) |>
-      dplyr::select(
-        -ns
-      ) |>
-      # Original freqs operation
-      freqs(
-        nas = TRUE,
-        wt = {{ wt }},
-        prompt = prompt,
-        digits = digits,
-        nas_group = nas_group,
-        factor_group = factor_group,
-        unweighted_ns = unweighted_ns,
-        show_missing_levels = show_missing_levels
-      )
-
-    if (isTRUE(remove_nas)) {
-      data <- data |>
-        dplyr::filter(
-          !is.na(.data$value)
-        )
-    }
-
-    # Adds stem freqs to datalist
-    datalist[[i]] <- data
-
-    message(
-      stringr::str_c(
-        'Variable stem "',
-        i,
-        '" successfully freq\'d'
+    cli::cli_warn(
+      c(
+        "{.val {v}} appears to be an actual variable in the dataset, not a stem.",
+        "i" = "{.fn multi_freqs} now selects columns with {.fn stem}; pass the
+               stem instead, e.g. {.code multi_freqs(data, {suggested})}.",
+        match_bullet
       )
     )
   }
+}
 
-  # Combine
-  frequencies <- dplyr::bind_rows(datalist)
+# The stems to run when the dots are empty: every stem in the dataset, minus the
+# weight and any grouping variables.
+all_stems <- function(dataset, wt_quo) {
+  dataset |>
+    dplyr::ungroup() |>
+    dplyr::select(
+      -!!wt_quo,
+      -tidyselect::any_of(dplyr::group_vars(dataset))
+    ) |>
+    names() |>
+    extract_stem()
+}
 
-  # Returns full data frame
-  return(frequencies)
+# Column names belonging to a stem, selected via the stem() tidyselect helper.
+stem_cols <- function(dataset, stem, separator, ignore.case) {
+  dataset |>
+    dplyr::ungroup() |>
+    dplyr::select(
+      stem(!!stem, separator = !!separator, ignore.case = !!ignore.case)
+    ) |>
+    names()
+}
+
+# Warn when a stem points at a text variable or a single-select variable.
+warn_stem_type <- function(dataset, cols) {
+  type_check <- dataset |>
+    dplyr::ungroup() |>
+    dplyr::select(tidyselect::all_of(cols))
+
+  if (is.character(type_check[[1]])) {
+    cli::cli_warn(
+      'Text variable stem detected -- please ensure this is intentional'
+    )
+  }
+
+  if (nrow(freqs(dplyr::select(type_check, 1), nas = FALSE)) > 1) {
+    cli::cli_warn(
+      'Single select variable stem detected -- please ensure this is intentional'
+    )
+  }
+}
+
+# Run freqs on a single stem: select its columns, drop rows where the respondent
+# answered none of them, then freq.
+freq_one_stem <- function(
+  dataset,
+  cols,
+  wt_quo,
+  remove_nas,
+  prompt,
+  digits,
+  nas_group,
+  factor_group,
+  unweighted_ns,
+  show_missing_levels
+) {
+  # Select grouping variables explicitly so dplyr does not silently re-add them
+  # (and emit "Adding missing grouping variables") when they are absent from the
+  # stem columns.
+  group_cols <- dplyr::group_vars(dataset)
+
+  data <- dataset |>
+    dplyr::select(
+      tidyselect::all_of(c(group_cols, cols)),
+      # weight is selected if specified
+      !!wt_quo
+    ) |>
+    # Filter out rows where none of the questions have been answered
+    dplyr::mutate(
+      ns = rowSums(
+        dplyr::across(
+          .cols = tidyselect::all_of(cols),
+          .fns = \(x) !is.na(x)
+        )
+      )
+    ) |>
+    dplyr::filter(ns > 0) |>
+    dplyr::select(-ns) |>
+    freqs(
+      nas = TRUE,
+      wt = !!wt_quo,
+      prompt = prompt,
+      digits = digits,
+      nas_group = nas_group,
+      factor_group = factor_group,
+      unweighted_ns = unweighted_ns,
+      show_missing_levels = show_missing_levels
+    )
+
+  if (isTRUE(remove_nas)) {
+    data <- data |>
+      dplyr::filter(!is.na(.data$value))
+  }
+
+  data
 }

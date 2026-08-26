@@ -87,9 +87,9 @@ stem <- function(stem, separator = c("_", "r"), ignore.case = FALSE) {
 }
 
 
-# extract_stem (Used for old multi-freqs interface)
-
-# jarl-ignore unused_function: To be used in the near future
+# extract_stem: derive unique stems from a set of column names by stripping a
+# trailing numeric suffix (optionally followed by _TEXT). Used by multi_freqs()
+# to resolve stems when `...` is empty and to suggest replacements in warnings.
 extract_stem <- function(nms) {
   nms |>
     stringr::str_remove("_[0-9]+_TEXT$") |>

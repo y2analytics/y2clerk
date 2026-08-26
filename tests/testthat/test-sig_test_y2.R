@@ -118,7 +118,7 @@ test_that('Sig Test works on a grouped freqs object of multiple variables', {
 test_that('Sig Test works on a grouped freqs object of multi select variables', {
   frequencies <- responses3 |>
     dplyr::group_by(group) |>
-    multi_freqs(V2_1) |>
+    multi_freqs(V2) |>
     sig_test_y2(
       responses3,
       group
