@@ -22,6 +22,16 @@ check_wt <- function(dataset, wt_quo, call = rlang::caller_env()) {
     keywords = "wt|weight",
     call = call
   )
+
+  wt_vec <- dataset[[rlang::as_label(wt_quo)]]
+  if (!is.numeric(wt_vec)) {
+    cli::cli_abort(
+      c(
+        "x" = "Weight column {.arg {rlang::as_label(wt_quo)}} must be numeric, not {.cls {class(wt_vec)}}"
+      ),
+      call = call
+    )
+  }
 }
 
 # check_unweighted_ns(): abort when `unweighted_ns = TRUE` but no weighting
@@ -127,7 +137,7 @@ column_names <- function(dataset, wt) {
 }
 
 
-check_data_frame2 <- function(dataset) {
+check_data_frame2 <- function(dataset, d_name = rlang::caller_arg(dataset)) {
   env <- rlang::caller_env()
   caller_call <- rlang::caller_call()
 
@@ -146,7 +156,7 @@ check_data_frame2 <- function(dataset) {
       } else if (grepl("not found", conditionMessage(e), fixed = TRUE)) {
         cli::cli_abort(
           c(
-            "x" = "dataset {.val {dataset}} not found",
+            "x" = "dataset {.val {d_name}} not found",
             "i" = "Please supply a valid dataset"
           ),
           call = env

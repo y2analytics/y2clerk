@@ -68,7 +68,7 @@ freqs <- function(
 ) {
   # options(warn = -1)
   stat <- rlang::arg_match(stat)
-  check_data_frame2(dataset)
+  check_data_frame2(dataset, rlang::caller_arg(dataset))
   rlang::check_bool(nas)
   rlang::check_bool(prompt)
   rlang::check_bool(nas_group)
@@ -250,7 +250,6 @@ freqs_original <- function(
         body <- if (grepl("doesn't exist", msg, fixed = TRUE)) {
           lines <- strsplit(msg, "\n", fixed = TRUE)[[1]]
           found <- trimws(lines[grepl("doesn't exist", lines, fixed = TRUE)])
-          purrr::set_names(found, rep("x", length(found)))
         } else {
           c("x" = msg)
         }
