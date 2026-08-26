@@ -134,6 +134,8 @@ and get them fixed for the next version of y2clerk.
   : Run frequencies for multiple-select variables
 - [`pivot_freqs()`](https://y2analytics.github.io/y2clerk/reference/pivot_freqs.md)
   : Widen a frequencies table
+- [`print_freq_inf()`](https://y2analytics.github.io/y2clerk/reference/print_freq_inf.md)
+  : Print with n = Inf
 - [`qnr_converter()`](https://y2analytics.github.io/y2clerk/reference/qnr_converter.md)
   : Upload survey to Qualtrics
 - [`sig_test_y2()`](https://y2analytics.github.io/y2clerk/reference/sig_test_y2.md)
