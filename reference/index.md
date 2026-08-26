@@ -15,7 +15,7 @@
   [`freq()`](https://y2analytics.github.io/y2clerk/reference/freqs.md) :
   Run frequencies for multiple variables
 - [`multi_freqs()`](https://y2analytics.github.io/y2clerk/reference/multi_freqs.md)
-  : Run frequencies for multiple select variables
+  : Run frequencies for multiple-select variables
 - [`pivot_freqs()`](https://y2analytics.github.io/y2clerk/reference/pivot_freqs.md)
   : Widen a frequencies table
 - [`qnr_converter()`](https://y2analytics.github.io/y2clerk/reference/qnr_converter.md)

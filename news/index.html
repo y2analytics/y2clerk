@@ -33,6 +33,30 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.0" id="y2clerk-100">y2clerk 1.0.0<a class="anchor" aria-label="anchor" href="#y2clerk-100"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-1-0-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-0-0"></a></h3>
+<ul><li>
+<code><a href="../reference/multi_freqs.html">multi_freqs()</a></code> now selects a stem’s columns with the <code><a href="../reference/stem.html">stem()</a></code> tidyselect helper. Pass the question <strong>stem</strong> (e.g. <code>multi_freqs(df, Q1)</code>), not an individual column (e.g. <code>multi_freqs(df, Q1_1)</code>). Passing an actual variable now warns and returns no rows for that stem.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-1-0-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-0-0"></a></h3>
+<ul><li>
+<code><a href="../reference/multi_freqs.html">multi_freqs()</a></code> accepts stems as bare symbols, strings, or a character vector via <code><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of()</a></code> / <code><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">any_of()</a></code>.</li>
+<li>
+<code><a href="../reference/multi_freqs.html">multi_freqs()</a></code> gains <code>separator</code> (default <code>c("_", "r")</code>) and <code>ignore.case</code> arguments, both passed through to <code><a href="../reference/stem.html">stem()</a></code>.</li>
+<li>
+<code><a href="../reference/multi_freqs.html">multi_freqs()</a></code> gains a <code>.by</code> argument for per-call grouping, matching <code><a href="../reference/freqs.html">freqs()</a></code>.</li>
+<li>
+<code><a href="../reference/multi_freqs.html">multi_freqs()</a></code> now validates its inputs up front (dataset, boolean flags, <code>digits</code>, <code>separator</code>, and the <code>wt</code> / <code>unweighted_ns</code> combination) with clear, <code><a href="../reference/multi_freqs.html">multi_freqs()</a></code>-attributed error messages, matching <code><a href="../reference/freqs.html">freqs()</a></code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="maintenance-1-0-0">Maintenance<a class="anchor" aria-label="anchor" href="#maintenance-1-0-0"></a></h3>
+<ul><li>
+<code><a href="../reference/multi_freqs.html">multi_freqs()</a></code> internals refactored into smaller helper functions.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.3" id="y2clerk-073">y2clerk 0.7.3<a class="anchor" aria-label="anchor" href="#y2clerk-073"></a></h2>
 <div class="section level3">
 <h3 id="display-changes-0-7-3">Display changes<a class="anchor" aria-label="anchor" href="#display-changes-0-7-3"></a></h3>

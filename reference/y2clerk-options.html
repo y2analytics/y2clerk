@@ -48,6 +48,19 @@ when the option is unset.</p>
     <h2 id="options">Options<a class="anchor" aria-label="anchor" href="#options"></a></h2>
 
 <div class="section">
+<h3 id="y-clerk-quiet"><code>y2clerk.quiet</code><a class="anchor" aria-label="anchor" href="#y-clerk-quiet"></a></h3>
+
+
+<p><strong>Default:</strong> <code>FALSE</code></p>
+<p>Whether to suppress y2clerk's informational messages (e.g. progress
+notes from <code><a href="multi_freqs.html">multi_freqs()</a></code> and <code><a href="sig_test_y2.html">sig_test_y2()</a></code>, or the hints emitted by
+<code><a href="freqs.html">freqs()</a></code> about ignored arguments). Warnings and errors are unaffected.
+Set to <code>TRUE</code> to silence informational output.</p>
+<p></p><div class="sourceCode r"><pre><code><span><span class="co"># Silence informational messages</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>y2clerk.quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre><p></p></div>
+</div>
+
+<div class="section">
 <h3 id="y-clerk-mcc-correction"><code>y2clerk.mcc_correction</code><a class="anchor" aria-label="anchor" href="#y-clerk-mcc-correction"></a></h3>
 
 

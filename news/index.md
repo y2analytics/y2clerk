@@ -1,5 +1,42 @@
 # Changelog
 
+## y2clerk 1.0.0
+
+### Breaking changes
+
+- [`multi_freqs()`](https://y2analytics.github.io/y2clerk/reference/multi_freqs.md)
+  now selects a stem’s columns with the
+  [`stem()`](https://y2analytics.github.io/y2clerk/reference/stem.md)
+  tidyselect helper. Pass the question **stem**
+  (e.g. `multi_freqs(df, Q1)`), not an individual column
+  (e.g. `multi_freqs(df, Q1_1)`). Passing an actual variable now warns
+  and returns no rows for that stem.
+
+### New features
+
+- [`multi_freqs()`](https://y2analytics.github.io/y2clerk/reference/multi_freqs.md)
+  accepts stems as bare symbols, strings, or a character vector via
+  [`all_of()`](https://tidyselect.r-lib.org/reference/all_of.html) /
+  [`any_of()`](https://tidyselect.r-lib.org/reference/all_of.html).
+- [`multi_freqs()`](https://y2analytics.github.io/y2clerk/reference/multi_freqs.md)
+  gains `separator` (default `c("_", "r")`) and `ignore.case` arguments,
+  both passed through to
+  [`stem()`](https://y2analytics.github.io/y2clerk/reference/stem.md).
+- [`multi_freqs()`](https://y2analytics.github.io/y2clerk/reference/multi_freqs.md)
+  gains a `.by` argument for per-call grouping, matching
+  [`freqs()`](https://y2analytics.github.io/y2clerk/reference/freqs.md).
+- [`multi_freqs()`](https://y2analytics.github.io/y2clerk/reference/multi_freqs.md)
+  now validates its inputs up front (dataset, boolean flags, `digits`,
+  `separator`, and the `wt` / `unweighted_ns` combination) with clear,
+  [`multi_freqs()`](https://y2analytics.github.io/y2clerk/reference/multi_freqs.md)-attributed
+  error messages, matching
+  [`freqs()`](https://y2analytics.github.io/y2clerk/reference/freqs.md).
+
+### Maintenance
+
+- [`multi_freqs()`](https://y2analytics.github.io/y2clerk/reference/multi_freqs.md)
+  internals refactored into smaller helper functions.
+
 ## y2clerk 0.7.3
 
 ### Display changes

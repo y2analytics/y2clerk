@@ -6,6 +6,23 @@ option has a built-in default that is used when the option is unset.
 
 ## Options
 
+### `y2clerk.quiet`
+
+**Default:** `FALSE`
+
+Whether to suppress y2clerk's informational messages (e.g. progress
+notes from
+[`multi_freqs()`](https://y2analytics.github.io/y2clerk/reference/multi_freqs.md)
+and
+[`sig_test_y2()`](https://y2analytics.github.io/y2clerk/reference/sig_test_y2.md),
+or the hints emitted by
+[`freqs()`](https://y2analytics.github.io/y2clerk/reference/freqs.md)
+about ignored arguments). Warnings and errors are unaffected. Set to
+`TRUE` to silence informational output.
+
+    # Silence informational messages
+    options(y2clerk.quiet = TRUE)
+
 ### `y2clerk.mcc_correction`
 
 **Default:** `"fdr"`

@@ -1,7 +1,13 @@
-# Run frequencies for multiple select variables
+# Run frequencies for multiple-select variables
 
-Filters out rows that are completely NULL values (if respondent did not
-answer question) then runs freqs
+`multi_freqs()` runs
+[`freqs()`](https://y2analytics.github.io/y2clerk/reference/freqs.md)
+across one or more multiple-select ("select all that apply") question
+*stems*. For each stem it selects the associated columns with the
+[`stem()`](https://y2analytics.github.io/y2clerk/reference/stem.md)
+tidyselect helper, drops respondents who answered none of them, then
+runs
+[`freqs()`](https://y2analytics.github.io/y2clerk/reference/freqs.md).
 
 ## Usage
 
@@ -9,6 +15,7 @@ answer question) then runs freqs
 multi_freqs(
   dataset,
   ...,
+  .by = NULL,
   remove_nas = TRUE,
   wt = NULL,
   prompt = FALSE,
@@ -16,7 +23,9 @@ multi_freqs(
   nas_group = TRUE,
   factor_group = FALSE,
   unweighted_ns = FALSE,
-  show_missing_levels = TRUE
+  show_missing_levels = TRUE,
+  separator = c("_", "r"),
+  ignore.case = FALSE
 )
 ```
 
@@ -28,9 +37,16 @@ multi_freqs(
 
 - ...:
 
-  The unquoted names of a set of variables in the dataset referring to
-  variable "stems". If nothing is specified, the function runs a
-  frequency on every column in given dataset.
+  Question stems to tabulate, given as bare symbols (`Q1`), strings
+  (`"Q1"`), or a character vector wrapped in
+  [`all_of()`](https://tidyselect.r-lib.org/reference/all_of.html) /
+  [`any_of()`](https://tidyselect.r-lib.org/reference/all_of.html). If
+  nothing is specified, the function runs on every stem in the dataset.
+
+- .by:
+
+  Variables to group by for this operation only. Cannot be used when the
+  dataset is already a grouped data frame.
 
 - remove_nas:
 
@@ -73,27 +89,63 @@ multi_freqs(
 
   Boolean, whether to keep response levels with no data (default: TRUE)
 
+- separator:
+
+  Character vector of separators allowed between the stem and its
+  numeric suffix, passed through to
+  [`stem()`](https://y2analytics.github.io/y2clerk/reference/stem.md)
+  (default: `c("_", "r")`).
+
+- ignore.case:
+
+  Boolean, whether to match the stem case-insensitively, passed through
+  to [`stem()`](https://y2analytics.github.io/y2clerk/reference/stem.md)
+  (default: FALSE).
+
 ## Value
 
 A dataframe with the variable names, prompts, values, labels, counts,
 stats, and resulting calculations.
 
+## Details
+
+Pass the *stem* of each question, not an individual column. For a
+question stored as `Q1_1`, `Q1_2`, `Q1_3`, pass `Q1`. Stems may be given
+as bare symbols (`Q1`), strings (`"Q1"`), or spliced in from a character
+vector with
+[`tidyselect::all_of()`](https://tidyselect.r-lib.org/reference/all_of.html)
+/
+[`tidyselect::any_of()`](https://tidyselect.r-lib.org/reference/all_of.html).
+If no stems are given, `multi_freqs()` runs on every stem in the
+dataset.
+
+Columns are matched with
+[`stem()`](https://y2analytics.github.io/y2clerk/reference/stem.md), so
+`_TEXT` / open-ended columns are excluded automatically. If you pass a
+name that is itself a column in the dataset (e.g. `Q1_1`),
+`multi_freqs()` warns: the modern interface expects the stem rather than
+an exemplar column.
+
+## See also
+
+[`stem()`](https://y2analytics.github.io/y2clerk/reference/stem.md),
+[`freqs()`](https://y2analytics.github.io/y2clerk/reference/freqs.md)
+
 ## Examples
 
 ``` r
 
-df <- data.frame(
+df <- tibble::tibble(
   a = c(1, 2, 3, 1, 2, 3, 1),
   Q1_1 = c(1, NA, 1, 1, NA, 1, NA),
   Q1_2 = c(1, 1, NA, 1, NA, 1, NA),
   Q1_3 = c(NA, 1, 1, NA, 4, 1, NA),
   weights = c(0.9, 0.9, 1.1, 1.1, 1, 1, 1)
-) |>
-  tidyr::as_tibble()
+)
 
 
-# All 3 methods below give the same output
-multi_freqs(df, Q1_1)
+# Pass the stem, not an individual column. These give the same output:
+multi_freqs(df, Q1)
 #> Variable stem "Q1" successfully freq'd
 #> # A tibble: 4 × 6
 #>   variable value label     n stat    result
@@ -102,7 +154,7 @@ multi_freqs(df, Q1_1)
 #> 2 Q1_2     1     1         4 percent   0.67
 #> 3 Q1_3     1     1         3 percent   0.5 
 #> 4 Q1_3     4     4         1 percent   0.17
-df |> multi_freqs(Q1_1)
+df |> multi_freqs(Q1)
 #> Variable stem "Q1" successfully freq'd
 #> # A tibble: 4 × 6
 #>   variable value label     n stat    result
@@ -111,9 +163,7 @@ df |> multi_freqs(Q1_1)
 #> 2 Q1_2     1     1         4 percent   0.67
 #> 3 Q1_3     1     1         3 percent   0.5 
 #> 4 Q1_3     4     4         1 percent   0.17
-df |>
-  dplyr::select(dplyr::starts_with("Q1")) |>
-  multi_freqs()
+df |> multi_freqs("Q1")
 #> Variable stem "Q1" successfully freq'd
 #> # A tibble: 4 × 6
 #>   variable value label     n stat    result
@@ -124,11 +174,23 @@ df |>
 #> 4 Q1_3     4     4         1 percent   0.17
 
 
-# Grouped examples with weights (both have same outputs)
+# Splice stems in from a character vector
+stems <- c("Q1")
+df |> multi_freqs(tidyselect::all_of(stems))
+#> Variable stem "Q1" successfully freq'd
+#> # A tibble: 4 × 6
+#>   variable value label     n stat    result
+#>   <chr>    <chr> <chr> <int> <chr>    <dbl>
+#> 1 Q1_1     1     1         4 percent   0.67
+#> 2 Q1_2     1     1         4 percent   0.67
+#> 3 Q1_3     1     1         3 percent   0.5 
+#> 4 Q1_3     4     4         1 percent   0.17
+
+
+# Grouped example with weights
 df |>
   dplyr::group_by(a) |>
-  multi_freqs(Q1_1, wt = weights)
-#> Adding missing grouping variables: `a`
+  multi_freqs(Q1, wt = weights)
 #> Variable stem "Q1" successfully freq'd
 #> # A tibble: 8 × 7
 #> # Groups:   group_var [3]
@@ -142,23 +204,21 @@ df |>
 #> 6         2 Q1_3     1     1       0.9 percent   0.47
 #> 7         2 Q1_3     4     4       1   percent   0.53
 #> 8         3 Q1_3     1     1       2.1 percent   1   
-df |>
-  dplyr::group_by(a) |>
-  dplyr::select(starts_with("Q1"), weights) |>
-  multi_freqs(wt = weights)
-#> Adding missing grouping variables: `a`
-#> Adding missing grouping variables: `a`
+
+
+# Group for this call only with .by
+multi_freqs(df, Q1, .by = a)
 #> Variable stem "Q1" successfully freq'd
 #> # A tibble: 8 × 7
 #> # Groups:   group_var [3]
 #>   group_var variable value label     n stat    result
-#>       <dbl> <chr>    <chr> <chr> <dbl> <chr>    <dbl>
-#> 1         1 Q1_1     1     1       2   percent   1   
-#> 2         3 Q1_1     1     1       2.1 percent   1   
-#> 3         1 Q1_2     1     1       2   percent   1   
-#> 4         2 Q1_2     1     1       0.9 percent   0.47
-#> 5         3 Q1_2     1     1       1   percent   0.48
-#> 6         2 Q1_3     1     1       0.9 percent   0.47
-#> 7         2 Q1_3     4     4       1   percent   0.53
-#> 8         3 Q1_3     1     1       2.1 percent   1   
+#>       <dbl> <chr>    <chr> <chr> <int> <chr>    <dbl>
+#> 1         1 Q1_1     1     1         2 percent    1  
+#> 2         3 Q1_1     1     1         2 percent    1  
+#> 3         1 Q1_2     1     1         2 percent    1  
+#> 4         2 Q1_2     1     1         1 percent    0.5
+#> 5         3 Q1_2     1     1         1 percent    0.5
+#> 6         2 Q1_3     1     1         1 percent    0.5
+#> 7         2 Q1_3     4     4         1 percent    0.5
+#> 8         3 Q1_3     1     1         2 percent    1  
 ```

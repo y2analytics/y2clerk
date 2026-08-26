@@ -86,9 +86,8 @@ present; single-variable frequencies tables always pivot on the bare
 
   df |>
     dplyr::group_by(group) |>
-    multi_freqs(activity_1) |>
+    multi_freqs(activity) |>
     pivot_freqs()
-#> Adding missing grouping variables: `group`
 #> Variable stem "activity" successfully freq'd
 #> # A tibble: 2 × 3
 #> # Groups:   group_var [2]
