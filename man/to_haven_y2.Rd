@@ -4,24 +4,27 @@
 \alias{to_haven_y2}
 \title{Convert a variable to haven labelled}
 \usage{
-to_haven_y2(variable)
+to_haven_y2(variable, ...)
 }
 \arguments{
-\item{variable}{The vector or variable within a data frame that you wish to convert to haven labelled}
+\item{variable}{The vector you wish to convert to haven labelled}
+
+\item{...}{Reserved for future expansion. Must be empty.}
 }
 \description{
-Convert a character or factor vector into a dbl labelled (haven labelled) vector. Useful for when you need to either extract labels or attach underlying numbers to each label
+Convert a character or factor vector into a labelled (haven labelled) vector. Useful for when you need to either extract labels or attach underlying numbers to each label.
 }
 \examples{
 
 test <- tibble::tibble(
-  color_factor = c('Blue', 'Blue', 'Red', 'Yellow') |>
-    forcats::as_factor()
+  color_vec = c('Blue', 'Blue', 'Red', 'Yellow'),
+  color_factor = forcats::as_factor(color_vec)
 )
 
 test$color <- to_haven_y2(test$color_factor)
+
 test <- test |>
   dplyr::mutate(
-    color = to_haven_y2(color_factor)
+    color = to_haven_y2(color_vec)
   )
 }

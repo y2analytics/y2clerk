@@ -3,7 +3,6 @@
     Code
       sig_test_y2(freqs(dplyr::group_by(mod_df, group), V1), mod_df, group)
     Message
-      Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "-1" for group_var "group"
       Adding grouped pairwise significance tests for response "0" for group_var "group"
       Adding grouped pairwise significance tests for response "1" for group_var "group"
@@ -27,7 +26,6 @@
     Code
       sig_test_y2(freqs(dplyr::group_by(mod_df, group), V1), mod_df, group)
     Message
-      Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "Agree" for group_var "group"
       Adding grouped pairwise significance tests for response "Disagree" for group_var "group"
       Adding grouped pairwise significance tests for response "Neither" for group_var "group"
@@ -51,7 +49,6 @@
     Code
       sig_test_y2(freqs(dplyr::group_by(responses3, group), V1), responses3, group)
     Message
-      Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "Agree" for group_var "group"
       Adding grouped pairwise significance tests for response "Disagree" for group_var "group"
       Adding grouped pairwise significance tests for response "Neither" for group_var "group"
@@ -75,7 +72,6 @@
     Code
       sig_test_y2(freqs(dplyr::group_by(responses3, group), V1), mod_df, group)
     Message
-      Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "Agree" for group_var "group"
       Adding grouped pairwise significance tests for response "Neither" for group_var "group"
       Adding grouped pairwise significance tests for response "Disagree" for group_var "group"
@@ -99,7 +95,6 @@
     Code
       sig_test_y2(freqs(dplyr::group_by(mod_df, group), V1), mod_df, group)
     Message
-      Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "Agree" for group_var "group"
       Adding grouped pairwise significance tests for response "Disagree" for group_var "group"
       Adding grouped pairwise significance tests for response "Neither" for group_var "group"
@@ -123,7 +118,6 @@
     Code
       sig_test_y2(freqs(dplyr::group_by(responses3, group), V1), responses3, group)
     Message
-      Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "Agree" for group_var "group"
       Adding grouped pairwise significance tests for response "Disagree" for group_var "group"
       Adding grouped pairwise significance tests for response "Neither" for group_var "group"
@@ -147,7 +141,6 @@
     Code
       sig_test_y2(freqs(dplyr::group_by(mod_df, group), V1), responses3, group)
     Message
-      Adding missing grouping variables: `group`
       Adding grouped pairwise significance tests for response "Agree" for group_var "group"
       Adding grouped pairwise significance tests for response "Disagree" for group_var "group"
       Adding grouped pairwise significance tests for response "Neither" for group_var "group"
@@ -171,11 +164,10 @@
     Code
       frequencies <- sig_test_y2(freqs(dplyr::group_by(mod_df, group), V1), mod_df,
       group)
-    Message
-      Adding missing grouping variables: `group`
     Condition
       Error in `sig_test_y2()`:
-      ! Banner variable "group" is a labelled double; please set "factor_group" equal to TRUE in freqs() for this variable
+      x Banner variable `group` is a haven labelled vector.
+      i Set `factor_group = TRUE` in `freqs()` for this variable.
 
 # Missing dataset
 
@@ -184,7 +176,7 @@
       banner_var = group)
     Condition
       Error in `sig_test_y2()`:
-      ! argument "dataset" is missing, with no default
+      ! `dataset` must be a data frame, not absent.
 
 # Missing banner_var
 
@@ -193,5 +185,6 @@
       dataset = responses3)
     Condition
       Error in `sig_test_y2()`:
-      ! argument "banner_var" is missing, with no default
+      x argument `banner_var` is missing
+      i Provide the same grouping variable you used in your `freqs()` call.
 

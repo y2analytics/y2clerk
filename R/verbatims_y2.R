@@ -41,7 +41,7 @@ verbatims_y2 <- function(
     }
   )
 
-  if ("No label" %in% frequencies$prompt == TRUE) {
+  if ("No label" %in% frequencies$prompt) {
     warning(
       "You are working with variables that have no labeling. You may want to consider adding a prompt before continuing"
     )
@@ -109,12 +109,10 @@ verbatims_y2_single <- function(
     dplyr::select(
       !!freq_flag
     ) |>
-    dplyr::mutate_all(
-      list(
-        ~ dplyr::case_when(
-          is.na(.) ~ labelled::var_label(.),
-          TRUE ~ labelled::var_label(.)
-        )
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::everything(),
+        \(x) labelled::var_label(x)
       )
     ) |>
     dplyr::mutate(variable = freq_var_char) |>
@@ -124,7 +122,7 @@ verbatims_y2_single <- function(
     ) |>
     dplyr::distinct(
       .data$variable,
-      .keep_all = T
+      .keep_all = TRUE
     )
 
   dplyr::left_join(freq_df, labels, by = c("variable")) |>

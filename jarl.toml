@@ -1,0 +1,6 @@
+[lint]
+extend-select = ["TESTTHAT"]
+ignore = ["internal_function"]
+[lint.undesirable_function]
+extend-functions = ["ifelse", "rbind", "cbind", "supressWarnings", "supressMessages"]
+

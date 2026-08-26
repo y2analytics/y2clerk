@@ -8,7 +8,7 @@
 #' @param append_to (default: label). The variable to which you wish to add (n = ...)
 #' @param by_group_var (default: FALSE). If FALSE, takes ns by row. If TRUE, takes group ns by group_var levels. Set to TRUE if making a stacked bar chart
 #' @param newline (default: FALSE). If FALSE, (n = ...) comes after a space " ". If TRUE, it comes after a hard return
-#' @importFrom data.table :=
+#' @importFrom rlang :=
 #' @examples
 #'
 #' # by_group_var = FALSE
@@ -30,9 +30,7 @@
 #'     by_group_var = TRUE
 #'   )
 #' @export
-
-append_ns <-
-  function(
+append_ns <- function(
     dataset,
     append_to = label,
     by_group_var = FALSE,
@@ -40,11 +38,11 @@ append_ns <-
   ) {
     label <- NULL
     character_split <- ' '
-    if (newline == TRUE) {
+    if (isTRUE(newline)) {
       character_split <- '\n'
     }
 
-    if (by_group_var == FALSE) {
+    if (isFALSE(by_group_var)) {
       dataset |>
         dplyr::mutate(
           '{{append_to}}' := stringr::str_c(

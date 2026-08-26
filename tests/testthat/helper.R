@@ -11,7 +11,7 @@ responses <- {
     q1 = sample(
       x = c(datasets::swiss$Agriculture, NA),
       size = 25,
-      prob = c(rep(.8 / 47, 47), 0.2),
+      prob = c(rep(0.8 / 47, 47), 0.2),
       replace = TRUE
     ),
     # factor (numbers), no value labels
@@ -51,12 +51,12 @@ responses <- {
     group_var1 = sample(
       c('group 1', 'group 2', NA_character_),
       25,
-      prob = c(.8, .15, .05),
+      prob = c(0.8, 0.15, 0.05),
       replace = TRUE
     ),
     # numeric weights
     w = rnorm(25, mean = 1, sd = 0.1)
-  ) %>%
+  ) |>
     labelled::set_value_labels(
       q4 = c(
         `Less than a year` = 1,
@@ -79,7 +79,7 @@ responses <- {
         'female' = 2,
         'other' = 3
       )
-    ) %>%
+    ) |>
     labelled::set_variable_labels(
       q1 = "% of males involved in agriculture",
       q2 = "Orange tree ID",
@@ -88,7 +88,7 @@ responses <- {
       q5 = "Satisfaction",
       w = "Weights",
       gender_labelled = 'gender'
-    ) %>%
+    ) |>
     dplyr::as_tibble()
 }
 
@@ -112,49 +112,49 @@ responses2 <- data.frame(
   s_activity_1 = sample(
     1:5,
     25,
-    prob = c(.4, .3, .2, .0, .1),
+    prob = c(0.4, 0.3, 0.2, 0.0, 0.1),
     replace = TRUE
   ),
   # multiple select
   m_activity_1 = sample(
     c(NA_real_, 1),
     25,
-    prob = c(.9, .1),
+    prob = c(0.9, 0.1),
     replace = TRUE
   ),
   m_activity_2 = sample(
     c(NA_real_, 1),
     25,
-    prob = c(.6, .4),
+    prob = c(0.6, 0.4),
     replace = TRUE
   ),
   m_activity_3 = sample(
     c(NA_real_, 1),
     25,
-    prob = c(.8, .2),
+    prob = c(0.8, 0.2),
     replace = TRUE
   ),
   m_activity_10 = sample(
     c(NA_real_, 1),
     25,
-    prob = c(.5, .5),
+    prob = c(0.5, 0.5),
     replace = TRUE
   ),
   m_activity_21 = sample(
     c(NA_real_, 1),
     25,
-    prob = c(.1, .9),
+    prob = c(0.1, 0.9),
     replace = TRUE
   ),
   m_activity_22 = NA_real_,
   # numeric weights
   weights = sample(
-    c(.5, 1, 2, 4),
+    c(0.5, 1, 2, 4),
     25,
-    prob = rep(.25, 4),
+    prob = rep(0.25, 4),
     replace = TRUE
   )
-) %>%
+) |>
   labelled::set_value_labels(
     s_activity_1 = c(
       'Basketball' = 1,
@@ -174,7 +174,7 @@ responses2 <- data.frame(
       'female' = 2,
       'other' = 3
     )
-  ) %>%
+  ) |>
   labelled::set_variable_labels(
     gender_labelled = "Which of the following best describes how you think of yourself?",
     s_activity_1 = "Which of the following is your preferred activity?",
@@ -184,7 +184,29 @@ responses2 <- data.frame(
     m_activity_10 = "Which of the following activities have you done in the past month? Please select all that apply. - Baseball",
     m_activity_21 = "Which of the following activities have you done in the past month? Please select all that apply. - Underwater Basket Weaving",
     weights = "Weights"
-  ) %>%
+  ) |>
+  dplyr::as_tibble()
+
+
+# Small hand-built "select all that apply" style dataset: two question
+# stems (q_festivals, q_parades), each with two checkbox items. Every item
+# shares the same 'Yes'/'No' value labels, so running multi_freqs() across
+# both stems produces a `label` column that collides across `variable`s --
+# used to test pivot_freqs()'s variable+label "compound name" disambiguation
+# on genuine multi-select data.
+responses_multi_select <- data.frame(
+  group_var = rep(c('Group 1', 'Group 2'), each = 6),
+  q_festivals_1 = c(1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0),
+  q_festivals_2 = c(0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0),
+  q_parades_1 = c(1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1),
+  q_parades_2 = c(0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1)
+) |>
+  labelled::set_value_labels(
+    q_festivals_1 = c('No' = 0, 'Yes' = 1),
+    q_festivals_2 = c('No' = 0, 'Yes' = 1),
+    q_parades_1 = c('No' = 0, 'Yes' = 1),
+    q_parades_2 = c('No' = 0, 'Yes' = 1)
+  ) |>
   dplyr::as_tibble()
 
 
@@ -234,7 +256,7 @@ responses3 <- data.frame(
   weight = c(
     rnorm(900, 1, 0.25)
   )
-) %>%
+) |>
   dplyr::mutate(
     V1 = forcats::fct_relevel(
       V1,
@@ -277,7 +299,7 @@ responses4 <- {
     q1 = sample(
       x = c(datasets::swiss$Agriculture, NA),
       size = 25,
-      prob = c(rep(.8 / 47, 47), 0.2),
+      prob = c(rep(0.8 / 47, 47), 0.2),
       replace = TRUE
     ),
 
@@ -317,12 +339,12 @@ responses4 <- {
       25,
       prob = 1 / (1:80 * sum(1 / (1:80))),
       replace = TRUE
-    ) %>%
+    ) |>
       forcats::as_factor(),
 
     # numeric weights
     w = rnorm(25, mean = 1, sd = 0.1)
-  ) %>%
+  ) |>
     labelled::set_value_labels(
       q4 = c(
         `Less than a year` = 1,
@@ -340,7 +362,7 @@ responses4 <- {
         `Somewhat unhappy` = "c",
         `Very unhappy` = "d"
       )
-    ) %>%
+    ) |>
     labelled::set_variable_labels(
       q1 = "% of males involved in agriculture",
       q2 = "Orange tree ID",
@@ -349,6 +371,6 @@ responses4 <- {
       q5 = "Satisfaction",
       q6 = 'Preferred fruit (f)',
       w = "Weights"
-    ) %>%
+    ) |>
     dplyr::as_tibble()
 }

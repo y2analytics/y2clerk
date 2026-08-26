@@ -28,33 +28,33 @@ calculate_nps(
 
 \item{result}{DEFAULT = result; The column of NPS question results (proportions) used to calculate the final NPS}
 
-\item{label}{DEFAULT = label; The column of NPS question labels (responses) used to calculate the final NPS (if `input_type` is set to "grouped", this column MUST include the values "Detractor", "Passive", and "Promoter" and no other values)}
+\item{label}{DEFAULT = label; The column of NPS question labels (responses) used to calculate the final NPS (if \code{input_type} is set to "grouped", this column MUST include the values "Detractor", "Passive", and "Promoter" and no other values)}
 
 \item{value}{DEFAULT = value; The column of NPS question values (levels) used to order the final output}
 
 \item{input_type}{DEFAULT = "grouped"; The input type of the NPS questions. Must be one of either "grouped" or "numeric" corresponding to either pre-formatted (3 groups of "Detractor", "Passive", and "Promoter") or unformatted (scale of 0-10) Qualtrics NPS questions, respectively}
 
-\item{by_variable}{DEFAULT = TRUE; Boolean, controls whether the function calculates the NPS for each unique specified `variable` (question columns) or for the frequencies as a whole}
+\item{by_variable}{DEFAULT = TRUE; Boolean, controls whether the function calculates the NPS for each unique specified \code{variable} (question columns) or for the frequencies as a whole}
 
-\item{variable}{DEFAULT = variable; The column of unique NPS questions and question names used to calculate the NPS for each (if `by_variable` is set to TRUE)}
+\item{variable}{DEFAULT = variable; The column of unique NPS questions and question names used to calculate the NPS for each (if \code{by_variable} is set to TRUE)}
 
-\item{add_group}{DEFAULT = TRUE; Boolean, controls whether the function adds the specified `variable` as a grouping variable to the frequencies object (if it is already grouped) or if the specified `variable` will overwrite any and all previously applied grouping variables}
+\item{add_group}{DEFAULT = TRUE; Boolean, controls whether the function adds the specified \code{variable} as a grouping variable to the frequencies object (if it is already grouped) or if the specified \code{variable} will overwrite any and all previously applied grouping variables}
 
-\item{get_brand}{DEFAULT = TRUE; Boolean, controls whether the function extracts the "brand" (NPS question subject) from the specified `prompt` column or does not}
+\item{get_brand}{DEFAULT = TRUE; Boolean, controls whether the function extracts the "brand" (NPS question subject) from the specified \code{prompt} column or does not}
 
-\item{prompt}{DEFAULT = prompt; The column of NPS question prompts (question texts) from which to extract the "brand" (if `get_brand` is set to TRUE)}
+\item{prompt}{DEFAULT = prompt; The column of NPS question prompts (question texts) from which to extract the "brand" (if \code{get_brand} is set to TRUE)}
 
-\item{brand_var_name}{DEFAULT = "brand"; The name assigned to the output "brand" column (if `get_brand` is set to TRUE)}
+\item{brand_var_name}{DEFAULT = "brand"; The name assigned to the output "brand" column (if \code{get_brand} is set to TRUE)}
 
-\item{prompt_rm_pre}{DEFAULT = ".+\\,.+recommend "; String pattern in the specified `prompt` column before which everything in the column is scrubbed to obtain the "brand"}
+\item{prompt_rm_pre}{DEFAULT = ".+\\,.+recommend "; String pattern in the specified \code{prompt} column before which everything in the column is scrubbed to obtain the "brand"}
 
-\item{prompt_rm_post}{DEFAULT = " to a .+\\? \\-.+"; String pattern in the specified `prompt` column after which everything in the column is scrubbed to obtain the "brand"}
+\item{prompt_rm_post}{DEFAULT = " to a .+\\? \\-.+"; String pattern in the specified \code{prompt} column after which everything in the column is scrubbed to obtain the "brand"}
 
 \item{arrange_nps}{DEFAULT = TRUE; Boolean, whether to arrange the final output by the NPS results, with previous frequencies arrangements/orderings still intact}
 
 \item{append_nps_to_brand}{DEFAULT = FALSE; Boolean, whether to append the NPS values to the "brand" column, having the format "["brand"] (NPS = [NPS])"}
 
-\item{brand_factor}{DEFAULT = TRUE; Boolean, whether to convert the "brand" variable (with appended NPS values) to a factor for ease of data visualization (argument specification only applied if `append_nps_to_brand` is set to TRUE)}
+\item{brand_factor}{DEFAULT = TRUE; Boolean, whether to convert the "brand" variable (with appended NPS values) to a factor for ease of data visualization (argument specification only applied if \code{append_nps_to_brand} is set to TRUE)}
 }
 \value{
 An updated frequencies object with the new NPS column (and other specified columns) attached, formatted as specified

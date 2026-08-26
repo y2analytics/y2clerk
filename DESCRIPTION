@@ -1,7 +1,7 @@
 Type: Package
 Package: y2clerk
 Title: Our Resident Tabulation Expert
-Version: 0.7.4
+Version: 1.0.0
 Authors@R: c(
     person('Scotty', 'Riding', email = 'scott@y2analytics.com', role = 'aut'), 
     person('Luke', 'Carter', email = 'luke@y2analytics.com', role = 'aut'), 
@@ -17,31 +17,35 @@ Authors@R: c(
     person('Adam', 'Hubbs', email = 'adam@y2analytics.com', role = 'aut'),
     person('Y2 Analytics', role = c('cph', 'fnd')))
 Description: Frequencies functions to speed up our workflow, freeing up time to wile away before the grave.
-License: file LICENSE
+License: GPL (>= 3) + file LICENSE
 URL: https://github.com/y2analytics/y2clerk, https://y2analytics.github.io/y2clerk/
 BugReports: https://github.com/y2analytics/y2clerk/issues
+Depends:
+  R (>= 4.1.0)
 Imports:
-    data.table,
     dplyr (>= 1.0.0),
     forcats,
     haven,
     httr,
     jsonlite,
+    lifecycle,
     labelled (>= 2.4.0),
     magrittr,
     officer,
     purrr,
-    rlang,
+    rlang (>= 1.2.0),
     stringr,
     survey,
     tibble,
     tidyr,
     tidyselect,
-    pillar,
-    cli
+    cli,
+    stats,
+    pkgconfig
 Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.3
+Config/roxygen2/markdown: TRUE
+Config/roxygen2/version: 8.0.0

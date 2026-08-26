@@ -2,53 +2,59 @@
 
 #' Convert a variable to haven labelled
 #'
-#' Convert a character or factor vector into a dbl labelled (haven labelled) vector. Useful for when you need to either extract labels or attach underlying numbers to each label
+#' Convert a character or factor vector into a labelled (haven labelled) vector. Useful for when you need to either extract labels or attach underlying numbers to each label.
 #'
-#' @param variable The vector or variable within a data frame that you wish to convert to haven labelled
+#' @param variable The vector you wish to convert to haven labelled
+#' @param ... Reserved for future expansion. Must be empty.
 #' @examples
 #'
 #' test <- tibble::tibble(
-#'   color_factor = c('Blue', 'Blue', 'Red', 'Yellow') |>
-#'     forcats::as_factor()
+#'   color_vec = c('Blue', 'Blue', 'Red', 'Yellow'),
+#'   color_factor = forcats::as_factor(color_vec)
 #' )
 #'
 #' test$color <- to_haven_y2(test$color_factor)
+#'
 #' test <- test |>
 #'   dplyr::mutate(
-#'     color = to_haven_y2(color_factor)
+#'     color = to_haven_y2(color_vec)
 #'   )
 #' @export
 
-to_haven_y2 <- function(
-  variable
-) {
-  # Errors
-  if (class(variable)[1] == 'numeric') {
-    variable_char <- deparse(substitute(variable))
-    stop(stringr::str_c(
-      'to_haven_y2 cannot be used on numeric variable: ',
-      variable_char
-    ))
-  }
-  if (class(variable)[1] == 'haven_labelled') {
-    variable_char <- deparse(substitute(variable))
-    stop(stringr::str_c(variable_char, ' is already a haven_labelled variable'))
-  }
+to_haven_y2 <- function(variable, ...) {
+  rlang::check_dots_empty()
+  UseMethod("to_haven_y2")
+}
 
-  # Functionality
-  if (class(variable)[1] == 'character') {
-    variable <- forcats::as_factor(variable)
-  }
-  var_numeric <- as.numeric(variable)
-  var_character <- as.character(variable)
-  var_numeric_unique <- var_numeric |> unique()
-  var_character_unique <- var_character |> unique()
-
-  matching_vector <- var_numeric_unique
-  names(matching_vector) <- var_character_unique
-
-  haven_vector <- haven::labelled(
-    x = c(var_numeric),
-    labels = c(matching_vector)
+#' @export
+to_haven_y2.default <- function(variable, ...) {
+  variable_char <- deparse(match.call()[[2]])
+  cli::cli_abort(
+    c(
+      "x" = "{.fn to_haven_y2} cannot be used on {.cls {class(variable)[1]}} variable: {variable_char}"
+    ),
+    call = rlang::call2("to_haven_y2")
   )
+}
+
+#' @export
+to_haven_y2.character <- function(variable, ...) {
+  to_haven_y2(forcats::as_factor(variable))
+}
+
+#' @export
+to_haven_y2.factor <- function(variable, ...) {
+  var_levels <- levels(variable)
+  matching_vector <- seq_along(var_levels)
+  names(matching_vector) <- var_levels
+
+  haven::labelled(
+    x = as.integer(variable),
+    labels = matching_vector
+  )
+}
+
+#' @export
+to_haven_y2.haven_labelled <- function(variable, ...) {
+  variable
 }

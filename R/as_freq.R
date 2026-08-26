@@ -5,23 +5,23 @@
 #'
 #' @returns A freq_y2 class (Subclass of a tibble)
 as_freq_y2 <- function(df, p = NULL) {
-  if ('freq_y2' %in% class(df)) {
+  if (inherits(df, 'freq_y2')) {
     return(df)
   }
 
-  if (!('tbl_df' %in% class(df))) {
+  if (!inherits(df, 'tbl_df')) {
     df <- tibble::as_tibble(df)
   }
 
   if (!is.null(p)) {
     #that p is a named character vector
     if (!is.character(p)) {
-      stop("p must be a character vector")
+      cli::cli_abort("p must be a character vector, not a {{class(p)}}.")
     }
 
     #Make sure that p is named for every element of p
-    if (any(is.null(names(p))) | any(names(p) == "")) {
-      stop("Every element of p must be named")
+    if (any(is.null(names(p))) || any(names(p) == "")) {
+      cli::cli_abort("Every element of p must be named")
     }
 
     attr(df, "prompts") <- p

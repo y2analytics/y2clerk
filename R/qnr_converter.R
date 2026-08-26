@@ -1,3 +1,6 @@
+# jarl-ignore-file vector_logic: Used inside deprecated function
+# jarl-ignore-file seq: Used inside deprecated function
+# jarl-ignore-file undesirable_function: Used inside deprecated function
 #' Upload survey to Qualtrics
 #'
 #' Upload a survey from docx format to the Qualtrics library. The questionnaire doc itself will need to be in the Y2 specified format.
@@ -20,6 +23,12 @@ qnr_converter <- function(
   api_token
 ) {
   # set api variables -------------------------------------------------------
+
+  lifecycle::deprecate_warn(
+    "1.0.0",
+    "qnr_converter()",
+    details = "Use Claude with the questionaire2survey tool instead."
+  )
 
   apiToken <- api_token
 
@@ -52,7 +61,7 @@ qnr_converter <- function(
   # create new survey -------------------------------------------------------
   print("Creating new survey")
 
-  response = httr::POST(
+  response <- httr::POST(
     baseUrl,
     body = request_body_json,
     encode = "raw",
@@ -367,7 +376,7 @@ qnr_converter <- function(
 
       questionDef_json <- jsonlite::toJSON(questionDef, auto_unbox = TRUE)
 
-      response = httr::POST(
+      response <- httr::POST(
         getSurveyQuestionUrl,
         body = questionDef_json,
         httr::add_headers(
@@ -424,7 +433,7 @@ qnr_converter <- function(
 
       questionDef_json <- jsonlite::toJSON(questionDef, auto_unbox = TRUE)
 
-      response = httr::POST(
+      response <- httr::POST(
         getSurveyQuestionUrl,
         body = questionDef_json,
         httr::add_headers(
@@ -456,7 +465,7 @@ qnr_converter <- function(
 
       questionDef_json <- jsonlite::toJSON(questionDef, auto_unbox = TRUE)
 
-      response = httr::POST(
+      response <- httr::POST(
         getSurveyQuestionUrl,
         body = questionDef_json,
         httr::add_headers(
@@ -523,7 +532,7 @@ qnr_converter <- function(
 
       questionDef_json <- jsonlite::toJSON(questionDef, auto_unbox = TRUE)
 
-      response = httr::POST(
+      response <- httr::POST(
         getSurveyQuestionUrl,
         body = questionDef_json,
         httr::add_headers(

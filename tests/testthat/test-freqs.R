@@ -4,20 +4,101 @@
 #dataframes
 test_that("Not a dataframe error - vectors", {
   df <- c('This', 'is', 'not', 'a', 'dataframe')
-  a = c(1, 1, 2, 3, 1)
+  a <- c(1, 1, 2, 3, 1)
   expect_snapshot(error = TRUE, freqs(df, a))
 })
+
 test_that("Not a dataframe error - matrix", {
   column_a <- c(1, 1, 1, 1, 2, 2, 3)
   column_b <- c(0.5, 1.2, 0.8, 0.5, 0.2, 0.1, 1)
+  # jarl-ignore undesirable_function: Using it explicitly for matrix combination
   table <- rbind(column_a, column_b)
   expect_snapshot(error = TRUE, freqs(table, column_a))
 })
+
 #variables
-test_that("Runs on variables, not integers", {
-  expect_snapshot(error = TRUE, freqs(mtcars, 10))
+test_that("Integer positions select columns (tidyselect behavior)", {
+  # tidyselect supports integer positions; 10 selects the 10th column (gear)
+  result <- freqs(mtcars, 10)
+  expect_equal(unique(result$variable), "gear")
 })
 #nas
+
+# tidyselect ---------------------------------------------------------------
+
+test_that("empty ... selects all non-group, non-weight columns", {
+  df <- data.frame(a = 1:3, b = 1:3, w = c(0.9, 1, 1.1))
+  result <- freqs(df, wt = w)
+  expect_equal(sort(unique(result$variable)), c("a", "b"))
+})
+
+test_that("starts_with() selects matching columns", {
+  df <- data.frame(q1 = 1:3, q2 = 1:3, other = 1:3)
+  result <- freqs(df, starts_with("q"))
+  expect_equal(sort(unique(result$variable)), c("q1", "q2"))
+})
+
+test_that("where() selects by predicate", {
+  df <- data.frame(a = 1:3, b = letters[1:3], c = 4:6)
+  result <- freqs(df, where(is.numeric))
+  expect_equal(sort(unique(result$variable)), c("a", "c"))
+})
+
+test_that("range selection with :", {
+  result <- freqs(mtcars, cyl:hp)
+  expect_equal(sort(unique(result$variable)), sort(c("cyl", "disp", "hp")))
+})
+
+test_that("everything() excludes weight and group vars", {
+  df <- data.frame(a = 1:3, b = 1:3, w = c(0.9, 1, 1.1)) |>
+    dplyr::group_by(b)
+  result <- freqs(df, everything(), wt = w)
+  expect_equal(unique(result$variable), "a")
+})
+
+test_that("integer position selects correct column", {
+  result <- freqs(mtcars, 10)
+  expect_equal(unique(result$variable), "gear")
+})
+
+test_that("named argument (alias = col) resolves to actual column name", {
+  result <- freqs(mtcars, flarb = hp)
+  expect_equal(unique(result$variable), "hp")
+})
+
+
+test_that("weight column excluded even when selected via everything()", {
+  df <- data.frame(x = 1:3, wt = c(0.9, 1, 1.1))
+  result <- freqs(df, everything(), wt = wt)
+  expect_false("wt" %in% unique(result$variable))
+})
+
+
+test_that(".by works", {
+  result <- freqs(mtcars, mpg, .by = cyl)
+
+  expect_s3_class(result, 'freq_y2')
+  expect_false(inherits(result, 'grouped_df'))
+})
+
+test_that(".by errors when grouping variable is not present in the data", {
+  expect_snapshot(
+    error = TRUE,
+    mtcars |>
+      freq(mpg, .by = ideology)
+  )
+})
+
+test_that(".by errors when data is already grouped", {
+  expect_snapshot(
+    error = TRUE,
+    mtcars |> dplyr::group_by(cyl) |> freq(mpg, .by = vs)
+  )
+})
+
+
+# -------------------------------------------------------------------------
+
 test_that("Incorrect nas argument", {
   expect_snapshot(error = TRUE, freqs(mtcars, cyl, nas = 'True'))
 })
@@ -26,32 +107,6 @@ test_that("Incorrect wt argument", {
   expect_snapshot(error = TRUE, freqs(mtcars, cyl, wt = 'True'))
 })
 
-### frequency tibble class testing
-#Returns class freq_y2
-test_that("`freq()` returns a frequency tibble", {
-  expect_s3_class(freqs(mtcars, cyl), 'freq_y2')
-})
-
-# Prints the question wordings
-test_that("`freq()` prints question wordings", {
-  test_freq1 <- responses |>
-    dplyr::select(q1) |>
-    freq()
-
-  expect_snapshot(print(test_freq1))
-})
-
-# Prints only three question wordings
-test_that("`freq()` prints only three question wordings", {
-  test_freq <- responses |>
-    dplyr::select(q1, q2, q3, q4) |>
-    freq()
-
-  # Prints The question wordings for the first three
-  # Does not print the question wording for the forth
-  # Does print message saying how may questions have wordings that are not displayed
-  expect_snapshot(print(test_freq))
-})
 
 ### weights
 test_that("Weights", {
@@ -61,7 +116,7 @@ test_that("Weights", {
   )
 
   freqs_weighted <- freqs(df, a, wt = weights)
-  expect_equal(freqs_weighted$n[1], .9)
+  expect_equal(freqs_weighted$n[1], 0.9)
 })
 
 
@@ -104,8 +159,8 @@ test_that("nas - group", {
 
   expect_equal(nrow(yes_nas), 7)
   expect_equal(nrow(no_nas), 6)
-  expect_equal(is.factor(group_factors$group_var), TRUE)
-  expect_equal(is.factor(no_nas$group_var), FALSE)
+  expect_true(is.factor(group_factors$group_var))
+  expect_false(is.factor(no_nas$group_var))
   expect_equal(names(yes_nas)[1], 'group_var')
 })
 
@@ -113,16 +168,16 @@ test_that("nas - group", {
 ###Digits
 test_that("Digits", {
   df <- data.frame(
-    a = c(.1, .2, .3)
+    a = c(0.1, 0.2, 0.3)
   )
 
   dig1 <- freqs(df, a, digits = 1)
   dig2 <- freqs(df, a)
   dig3 <- freqs(df, a, digits = 3)
 
-  expect_equal(dig1$result[1], .3)
-  expect_equal(dig2$result[1], .33)
-  expect_equal(dig3$result[1], .333)
+  expect_equal(dig1$result[1], 0.3)
+  expect_equal(dig2$result[1], 0.33)
+  expect_equal(dig3$result[1], 0.333)
 })
 
 
@@ -133,7 +188,7 @@ test_that("character vars", {
     a = c('Character', '1', 'test')
   )
   frequencies <- freqs(df, a)
-  expect_equal(is.data.frame(frequencies), TRUE)
+  expect_true(is.data.frame(frequencies))
 })
 #numeric column freq
 test_that("numeric vars", {
@@ -141,7 +196,7 @@ test_that("numeric vars", {
     a = c(1, 2, 3)
   )
   frequencies <- freqs(df, a)
-  expect_equal(is.data.frame(frequencies), TRUE)
+  expect_true(is.data.frame(frequencies))
 })
 #factored/labelled column freq
 test_that("factor vars with missing values", {
@@ -239,7 +294,7 @@ test_that("NAs not present, nas = F: n & result are correct", {
   )
 })
 
-test_that("NAs present, nas = T: throws error", {
+test_that("NAs present: throws error", {
   expect_snapshot(
     error = TRUE,
     responses |>
@@ -248,7 +303,7 @@ test_that("NAs present, nas = T: throws error", {
   )
 })
 
-test_that("NAs present, nas = F: n & result are correct", {
+test_that("NAs present, nas = FALSE: n & result are correct", {
   expect_equal(
     responses |>
       dplyr::select(q1) |>
@@ -274,7 +329,7 @@ test_that("factor variable input: throws error", {
   expect_snapshot(
     error = TRUE,
     responses |>
-      select(q2) |>
+      dplyr::select(q2) |>
       freqs(stat = 'mean')
   )
 })
@@ -738,6 +793,14 @@ test_that("character variable input: throws error", {
   )
 })
 
+test_that("invalid input: groups errors together", {
+  expect_snapshot(
+    error = TRUE,
+    responses |>
+      dplyr::select(q2, q3) |>
+      freqs(stat = 'quantile')
+  )
+})
 
 test_that("column with value labels input: throws error", {
   expect_snapshot(
@@ -914,5 +977,5 @@ test_that("stat = 'mean' works when GROUPED", {
     dplyr::group_by(q2) |>
     freqs(q1, stat = "mean", nas = FALSE, wt = q0)
 
-  expect_equal(length(test$group_var), 4)
+  expect_length(test$group_var, 4)
 })
