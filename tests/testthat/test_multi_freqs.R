@@ -166,21 +166,22 @@ test_that("multi_freqs - warns and returns nothing when passed an actual variabl
   expect_snapshot(x <- responses2 |> multi_freqs(m_activity_1))
 
   expect_equal(nrow(x), 0)
+
+  expect_snapshot(
+    responses2 |>
+      dplyr::mutate(m_activity_1_1 = m_activity_10) |>
+      multi_freqs(m_activity_1) |>
+      tibble::as_tibble()
+  )
 })
 
 
-test_that("multi_freqs - warns on single-select and text stems", {
-  single_warnings <- testthat::capture_warnings(
-    responses2 |> multi_freqs(s_activity)
+test_that("multi_freqs - warns on variables with multiple response options", {
+  expect_snapshot(
+    responses2 |>
+      multi_freqs(s_activity) |>
+      tibble::as_tibble()
   )
-  expect_true(any(grepl('Single select', single_warnings)))
-
-  text_df <- tibble::tibble(
-    Q1_1 = c('a', 'b'),
-    Q1_2 = c('c', 'd')
-  )
-  text_warnings <- testthat::capture_warnings(text_df |> multi_freqs(Q1))
-  expect_true(any(grepl('Text variable', text_warnings)))
 })
 
 

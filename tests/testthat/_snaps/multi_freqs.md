@@ -4,9 +4,50 @@
       x <- multi_freqs(responses2, m_activity_1)
     Condition
       Warning:
-      "m_activity_1" appears to be an actual variable in the dataset, not a stem.
-      i `multi_freqs()` now selects columns with `stem()`; pass the stem instead, e.g. `multi_freqs(data, m_activity)`.
-      ! Passed to `stem()` as-is, "m_activity_1" will match nothing.
+      "m_activity_1" exists in the dataset
+      i `multi_freqs()` now works on stems instead of an example variable
+      i Did you mean `multi_freqs(data, m_activity)`?
+      ! As-is, "m_activity_1" will match nothing.
+
+---
+
+    Code
+      tibble::as_tibble(multi_freqs(dplyr::mutate(responses2, m_activity_1_1 = m_activity_10),
+      m_activity_1))
+    Condition
+      Warning:
+      "m_activity_1" exists in the dataset
+      i `multi_freqs()` now works on stems instead of an example variable
+      i Did you mean `multi_freqs(data, m_activity)`?
+      ! As-is, "m_activity_1" will match: "m_activity_1_1".
+    Message
+      Variable stem "m_activity_1" successfully freq'd
+    Output
+      # A tibble: 1 x 6
+        variable       value label        n stat    result
+        <chr>          <chr> <chr>    <dbl> <chr>    <dbl>
+      1 m_activity_1_1 1     Baseball    11 percent      1
+
+# multi_freqs - warns on variables with multiple response options
+
+    Code
+      tibble::as_tibble(multi_freqs(responses2, s_activity))
+    Condition
+      Warning in `multi_freqs()`:
+      ! Matrix question detected
+      i Question "s_activity_1" contains 5 response options
+      i Please make sure this is intentional
+    Message
+      Variable stem "s_activity" successfully freq'd
+    Output
+      # A tibble: 5 x 6
+        variable     value label                         n stat    result
+        <chr>        <chr> <chr>                     <dbl> <chr>    <dbl>
+      1 s_activity_1 1     Basketball                   11 percent   0.44
+      2 s_activity_1 2     Football                      8 percent   0.32
+      3 s_activity_1 3     Volleyball                    3 percent   0.12
+      4 s_activity_1 4     Baseball                      0 percent   0   
+      5 s_activity_1 5     Underwater Basket Weaving     3 percent   0.12
 
 # multi_freqs - .by errors when data is already grouped
 

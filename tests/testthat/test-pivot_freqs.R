@@ -1,3 +1,4 @@
+# jarl-ignore-file undesirable_function: We need supressWarnings to test pivot_freqs without multi_freqs warnings getting in the way
 ### Column names
 test_that("pivot_freqs works with Column names", {
   expect_snapshot(
@@ -97,17 +98,21 @@ test_that("pivot_freqs errors on missing label or result column", {
 # (Basketball, Football, ...), so multi_freqs() naturally produces labels
 # that are unique across variables.
 test_that("pivot_freqs: multi-select stem with unique labels pivots on label", {
-  frequencies <- responses2 |>
-    dplyr::group_by(gender) |>
-    multi_freqs(m_activity)
+  frequencies <- suppressWarnings(
+    responses2 |>
+      dplyr::group_by(gender) |>
+      multi_freqs(m_activity)
+  )
 
   expect_snapshot(frequencies |> pivot_freqs())
 })
 
 test_that("pivot_freqs: multi-select stem with unique labels pivots on group_var", {
-  frequencies <- responses2 |>
-    dplyr::group_by(gender) |>
-    multi_freqs(m_activity)
+  frequencies <- suppressWarnings(
+    responses2 |>
+      dplyr::group_by(gender) |>
+      multi_freqs(m_activity)
+  )
 
   expect_snapshot(frequencies |> pivot_freqs(group_var))
 })
@@ -116,17 +121,21 @@ test_that("pivot_freqs: multi-select stem with unique labels pivots on group_var
 # whose items all share the same 'Yes'/'No' value labels, so multi_freqs()
 # produces a `label` column that collides across `variable`s.
 test_that("pivot_freqs: multi-select stems with colliding labels get variable-prefixed column names", {
-  frequencies <- responses_multi_select |>
-    dplyr::group_by(group_var) |>
-    multi_freqs(q_festivals, q_parades)
+  frequencies <- suppressWarnings(
+    responses_multi_select |>
+      dplyr::group_by(group_var) |>
+      multi_freqs(q_festivals, q_parades)
+  )
 
   expect_snapshot(frequencies |> pivot_freqs())
 })
 
 test_that("pivot_freqs: multi-select stems with colliding labels keep variable as id column on group_var pivot", {
-  frequencies <- responses_multi_select |>
-    dplyr::group_by(group_var) |>
-    multi_freqs(q_festivals, q_parades)
+  frequencies <- suppressWarnings(
+    responses_multi_select |>
+      dplyr::group_by(group_var) |>
+      multi_freqs(q_festivals, q_parades)
+  )
 
   expect_snapshot(frequencies |> pivot_freqs(group_var))
 })
