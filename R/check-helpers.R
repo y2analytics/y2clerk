@@ -98,7 +98,8 @@ check_col <- function(
 
   hints <- col_hint(col_name, hint_cols, keywords = keywords)
   hint_bullet <- if (length(hints) > 0L) {
-    c("i" = cli::format_inline("Did you mean: {.val {hints}}?"))
+    hints_vec <- cli::cli_vec(hints, style = list("vec-last" = ", or "))
+    c("i" = cli::format_inline("Did you mean: {.val {hints_vec}}?"))
   } else {
     character(0)
   }
