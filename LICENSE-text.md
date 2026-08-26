@@ -1,5 +1,4 @@
 # License
 
-    Proprietary
-
-    Do not distribute outside of Y2 Analytics, LLC.
+    YEAR: 2026
+    COPYRIGHT HOLDER: Y2 Analytics

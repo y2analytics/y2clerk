@@ -81,6 +81,7 @@ stats, and resulting calculations.
 ## Examples
 
 ``` r
+
 df <- data.frame(
   a = c(1, 2, 3, 1, 2, 3, 1),
   Q1_1 = c(1, NA, 1, 1, NA, 1, NA),
@@ -94,7 +95,7 @@ df <- data.frame(
 # All 3 methods below give the same output
 multi_freqs(df, Q1_1)
 #> Variable stem "Q1" successfully freq'd
-#> # A frequency tibble: 4 × 6
+#> # A tibble: 4 × 6
 #>   variable value label     n stat    result
 #>   <chr>    <chr> <chr> <int> <chr>    <dbl>
 #> 1 Q1_1     1     1         4 percent   0.67
@@ -103,7 +104,7 @@ multi_freqs(df, Q1_1)
 #> 4 Q1_3     4     4         1 percent   0.17
 df |> multi_freqs(Q1_1)
 #> Variable stem "Q1" successfully freq'd
-#> # A frequency tibble: 4 × 6
+#> # A tibble: 4 × 6
 #>   variable value label     n stat    result
 #>   <chr>    <chr> <chr> <int> <chr>    <dbl>
 #> 1 Q1_1     1     1         4 percent   0.67
@@ -114,7 +115,7 @@ df |>
   dplyr::select(dplyr::starts_with("Q1")) |>
   multi_freqs()
 #> Variable stem "Q1" successfully freq'd
-#> # A frequency tibble: 4 × 6
+#> # A tibble: 4 × 6
 #>   variable value label     n stat    result
 #>   <chr>    <chr> <chr> <int> <chr>    <dbl>
 #> 1 Q1_1     1     1         4 percent   0.67
@@ -127,9 +128,6 @@ df |>
 df |>
   dplyr::group_by(a) |>
   multi_freqs(Q1_1, wt = weights)
-#> Adding missing grouping variables: `a`
-#> Adding missing grouping variables: `a`
-#> Adding missing grouping variables: `a`
 #> Adding missing grouping variables: `a`
 #> Variable stem "Q1" successfully freq'd
 #> # A tibble: 8 × 7
@@ -148,9 +146,6 @@ df |>
   dplyr::group_by(a) |>
   dplyr::select(starts_with("Q1"), weights) |>
   multi_freqs(wt = weights)
-#> Adding missing grouping variables: `a`
-#> Adding missing grouping variables: `a`
-#> Adding missing grouping variables: `a`
 #> Adding missing grouping variables: `a`
 #> Adding missing grouping variables: `a`
 #> Variable stem "Q1" successfully freq'd

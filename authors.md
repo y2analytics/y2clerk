@@ -35,13 +35,13 @@ Source:
 
 Riding S, Carter L, Moffitt N, Eliason J, Gilchrist T, Solomon P,
 Heimuli C, Scott D, Hubbs A (2026). *y2clerk: Our Resident Tabulation
-Expert*. R package version 0.7.4,
+Expert*. R package version 1.0.0,
 <https://github.com/y2analytics/y2clerk>.
 
     @Manual{,
       title = {y2clerk: Our Resident Tabulation Expert},
       author = {Scotty Riding and Luke Carter and Nick Moffitt and Jacob Eliason and Tatiana Gilchrist and Pearce Solomon and Canyen Heimuli and Daniel Scott and Adam Hubbs},
       year = {2026},
-      note = {R package version 0.7.4},
+      note = {R package version 1.0.0},
       url = {https://github.com/y2analytics/y2clerk},
     }

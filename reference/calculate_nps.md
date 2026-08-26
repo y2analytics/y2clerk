@@ -40,7 +40,7 @@ calculate_nps(
 - label:
 
   DEFAULT = label; The column of NPS question labels (responses) used to
-  calculate the final NPS (if \`input_type\` is set to "grouped", this
+  calculate the final NPS (if `input_type` is set to "grouped", this
   column MUST include the values "Detractor", "Passive", and "Promoter"
   and no other values)
 
@@ -59,49 +59,49 @@ calculate_nps(
 - by_variable:
 
   DEFAULT = TRUE; Boolean, controls whether the function calculates the
-  NPS for each unique specified \`variable\` (question columns) or for
-  the frequencies as a whole
+  NPS for each unique specified `variable` (question columns) or for the
+  frequencies as a whole
 
 - variable:
 
   DEFAULT = variable; The column of unique NPS questions and question
-  names used to calculate the NPS for each (if \`by_variable\` is set to
+  names used to calculate the NPS for each (if `by_variable` is set to
   TRUE)
 
 - add_group:
 
   DEFAULT = TRUE; Boolean, controls whether the function adds the
-  specified \`variable\` as a grouping variable to the frequencies
-  object (if it is already grouped) or if the specified \`variable\`
-  will overwrite any and all previously applied grouping variables
+  specified `variable` as a grouping variable to the frequencies object
+  (if it is already grouped) or if the specified `variable` will
+  overwrite any and all previously applied grouping variables
 
 - get_brand:
 
   DEFAULT = TRUE; Boolean, controls whether the function extracts the
-  "brand" (NPS question subject) from the specified \`prompt\` column or
+  "brand" (NPS question subject) from the specified `prompt` column or
   does not
 
 - prompt:
 
   DEFAULT = prompt; The column of NPS question prompts (question texts)
-  from which to extract the "brand" (if \`get_brand\` is set to TRUE)
+  from which to extract the "brand" (if `get_brand` is set to TRUE)
 
 - brand_var_name:
 
   DEFAULT = "brand"; The name assigned to the output "brand" column (if
-  \`get_brand\` is set to TRUE)
+  `get_brand` is set to TRUE)
 
 - prompt_rm_pre:
 
-  DEFAULT = ".+\\.+recommend "; String pattern in the specified
-  \`prompt\` column before which everything in the column is scrubbed to
-  obtain the "brand"
+  DEFAULT = ".+\\.+recommend "; String pattern in the specified `prompt`
+  column before which everything in the column is scrubbed to obtain the
+  "brand"
 
 - prompt_rm_post:
 
-  DEFAULT = " to a .+\\ \\.+"; String pattern in the specified
-  \`prompt\` column after which everything in the column is scrubbed to
-  obtain the "brand"
+  DEFAULT = " to a .+\\ \\.+"; String pattern in the specified `prompt`
+  column after which everything in the column is scrubbed to obtain the
+  "brand"
 
 - arrange_nps:
 
@@ -118,7 +118,7 @@ calculate_nps(
 
   DEFAULT = TRUE; Boolean, whether to convert the "brand" variable (with
   appended NPS values) to a factor for ease of data visualization
-  (argument specification only applied if \`append_nps_to_brand\` is set
+  (argument specification only applied if `append_nps_to_brand` is set
   to TRUE)
 
 ## Value
@@ -129,6 +129,7 @@ specified columns) attached, formatted as specified
 ## Examples
 
 ``` r
+
 set.seed(1)
 
 df <- data.frame(
@@ -186,7 +187,7 @@ frequencies <- df |>
 calculate_nps(frequencies)
 #> # A tibble: 9 × 9
 #>   variable         prompt             value label     n stat  result   nps brand
-#>   <chr>            <chr>              <chr> <chr> <int> <chr>  <dbl> <dbl> <chr>
+#>   <chr>            <chr>              <chr> <chr> <dbl> <chr>  <dbl> <dbl> <chr>
 #> 1 brand1_NPS_GROUP How likely are yo… 1     Detr…    51 perc…   0.33     0 How …
 #> 2 brand1_NPS_GROUP How likely are yo… 2     Pass…    54 perc…   0.35     0 How …
 #> 3 brand1_NPS_GROUP How likely are yo… 3     Prom…    51 perc…   0.33     0 How …

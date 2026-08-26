@@ -125,10 +125,6 @@ mtcars |> cross_freqs(
   gear,
   carb
 )
-#> Adding missing grouping variables: `am`
-#> Adding missing grouping variables: `am`
-#> Adding missing grouping variables: `vs`
-#> Adding missing grouping variables: `vs`
 #> # A tibble: 27 × 8
 #>    group_var_name group_var variable value label     n stat    result
 #>    <chr>          <fct>     <chr>    <chr> <chr> <int> <chr>    <dbl>
